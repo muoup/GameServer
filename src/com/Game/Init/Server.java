@@ -1,30 +1,66 @@
 package com.Game.Init;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class Server {
+    private static ObjectInputStream input;
+    private static ObjectOutputStream output;
+    private static ServerSocket ss;
+    private static Socket connection;
+
     public static void main(String[] args) throws IOException {
         Server server = new Server();
-        ServerSocket ss = new ServerSocket(3000);
 
-        while (true) {
-            server.detectPackets(ss);
+        server.startRunning();
+    }
+
+    public void startRunning() {
+        try {
+            ss = new ServerSocket(3000, 5);
+            while (true) {
+                try {
+                    connect();
+                    setupConnection();
+                    detectPackets();
+                } catch (EOFException e) {
+                    System.out.println("Player has connected...");
+                } catch (SocketException e) {
+                    System.out.println("Player has disconnected...");
+                } finally {
+                    input.close();
+                    output.close();
+                    connection.close();
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public void detectPackets(ServerSocket ss) throws IOException {
-        Socket socket = ss.accept();
-        System.out.println(socket);
+    public void connect() throws IOException {
+        connection = ss.accept();
+    }
 
-        InputStreamReader in = new InputStreamReader(socket.getInputStream());
-        BufferedReader bf = new BufferedReader(in);
+    public void setupConnection() throws IOException {
+        output = new ObjectOutputStream(connection.getOutputStream());
+        output.flush();
 
-        String str = bf.readLine();
+        input = new ObjectInputStream(connection.getInputStream());
+    }
 
-        System.out.println(str);
+    public void detectPackets() throws IOException {
+        while (true) {
+            try {
+                String message = (String) input.readObject();
+                output.writeObject(message);
+                output.flush();
+                System.out.println(message);
+            } catch (ClassNotFoundException e) {
+                System.err.println("This user has sent an unknown object!");
+            }
+        }
     }
 }
