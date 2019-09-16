@@ -4,6 +4,7 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Server {
@@ -11,13 +12,13 @@ public class Server {
     private Thread listenThread;
     private boolean listening = false;
     private DatagramSocket socket;
-    private Set<PlayerConnection> connections;
+    private List<PlayerConnection> connections;
     private final int MAX_PACKET_SIZE = 1024;
     private byte[] dataBuffer = new byte[MAX_PACKET_SIZE * 10];
 
     public Server(int port) {
         this.port = port;
-        connections = new HashSet<PlayerConnection>();
+        connections = new ArrayList<PlayerConnection>();
     }
 
     public void start() {
@@ -55,29 +56,72 @@ public class Server {
         String code = contents.substring(0, 2);
         String message = contents.substring(2);
 
-        System.out.println(code);
-        System.out.println(contents);
-
         switch (code) {
             case "69": // connection code
-                // Do connection stuff
-                PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
-                connections.add(connection);
+                String[] index = message.split(",");
+                PlayerConnection newUser = handleLogin(packet, index[0].trim(), index[1].trim(), Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
+                System.out.println("POSITION RECEIVED: " + newUser.getX() + " " + newUser.getY());
+                for (PlayerConnection c : connections) {
+                    if (c.getUsername() != newUser.getUsername()) {
+                        send((12 + "" + c.getX() + ":" + c.getY() + ":" + c.getUsername()).getBytes(), packet.getAddress(), packet.getPort());
+                        send((12 + "" + newUser.getX() + ":" + newUser.getY() + ":" + newUser.getUsername()).getBytes(), c.getIpAddress(), c.getPort());
+                    }
+                }
+                System.out.println(connections.get(0));
                 break;
             case "13": // Chat box message code
-                System.out.println(connections.size());
+                chatMessage(contents);
+                break;
+            case "55": // Disconnect code
+                chatMessage(contents + " has left the game...");
                 for (PlayerConnection c : connections) {
-                    System.out.println(c);
-                    send(contents.getBytes(), c.getIpAddress(), c.getPort());
+                    if (c.getUsername() == contents) {
+                        System.out.println(c.getIpAddress() + " disconnect");
+                        connections.remove(c);
+                        return;
+                    }
+                }
+                break;
+            case "15":
+                String[] parts = message.split(":");
+                int i = Integer.parseInt(parts[3].trim());
+                if (i == -1)
+                    return;
+                PlayerConnection movement = connections.get(i);
+                System.out.println("Y: " + parts[2]);
+                movement.setPos(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                if (movement == null)
+                    return;
+                for (PlayerConnection c : connections) {
+                    if (c.getUsername() != movement.getUsername()) {
+                        send(("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY()).getBytes(), c.getIpAddress(), c.getPort());
+                    }
                 }
                 break;
         }
+    }
 
-        // Use a prefix to indicate the packet type, reference data from there
+    public void chatMessage(String message) {
+        for (PlayerConnection c : connections) {
+            send(message.getBytes(), c.getIpAddress(), c.getPort());
+        }
+    }
+
+    public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
+        // This is wear loading and saving would go, nothing for now
+        // TODO: implement saving and loading
+        // TODO: implement checking password
+        PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
+        connection.setUsername(username);
+        connection.setPos(x, y);
+        connections.add(connection);
+        send(("01" + (connections.size() - 1)).getBytes(), packet.getAddress(), packet.getPort());
+        return connection;
     }
 
     public void send(byte[] data, InetAddress address, int port) {
         assert(socket.isConnected());
+        System.out.println("Packet Sent: " + new String(data) + " " + address.getHostAddress() + ":" + port + " Length: " + data.length);
         DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
         try {
             socket.send(packet);
