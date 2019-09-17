@@ -10,6 +10,7 @@ import java.util.Set;
 public class Server {
     private int port;
     private Thread listenThread;
+    private Thread checkConnect;
     private boolean listening = false;
     private DatagramSocket socket;
     private List<PlayerConnection> connections;
@@ -32,6 +33,9 @@ public class Server {
 
         listenThread = new Thread(() -> listen());
         listenThread.start();
+
+        checkConnect = new Thread(() -> checkConnection());
+        checkConnect.start();
     }
 
     private void listen() {
@@ -47,6 +51,33 @@ public class Server {
         }
     }
 
+    private void checkConnection() {
+        while (listening) {
+            try {
+                for (PlayerConnection c : connections) {
+                    if (c.connected) {
+                        send("76".getBytes(), c.getIpAddress(), c.getPort());
+                        c.connected = false;
+                    } else {
+                        send("99".getBytes(), c.getIpAddress(), c.getPort());
+                        playerDisconnect(c);
+                        connections.remove(c);
+                        break;
+                    }
+                }
+                checkConnect.sleep(10000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void playerDisconnect(PlayerConnection connection) {
+        for (PlayerConnection c : connections) {
+            send("66" + connection.getUsername(), c.getIpAddress(), c.getPort());
+        }
+    }
+
     private void process(DatagramPacket packet) {
         //dumpPacket(packet);
 
@@ -54,33 +85,33 @@ public class Server {
         String contents = new String(packet.getData());
 
         String code = contents.substring(0, 2);
-        String message = contents.substring(2);
+        String message = contents.substring(2).trim();
+        String[] index;
+        PlayerConnection connection;
 
         switch (code) {
             case "69": // connection code
-                String[] index = message.split(",");
-                PlayerConnection newUser = handleLogin(packet, index[0].trim(), index[1].trim(), Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
-                System.out.println("POSITION RECEIVED: " + newUser.getX() + " " + newUser.getY());
+                index = message.split(",");
+                connection = handleLogin(packet, index[0].trim(), index[1].trim(), Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
+                System.out.println("POSITION RECEIVED: " + connection.getX() + " " + connection.getY());
                 for (PlayerConnection c : connections) {
-                    if (c.getUsername() != newUser.getUsername()) {
+                    if (c.getUsername() != connection.getUsername()) {
                         send((12 + "" + c.getX() + ":" + c.getY() + ":" + c.getUsername()).getBytes(), packet.getAddress(), packet.getPort());
-                        send((12 + "" + newUser.getX() + ":" + newUser.getY() + ":" + newUser.getUsername()).getBytes(), c.getIpAddress(), c.getPort());
+                        send((12 + "" + connection.getX() + ":" + connection.getY() + ":" + connection.getUsername()).getBytes(), c.getIpAddress(), c.getPort());
                     }
                 }
                 System.out.println(connections.get(0));
+                break;
+            case "76":
+                findPlayer(message).connected = true;
                 break;
             case "13": // Chat box message code
                 chatMessage(contents);
                 break;
             case "55": // Disconnect code
-                chatMessage(contents + " has left the game...");
-                for (PlayerConnection c : connections) {
-                    if (c.getUsername() == contents) {
-                        System.out.println(c.getIpAddress() + " disconnect");
-                        connections.remove(c);
-                        return;
-                    }
-                }
+                connection = findPlayer(message);
+                connections.remove(connection);
+                playerDisconnect(connection);
                 break;
             case "15":
                 String[] parts = message.split(":");
@@ -88,7 +119,6 @@ public class Server {
                 if (i == -1)
                     return;
                 PlayerConnection movement = connections.get(i);
-                System.out.println("Y: " + parts[2]);
                 movement.setPos(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
                 if (movement == null)
                     return;
@@ -99,6 +129,15 @@ public class Server {
                 }
                 break;
         }
+    }
+
+    public PlayerConnection findPlayer(String username) {
+        for (PlayerConnection c : connections) {
+            if (c.getUsername().equals(username.trim()))
+                return c;
+        }
+
+        return null;
     }
 
     public void chatMessage(String message) {
@@ -121,13 +160,17 @@ public class Server {
 
     public void send(byte[] data, InetAddress address, int port) {
         assert(socket.isConnected());
-        System.out.println("Packet Sent: " + new String(data) + " " + address.getHostAddress() + ":" + port + " Length: " + data.length);
+//        System.out.println("Packet Sent: " + new String(data) + " " + address.getHostAddress() + ":" + port + " Length: " + data.length);
         DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
         try {
             socket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void send(String data, InetAddress address, int port) {
+        send(data.getBytes(), address, port);
     }
 
     private void dumpPacket(DatagramPacket packet) {
