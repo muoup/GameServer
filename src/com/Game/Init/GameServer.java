@@ -5,6 +5,7 @@ import java.net.UnknownHostException;
 
 public class GameServer {
     public static void main(String[] args) {
+        PlayerConnection.init();
         Server server = new Server(3112);
         server.start();
 

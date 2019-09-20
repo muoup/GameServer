@@ -1,11 +1,13 @@
 package com.Game.Init;
 
+import com.Game.Save.ItemMemory;
+import com.Game.Save.ManageSave;
+import com.Game.Save.SaveSettings;
+
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class Server {
     private int port;
@@ -73,6 +75,7 @@ public class Server {
     }
 
     private void playerDisconnect(PlayerConnection connection) {
+        ManageSave.savePlayerData(connection);
         for (PlayerConnection c : connections) {
             send("66" + connection.getUsername(), c.getIpAddress(), c.getPort());
         }
@@ -91,19 +94,24 @@ public class Server {
 
         switch (code) {
             case "69": // connection code
-                index = message.split(",");
-                connection = handleLogin(packet, index[0].trim(), index[1].trim(), Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
-                System.out.println("POSITION RECEIVED: " + connection.getX() + " " + connection.getY());
+                index = message.split(":");
+                String username = index[0].trim();
+                String password = index[1].trim();
+                boolean connect = handleLogin(username, password, Integer.parseInt(index[2]), packet);
+                if (!connect)
+                    break;
+                connection = handleLogin(packet, username, password, Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
                 for (PlayerConnection c : connections) {
                     if (c.getUsername() != connection.getUsername()) {
                         send((12 + "" + c.getX() + ":" + c.getY() + ":" + c.getUsername()).getBytes(), packet.getAddress(), packet.getPort());
                         send((12 + "" + connection.getX() + ":" + connection.getY() + ":" + connection.getUsername()).getBytes(), c.getIpAddress(), c.getPort());
                     }
                 }
-                System.out.println(connections.get(0));
                 break;
             case "76":
-                findPlayer(message).connected = true;
+                connection = findPlayer(message);
+                if (connection != null)
+                    connection.connected = true;
                 break;
             case "13": // Chat box message code
                 chatMessage(contents);
@@ -114,30 +122,64 @@ public class Server {
                 playerDisconnect(connection);
                 break;
             case "15":
-                String[] parts = message.split(":");
-                int i = Integer.parseInt(parts[3].trim());
+                index = message.split(":");
+                int i = Integer.parseInt(index[3].trim());
                 if (i == -1)
-                    return;
+                    break;
                 PlayerConnection movement = connections.get(i);
-                movement.setPos(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
                 if (movement == null)
-                    return;
+                    break;
                 for (PlayerConnection c : connections) {
                     if (c.getUsername() != movement.getUsername()) {
                         send(("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY()).getBytes(), c.getIpAddress(), c.getPort());
                     }
                 }
                 break;
+            case "07":
+                index = message.split(":");
+                int skill = Integer.parseInt(index[0]);
+                float xp = Float.parseFloat(index[1]);
+                System.out.println("Skill: " + skill + " XP: " + xp);
+                findPlayer(index[2]).skillXP[skill] += xp;
+                break;
+            case "08":
+                index = message.split(":");
+                int slot = Integer.parseInt(index[0]);
+                int id = Integer.parseInt(index[1]);
+                int amount = Integer.parseInt(index[2]);
+                connection = findPlayer(index[3]);
+                System.out.println("SLOT: " + slot + " ID: " + id + " AMOUNT: " + amount);
+                connection.inventoryItems[slot].id = id;
+                connection.inventoryItems[slot].amount = amount;
+                break;
         }
     }
 
     public PlayerConnection findPlayer(String username) {
         for (PlayerConnection c : connections) {
-            if (c.getUsername().equals(username.trim()))
+            if (c.getUsername().equalsIgnoreCase(username.trim()))
                 return c;
         }
 
         return null;
+    }
+
+    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet) {
+        if (connection == 0) {
+            boolean isConnect = ManageSave.loginCorrect(username, password);
+            String capName = ManageSave.getUsername(username);
+            send("02" + "l" + ((isConnect) ? "c:" + capName : "i:N/A"), packet.getAddress(), packet.getPort());
+            return isConnect;
+        } else if (connection == 1) {
+            boolean isConnect = !ManageSave.usernameExists(username);
+            String capName = ManageSave.getUsername(username);
+            send("02" + "r" + ((isConnect) ? "c:" + capName : "i:N/A"), packet.getAddress(), packet.getPort());
+            return isConnect;
+        } else {
+            System.err.println("Bad connection code: " + connection);
+        }
+        return false;
     }
 
     public void chatMessage(String message) {
@@ -148,13 +190,27 @@ public class Server {
 
     public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
         // This is wear loading and saving would go, nothing for now
-        // TODO: implement saving and loading
-        // TODO: implement checking password
-        PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
-        connection.setUsername(username);
-        connection.setPos(x, y);
+        PlayerConnection connection = ManageSave.loadPlayerData(username, packet);
+//        connection.connected = true;
         connections.add(connection);
-        send(("01" + (connections.size() - 1)).getBytes(), packet.getAddress(), packet.getPort());
+        send("01" + (connections.size() - 1), packet.getAddress(), packet.getPort());
+        String send = "04" + connection.getUsername() + ":" + connection.getX() + ":" + connection.getY();
+        for (int i = 0; i < SaveSettings.skillAmount; i++) {
+            send += ":" + connection.skillXP[i];
+        }
+        send(send, packet.getAddress(), packet.getPort());
+        send = "05";
+        for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
+            ItemMemory mem = connection.inventoryItems[i];
+            send += ":" + mem.id + ":" + mem.amount;
+        }
+        send(send, packet.getAddress(), packet.getPort());
+        send = "06";
+        for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
+            ItemMemory mem = connection.accessoryItems[i];
+            send += ":" + mem.id + ":" + mem.amount;
+        }
+        send(send, packet.getAddress(), packet.getPort());
         return connection;
     }
 
@@ -171,18 +227,5 @@ public class Server {
 
     public void send(String data, InetAddress address, int port) {
         send(data.getBytes(), address, port);
-    }
-
-    private void dumpPacket(DatagramPacket packet) {
-        byte[] data = packet.getData();
-        InetAddress address = packet.getAddress();
-        int port = packet.getPort();
-
-        System.out.println(".......................");
-        System.out.println("PACKET: ");
-        System.out.println("\t" + address.getHostAddress() + ":" + port);
-        System.out.println();
-        System.out.println("\tContents: " +new String(data).trim());
-        System.out.println(".......................");
     }
 }
