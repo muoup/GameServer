@@ -140,7 +140,6 @@ public class Server {
                 index = message.split(":");
                 int skill = Integer.parseInt(index[0]);
                 float xp = Float.parseFloat(index[1]);
-                System.out.println("Skill: " + skill + " XP: " + xp);
                 findPlayer(index[2]).skillXP[skill] += xp;
                 break;
             case "08":
@@ -149,9 +148,17 @@ public class Server {
                 int id = Integer.parseInt(index[1]);
                 int amount = Integer.parseInt(index[2]);
                 connection = findPlayer(index[3]);
-                System.out.println("SLOT: " + slot + " ID: " + id + " AMOUNT: " + amount);
                 connection.inventoryItems[slot].id = id;
                 connection.inventoryItems[slot].amount = amount;
+                break;
+            case "09":
+                index = message.split(":");
+                int aslot = Integer.parseInt(index[0]);
+                int aid = Integer.parseInt(index[1]);
+                int aamount = Integer.parseInt(index[2]);
+                connection = findPlayer(index[3]);
+                connection.accessoryItems[aslot].id = aid;
+                connection.accessoryItems[aslot].amount = aamount;
                 break;
         }
     }
@@ -168,11 +175,19 @@ public class Server {
     public boolean handleLogin(String username, String password, int connection, DatagramPacket packet) {
         if (connection == 0) {
             boolean isConnect = ManageSave.loginCorrect(username, password);
+            if (findPlayer(username) != null) {
+                send("02" + "p", packet.getAddress(), packet.getPort());
+                return false;
+            }
             String capName = ManageSave.getUsername(username);
             send("02" + "l" + ((isConnect) ? "c:" + capName : "i:N/A"), packet.getAddress(), packet.getPort());
             return isConnect;
         } else if (connection == 1) {
             boolean isConnect = !ManageSave.usernameExists(username);
+            if (findPlayer(username) != null) {
+                send("02" + "p", packet.getAddress(), packet.getPort());
+                return false;
+            }
             String capName = ManageSave.getUsername(username);
             send("02" + "r" + ((isConnect) ? "c:" + capName : "i:N/A"), packet.getAddress(), packet.getPort());
             return isConnect;

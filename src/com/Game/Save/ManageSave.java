@@ -47,9 +47,9 @@ public class ManageSave {
                 case "Inventory:":
                     for (int i = 1; i < parts.length; i++) {
                         if (i % 2 == 1)
-                            data.inventoryItems[(i - 1) / 2].id = i;
+                            data.inventoryItems[(i - 1) / 2].id = Integer.parseInt(parts[i]);
                         else
-                            data.inventoryItems[(i - 1) / 2].amount = i;
+                            data.inventoryItems[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
                     }
                     break;
                 case "Accessory:":
@@ -85,13 +85,13 @@ public class ManageSave {
 
         String invLine = "Inventory:";
         for (ItemMemory mem : data.inventoryItems)
-            invLine += " " + mem.amount + " " + mem.id;
+            invLine += " " + mem.id + " " + mem.amount;
 
         writer.println(invLine);
 
         String accLine = "Accessory:";
         for (ItemMemory mem : data.accessoryItems)
-            accLine += " " + mem.amount + " " + mem.id;
+            accLine += " " + mem.id + " " + mem.amount;
 
         writer.println(accLine);
 
