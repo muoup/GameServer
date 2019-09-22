@@ -8,4 +8,8 @@ public class ItemMemory {
         this.id = id;
         this.amount = amount;
     }
+
+    public String toString() {
+        return "ITEM: " + id + ", " + amount;
+    }
 }

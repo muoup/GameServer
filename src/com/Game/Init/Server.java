@@ -91,7 +91,6 @@ public class Server {
         String message = contents.substring(2).trim();
         String[] index;
         PlayerConnection connection;
-
         switch (code) {
             case "69": // connection code
                 index = message.split(":");
@@ -159,6 +158,7 @@ public class Server {
                 connection = findPlayer(index[3]);
                 connection.accessoryItems[aslot].id = aid;
                 connection.accessoryItems[aslot].amount = aamount;
+                System.out.println("Changing index " + aslot + " to item: " + aid + ", " + aamount);
                 break;
         }
     }
@@ -225,6 +225,7 @@ public class Server {
             ItemMemory mem = connection.accessoryItems[i];
             send += ":" + mem.id + ":" + mem.amount;
         }
+        System.out.println("ACCESSORY: " + send);
         send(send, packet.getAddress(), packet.getPort());
         return connection;
     }
