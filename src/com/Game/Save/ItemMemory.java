@@ -12,4 +12,8 @@ public class ItemMemory {
     public String toString() {
         return "ITEM: " + id + ", " + amount;
     }
+
+    public ItemMemory clone() {
+        return new ItemMemory(id, amount);
+    }
 }

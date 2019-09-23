@@ -48,8 +48,15 @@ public class PlayerConnection {
         this.y = 0;
         this.username = "";
         this.password = "";
-        this.inventoryItems = invTemp.clone();
-        this.accessoryItems = accTemp.clone();
+        this.inventoryItems = new ItemMemory[invTemp.length];
+        this.accessoryItems = new ItemMemory[accTemp.length];
+
+        for (int i = 0; i < invTemp.length; i++) {
+            inventoryItems[i] = new ItemMemory(0, 0);
+        }
+        for (int i = 0; i < accTemp.length; i++) {
+            accessoryItems[i] = new ItemMemory(0, 0);
+        }
     }
 
     public InetAddress getIpAddress() {

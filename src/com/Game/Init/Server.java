@@ -8,11 +8,14 @@ import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 public class Server {
     private int port;
     private Thread listenThread;
     private Thread checkConnect;
+    private Thread commandThread;
+    private Thread saveThread;
     private boolean listening = false;
     private DatagramSocket socket;
     private List<PlayerConnection> connections;
@@ -38,6 +41,12 @@ public class Server {
 
         checkConnect = new Thread(() -> checkConnection());
         checkConnect.start();
+
+        commandThread = new Thread(() -> commands());
+        commandThread.start();
+
+        saveThread = new Thread(() -> savePlayerData());
+        saveThread.start();
     }
 
     private void listen() {
@@ -50,6 +59,54 @@ public class Server {
             }
 
             process(packet);
+        }
+    }
+
+    private void commands() {
+        String listen;
+        Scanner scanner = new Scanner(System.in);
+        while (true) {
+            listen = scanner.nextLine();
+            handleCommands(listen);
+        }
+    }
+
+    private void handleCommands(String command) {
+        String[] parts = command.split(" ");
+        switch (parts[0]) {
+            case "say":
+                if (parts.length == 1) {
+                    System.out.println("say [message]");
+                    break;
+                }
+                String message = "";
+                for (int i = 1; i < parts.length; i++) {
+                    message += parts[i];
+                }
+                chatMessage("[Server] " + message);
+                break;
+            case "stop":
+                chatMessage("Server shutting down...");
+                for (PlayerConnection c : connections) {
+                    ManageSave.savePlayerData(c);
+                    send("99", c.getIpAddress(), c.getPort());
+                }
+                System.exit(0);
+                break;
+        }
+    }
+
+    private void savePlayerData() {
+        while (true) {
+            for (PlayerConnection c : connections) {
+                ManageSave.savePlayerData(c);
+            }
+            System.out.println("Saved player data.");
+            try {
+                saveThread.sleep(25000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -122,10 +179,7 @@ public class Server {
                 break;
             case "15":
                 index = message.split(":");
-                int i = Integer.parseInt(index[3].trim());
-                if (i == -1)
-                    break;
-                PlayerConnection movement = connections.get(i);
+                PlayerConnection movement = findPlayer(index[0]);
                 movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
                 if (movement == null)
                     break;
@@ -158,7 +212,6 @@ public class Server {
                 connection = findPlayer(index[3]);
                 connection.accessoryItems[aslot].id = aid;
                 connection.accessoryItems[aslot].amount = aamount;
-                System.out.println("Changing index " + aslot + " to item: " + aid + ", " + aamount);
                 break;
         }
     }
@@ -175,7 +228,7 @@ public class Server {
     public boolean handleLogin(String username, String password, int connection, DatagramPacket packet) {
         if (connection == 0) {
             boolean isConnect = ManageSave.loginCorrect(username, password);
-            if (findPlayer(username) != null) {
+            if (findPlayer(username) != null && isConnect) {
                 send("02" + "p", packet.getAddress(), packet.getPort());
                 return false;
             }
@@ -184,10 +237,6 @@ public class Server {
             return isConnect;
         } else if (connection == 1) {
             boolean isConnect = !ManageSave.usernameExists(username);
-            if (findPlayer(username) != null) {
-                send("02" + "p", packet.getAddress(), packet.getPort());
-                return false;
-            }
             String capName = ManageSave.getUsername(username);
             send("02" + "r" + ((isConnect) ? "c:" + capName : "i:N/A"), packet.getAddress(), packet.getPort());
             return isConnect;
@@ -205,11 +254,9 @@ public class Server {
 
     public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
         // This is wear loading and saving would go, nothing for now
-        PlayerConnection connection = ManageSave.loadPlayerData(username, packet);
-//        connection.connected = true;
+        PlayerConnection connection = (connectionCode == 0 ) ? ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
         connections.add(connection);
-        send("01" + (connections.size() - 1), packet.getAddress(), packet.getPort());
-        String send = "04" + connection.getUsername() + ":" + connection.getX() + ":" + connection.getY();
+        String send = "04" + username + ":" + connection.getX() + ":" + connection.getY();
         for (int i = 0; i < SaveSettings.skillAmount; i++) {
             send += ":" + connection.skillXP[i];
         }
@@ -225,7 +272,6 @@ public class Server {
             ItemMemory mem = connection.accessoryItems[i];
             send += ":" + mem.id + ":" + mem.amount;
         }
-        System.out.println("ACCESSORY: " + send);
         send(send, packet.getAddress(), packet.getPort());
         return connection;
     }

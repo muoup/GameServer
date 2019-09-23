@@ -53,16 +53,28 @@ public class ManageSave {
                     }
                     break;
                 case "Accessory:":
+                    System.out.println(data + " " + data.accessoryItems.length);
                     for (int i = 1; i < parts.length; i++) {
                         if (i % 2 == 1)
                             data.accessoryItems[(i - 1) / 2].id = Integer.parseInt(parts[i]);
-                        else
+                         else
                             data.accessoryItems[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
+
                     }
                     break;
             }
         }
         return data;
+    }
+
+    public static PlayerConnection createPlayerData(String playername, String password, DatagramPacket packet) {
+        PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
+        connection.setUsername(playername);
+        connection.setPassword(password);
+        connection.setPos(SaveSettings.startX, SaveSettings.startY);
+        savePlayerData(connection);
+
+        return connection;
     }
 
     public static PlayerConnection savePlayerData(PlayerConnection data) {
