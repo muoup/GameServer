@@ -32,8 +32,18 @@ public class ManageSave {
             parts = scanner.nextLine().split(" ");
             switch (parts[0]) {
                 case "Login:":
-                    data.username = parts[1];
-                    data.password = parts[2];
+                    String username = "";
+                    for (int i = 1; i < parts.length; i++) {
+                        username += parts[i];
+                    }
+                    data.username = username;
+                    break;
+                case "Password:":
+                    String password = "";
+                    for (int i = 1; i < parts.length; i++) {
+                        password += parts[i];
+                    }
+                    data.password = password;
                     break;
                 case "Pos:":
                     data.x = Integer.parseInt(parts[1]);
@@ -87,7 +97,8 @@ public class ManageSave {
             return null;
         }
 
-        writer.println("Login: " + data.username + " " + data.password);
+        writer.println("Login: " + data.username);
+        writer.println("Password: " + data.password);
         writer.println("Pos: " + data.x + " " + data.y);
 
         String skillsLine = "Skills:";
@@ -123,8 +134,14 @@ public class ManageSave {
             System.err.println("FILE NOT FOUND: " + username.toLowerCase() + ".psave");
             return false;
         }
+        scanner.nextLine();
         String[] loginLine = scanner.nextLine().split(" ");
-        return loginLine[2].trim().equalsIgnoreCase(password);
+        String pass = "";
+        for (int i = 1; i < loginLine.length; i++) {
+            pass += loginLine[i];
+        }
+        System.out.println(password + " " + pass);
+        return pass.trim().equalsIgnoreCase(password);
     }
 
     public static String getUsername(String username) {

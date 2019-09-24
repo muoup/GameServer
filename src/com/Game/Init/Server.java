@@ -21,6 +21,7 @@ public class Server {
     private List<PlayerConnection> connections;
     private final int MAX_PACKET_SIZE = 1024;
     private byte[] dataBuffer = new byte[MAX_PACKET_SIZE * 10];
+    private static final String serverVersion = "0.0.1a";
 
     public Server(int port) {
         this.port = port;
@@ -153,7 +154,8 @@ public class Server {
                 index = message.split(":");
                 String username = index[0].trim();
                 String password = index[1].trim();
-                boolean connect = handleLogin(username, password, Integer.parseInt(index[2]), packet);
+                String clientVersion = index[5].trim();
+                boolean connect = handleLogin(username, password, Integer.parseInt(index[2]), packet, clientVersion);
                 if (!connect)
                     break;
                 connection = handleLogin(packet, username, password, Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
@@ -225,7 +227,11 @@ public class Server {
         return null;
     }
 
-    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet) {
+    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
+        if (!clientVersion.equals(serverVersion)) {
+            send("02" + "v", packet.getAddress(), packet.getPort());
+            return false;
+        }
         if (connection == 0) {
             boolean isConnect = ManageSave.loginCorrect(username, password);
             if (findPlayer(username) != null && isConnect) {
@@ -254,7 +260,7 @@ public class Server {
 
     public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
         // This is wear loading and saving would go, nothing for now
-        PlayerConnection connection = (connectionCode == 0 ) ? ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
+        PlayerConnection connection = (connectionCode == 0) ? ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
         connections.add(connection);
         String send = "04" + username + ":" + connection.getX() + ":" + connection.getY();
         for (int i = 0; i < SaveSettings.skillAmount; i++) {
