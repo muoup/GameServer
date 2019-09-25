@@ -110,6 +110,9 @@ public class Server {
                 }
                 System.exit(0);
                 break;
+            case "finger":
+                connections.forEach(System.out::println);
+                break;
         }
     }
 

@@ -17,49 +17,44 @@
 
 package com.Game.security;
 
-import com.Game.exceptions.InvalidPasswordException;
-
-import java.io.*;
-import java.util.Comparator;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
 
-public class HashedLogin implements LoginHandler {
+public class VunlerableLogin implements LoginHandler {
 
     private Password pass;
     private String username;
 
+    @Override
     public void setPassword(Password p) {
-        pass = p;
+        if (p.state == PasswordState.UNHASHED) {
+            this.pass = p;
+        }
     }
 
     @Override
     public String takeUserInput() {
         Scanner input = new Scanner(System.in);
-        String usr = input.nextLine();
-        return usr;
+        return input.nextLine();
     }
 
     @Override
     public boolean match(Password p) {
-        return pass.compareTo(p) == 0;
+        return this.pass.compareTo(p) == 0;
     }
 
     @Override
     public Password readPassword(File save) throws IOException {
-        Obfuscator obf = new Obfuscator();
         BufferedReader reader = new BufferedReader(new FileReader(save));
-        String logins = reader.readLine();
-        String[] usrpass = logins.split(" ");
-        return new Password(usrpass[1], true, true);
+        String[] logins = reader.readLine().split(" ");
+        return new Password(logins[1], true, false);
     }
 
-    public Password hashPass(Password p) {
-        Obfuscator obs = new Obfuscator();
-        String temp = obs.hashPassword(p.getPassword(this));
-        return new Password(temp, true, true);
+    @Override
+    public File findSave() {
+        return new File("com/Game/saves/" + username + ".psave");
     }
 }

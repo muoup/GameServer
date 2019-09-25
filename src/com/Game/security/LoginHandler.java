@@ -34,5 +34,5 @@ public interface LoginHandler {
 
     Password readPassword(File save) throws IOException;
 
-    Password hashPass(Password p);
+    File findSave() throws IOException;
 }
