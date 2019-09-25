@@ -155,7 +155,7 @@ public class Server {
                 String username = index[0].trim();
                 String password = index[1].trim();
                 String clientVersion = index[5].trim();
-                boolean connect = handleLogin(username, password, Integer.parseInt(index[2]), packet, clientVersion);
+                boolean connect = canLogin(username, password, Integer.parseInt(index[2]), packet, clientVersion);
                 if (!connect)
                     break;
                 connection = handleLogin(packet, username, password, Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
@@ -227,7 +227,7 @@ public class Server {
         return null;
     }
 
-    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
+    public boolean canLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
         if (!clientVersion.equals(serverVersion)) {
             send("02" + "v", packet.getAddress(), packet.getPort());
             return false;
@@ -252,12 +252,6 @@ public class Server {
         return false;
     }
 
-    public void chatMessage(String message) {
-        for (PlayerConnection c : connections) {
-            send(message.getBytes(), c.getIpAddress(), c.getPort());
-        }
-    }
-
     public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
         // This is wear loading and saving would go, nothing for now
         PlayerConnection connection = (connectionCode == 0) ? ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
@@ -280,6 +274,12 @@ public class Server {
         }
         send(send, packet.getAddress(), packet.getPort());
         return connection;
+    }
+
+    public void chatMessage(String message) {
+        for (PlayerConnection c : connections) {
+            send(message.getBytes(), c.getIpAddress(), c.getPort());
+        }
     }
 
     public void send(byte[] data, InetAddress address, int port) {

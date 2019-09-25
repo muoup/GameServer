@@ -6,13 +6,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.Scanner;
-
-// Save Order:
-// Login: name pass
-// Pos: x y
-// Skills: s1 s2 s3...
 
 public class ManageSave {
     public static DecimalFormat df = new DecimalFormat("0.00");
@@ -36,14 +33,14 @@ public class ManageSave {
                     for (int i = 1; i < parts.length; i++) {
                         username += parts[i];
                     }
-                    data.username = username;
+                    data.setUsername(username);
                     break;
                 case "Password:":
                     String password = "";
                     for (int i = 1; i < parts.length; i++) {
                         password += parts[i];
                     }
-                    data.password = password;
+                    data.setPassword(password);
                     break;
                 case "Pos:":
                     data.x = Integer.parseInt(parts[1]);
@@ -88,7 +85,7 @@ public class ManageSave {
     }
 
     public static PlayerConnection savePlayerData(PlayerConnection data) {
-        File getFile = new File("src/saves/" + data.username.toLowerCase() + ".psave");;
+        File getFile = new File("src/saves/" + data.getUsername().toLowerCase() + ".psave");;
         PrintWriter writer;
 
         try {
@@ -97,8 +94,8 @@ public class ManageSave {
             return null;
         }
 
-        writer.println("Login: " + data.username);
-        writer.println("Password: " + data.password);
+        writer.println("Login: " + data.getUsername());
+        writer.println("Password: " + data.getPassword());
         writer.println("Pos: " + data.x + " " + data.y);
 
         String skillsLine = "Skills:";
@@ -136,12 +133,11 @@ public class ManageSave {
         }
         scanner.nextLine();
         String[] loginLine = scanner.nextLine().split(" ");
-        String pass = "";
-        for (int i = 1; i < loginLine.length; i++) {
-            pass += loginLine[i];
-        }
-        System.out.println(password + " " + pass);
-        return pass.trim().equalsIgnoreCase(password);
+        String pass = loginLine[1]; // Hashed passwords are one word (?) so the for loop is no longer needed.
+
+        // TODO: FIX PASSWORD SYSTEM, CANNOT LOGIN RN
+
+        return false;
     }
 
     public static String getUsername(String username) {

@@ -12,7 +12,6 @@ import java.security.SecureRandom;
 public class PlayerConnection {
     private InetAddress ipAddress;
     private int port;
-    // TODO: Save arrays of information for saving
     public boolean connected = true;
 
     public float[] skillXP;
@@ -20,15 +19,15 @@ public class PlayerConnection {
     public ItemMemory[] accessoryItems;
     private static ItemMemory[] invTemp;
     private static ItemMemory[] accTemp;
-    public int x, y;
-    public String username;
+    public int x, y, subWorld;
+    private String username;
     /**
      * The Password, when set using {@link #setPassword(String)}.
      * Typically, when set through this method, the password will be hashed.
      */
     private String password;
-    private byte[] salt = getSalt(); //Salt is added to the password to make the hash more secure.
-    public boolean isPasswordHashed = false; //By default, the password should not be considered hashed.
+    private byte[] salt = getSalt(); // Salt is added to the password to make the hash more secure.
+    public boolean isPasswordHashed = false; // By default, the password should not be considered hashed.
 
     public static void init() {
         invTemp = new ItemMemory[SaveSettings.inventoryAmount];
@@ -55,13 +54,14 @@ public class PlayerConnection {
     }
 
     public void initSkills() {
-        skillXP = new float[SaveSettings.skillAmount];
+        this.skillXP = new float[SaveSettings.skillAmount];
         this.x = 0;
         this.y = 0;
         this.username = "";
         this.password = "";
         this.inventoryItems = new ItemMemory[invTemp.length];
         this.accessoryItems = new ItemMemory[accTemp.length];
+        this.subWorld = 0;
 
         for (int i = 0; i < invTemp.length; i++) {
             inventoryItems[i] = new ItemMemory(0, 0);
@@ -112,15 +112,6 @@ public class PlayerConnection {
         this.y = y;
     }
 
-    public void printData() {
-        System.out.println("SKILLS:");
-        for (int i = 0; i < skillXP.length; i++) {
-            System.out.println(i + ": " + skillXP[i]);
-        }
-        System.out.println("USERNAME: " + username + " PASSWORD: " + password);
-        System.out.println("POS: " + x + ", " + y);
-    }
-
     /**
      * This takes the unhashed password typically set by {@link #setPassword(String)} and securely hashes it with
      * a salted SHA-256 hash.
@@ -153,11 +144,11 @@ public class PlayerConnection {
     }
 
     /**
-     * This method uses a Secure Random pseudorandom generation method to generate a byte array to be used as the password
+     * This method uses a Secure Random pseudo-random generation method to generate a byte array to be used as the password
      * salt.
      * @return The password salt
      */
-    private byte[] getSalt() {
+    public static byte[] getSalt() {
         SecureRandom sr = null;
         try {
             sr = SecureRandom.getInstance("SHA1PRNG");
