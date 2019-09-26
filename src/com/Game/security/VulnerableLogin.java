@@ -23,7 +23,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Scanner;
 
-public class VunlerableLogin implements LoginHandler {
+public class VulnerableLogin implements LoginHandler {
 
     private Password pass;
     private String username;
@@ -54,7 +54,7 @@ public class VunlerableLogin implements LoginHandler {
     }
 
     @Override
-    public File findSave() {
-        return new File("com/Game/saves/" + username + ".psave");
+    public File findSave(String username) throws IOException {
+        return new File("src/com/Game/saves/" + username + ".psave");
     }
 }

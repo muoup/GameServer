@@ -18,9 +18,12 @@
 package com.Game.Save;
 
 import com.Game.Init.PlayerConnection;
+import com.Game.exceptions.InvalidSaveFileException;
+import com.Game.security.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.text.DecimalFormat;
@@ -130,7 +133,7 @@ public class ManageSave {
         return data;
     }
 
-    public static boolean loginCorrect(String username, String password) {
+    public static boolean loginCorrect(String username, Password password) {
         File file = new File("src/saves/" + username.toLowerCase() + ".psave");
 
         Scanner scanner;
@@ -141,7 +144,19 @@ public class ManageSave {
             return false;
         }
         String[] loginLine = scanner.nextLine().split(" ");
-        return loginLine[2].trim().equalsIgnoreCase(password);
+        LoginHandler handler = new HashedLogin(password);
+        File saveFile = new File("src");
+        Password toMatch = new Password("", false, false); //marked for garbage collection
+        boolean success = false;
+        try {
+            saveFile = handler.findSave(username);
+            toMatch = handler.readPassword(saveFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            success = handler.match(toMatch);
+        }
+        return success;
     }
 
     public static String getUsername(String username) {

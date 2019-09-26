@@ -57,9 +57,18 @@ public class HashedLogin implements LoginHandler {
         return new Password(usrpass[1], true, true);
     }
 
+    @Override
+    public File findSave(String username) throws IOException {
+        return new File("src/com/Game/saves/" + username + ".psave");
+    }
+
     public Password hashPass(Password p) {
         Obfuscator obs = new Obfuscator();
         String temp = obs.hashPassword(p.getPassword(this));
         return new Password(temp, true, true);
+    }
+
+    public HashedLogin(Password p) {
+        this.pass = p;
     }
 }

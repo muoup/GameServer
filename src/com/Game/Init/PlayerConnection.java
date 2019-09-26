@@ -38,7 +38,7 @@ public class PlayerConnection {
      * The Password, when set using {@link #setPassword(String)}.
      * Typically, when set through this method, the password will be hashed.
      */
-    public String password;
+    public String password; //TODO: Make a Password
 
     public static void init() {
         invTemp = new ItemMemory[SaveSettings.inventoryAmount];

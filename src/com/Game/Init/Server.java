@@ -20,6 +20,7 @@ package com.Game.Init;
 import com.Game.Save.ItemMemory;
 import com.Game.Save.ManageSave;
 import com.Game.Save.SaveSettings;
+import com.Game.security.*;
 
 import java.io.*;
 import java.net.*;
@@ -244,10 +245,11 @@ public class Server {
 
         return null;
     }
-
+    //TODO implement a LoginHandler
     public boolean handleLogin(String username, String password, int connection, DatagramPacket packet) {
+        Password pass = new Password(password, true, false);
         if (connection == 0) {
-            boolean isConnect = ManageSave.loginCorrect(username, password);
+            boolean isConnect = ManageSave.loginCorrect(username, pass);
             if (findPlayer(username) != null && isConnect) {
                 send("02" + "p", packet.getAddress(), packet.getPort());
                 return false;
