@@ -17,6 +17,8 @@
 
 package com.Game.security;
 
+import com.Game.Save.ManageSave;
+
 import java.util.Objects;
 
 public class Password implements Comparable<Password> {
@@ -40,7 +42,7 @@ public class Password implements Comparable<Password> {
         if (state == PasswordState.HASHED) {
             return password;
         } else {
-            if (o instanceof LoginHandler || o instanceof Obfuscator || o instanceof Password) {
+            if ((o instanceof LoginHandler) || (o instanceof Obfuscator) || (o instanceof Password)) {
                 return password;
             } else {
                 return null;
@@ -60,5 +62,9 @@ public class Password implements Comparable<Password> {
         } else {
             return -1;
         }
+    }
+
+    public PasswordState getState() {
+        return state;
     }
 }

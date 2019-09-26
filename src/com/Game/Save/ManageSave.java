@@ -116,9 +116,12 @@ public class ManageSave {
         } catch (FileNotFoundException e) {
             return null;
         }
-
         writer.println("Login: " + data.username);
-        writer.println("Password: " + data.password);
+        if (data.password.getState() == PasswordState.HASHED) {
+            writer.println("Password: " + data.password.getPassword(new ManageSave()) + " " + "1");
+        } else {
+            writer.println("Password: " + data.password.getPassword(new VulnerableLogin(data.password)) + " " + "0"); //Must be passed an instance of VulnerableLogin
+        }
         writer.println("Pos: " + data.x + " " + data.y);
 
         String skillsLine = "Skills:";

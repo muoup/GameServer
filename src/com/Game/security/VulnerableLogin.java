@@ -55,6 +55,10 @@ public class VulnerableLogin implements LoginHandler {
 
     @Override
     public File findSave(String username) throws IOException {
-        return new File("src/com/Game/saves/" + username + ".psave");
+        return new File("src/saves/" + username + ".psave");
+    }
+
+    public VulnerableLogin(Password p) {
+        this.pass = p;
     }
 }

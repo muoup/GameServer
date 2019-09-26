@@ -18,6 +18,7 @@
 package com.Game.Init;
 
 import com.Game.Save.*;
+import com.Game.security.*;
 
 import java.net.InetAddress;
 
@@ -35,10 +36,10 @@ public class PlayerConnection {
     public int x, y;
     public String username;
     /**
-     * The Password, when set using {@link #setPassword(String)}.
+     * The Password, when set using {@link #setPassword(Password)}.
      * Typically, when set through this method, the password will be hashed.
      */
-    public String password; //TODO: Make a Password
+    public Password password; //TODO: Make a Password
 
     public static void init() {
         invTemp = new ItemMemory[SaveSettings.inventoryAmount];
@@ -69,7 +70,7 @@ public class PlayerConnection {
         this.x = 0;
         this.y = 0;
         this.username = "";
-        this.password = "";
+        this.password = new Password("", false, false);
         this.inventoryItems = new ItemMemory[invTemp.length];
         this.accessoryItems = new ItemMemory[accTemp.length];
 
@@ -97,7 +98,7 @@ public class PlayerConnection {
         return username;
     }
 
-    public String getPassword() {
+    public Password getPassword() {
         return password;
     }
 
@@ -113,7 +114,7 @@ public class PlayerConnection {
         this.username = username;
     }
 
-    public void setPassword(String password) {
+    public void setPassword(Password password) {
         this.password = password;
     }
 

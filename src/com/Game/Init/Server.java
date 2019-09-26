@@ -249,8 +249,8 @@ public class Server {
     }
 
     //TODO implement a LoginHandler
-    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet) {
-        Password pass = new Password(password, true, false);
+    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
+        Password pass = new Password(password, true, false); //Encode password as Password
         if (!clientVersion.equals(serverVersion)) {
             send("02" + "v", packet.getAddress(), packet.getPort());
             return false;
