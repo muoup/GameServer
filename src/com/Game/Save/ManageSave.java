@@ -1,9 +1,29 @@
+/*
+ * Copyright (c) 2019 Zachary Verlardi
+ *
+ * This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.Game.Save;
 
 import com.Game.Init.PlayerConnection;
+import com.Game.exceptions.InvalidSaveFileException;
+import com.Game.security.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.text.DecimalFormat;
@@ -124,7 +144,7 @@ public class ManageSave {
         return data;
     }
 
-    public static boolean loginCorrect(String username, String password) {
+    public static boolean loginCorrect(String username, Password password) {
         File file = new File("src/saves/" + username.toLowerCase() + ".psave");
 
         Scanner scanner;
@@ -136,12 +156,19 @@ public class ManageSave {
         }
         scanner.nextLine();
         String[] loginLine = scanner.nextLine().split(" ");
-        String pass = "";
-        for (int i = 1; i < loginLine.length; i++) {
-            pass += loginLine[i];
+        LoginHandler handler = new HashedLogin(password);
+        File saveFile = new File("src");
+        Password toMatch = new Password("", false, false); //marked for garbage collection
+        boolean success = false;
+        try {
+            saveFile = handler.findSave(username);
+            toMatch = handler.readPassword(saveFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            success = handler.match(toMatch);
         }
-        System.out.println(password + " " + pass);
-        return pass.trim().equalsIgnoreCase(password);
+        return success;
     }
 
     public static String getUsername(String username) {

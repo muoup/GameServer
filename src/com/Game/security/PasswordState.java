@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Zachary Verlardi
+ * Copyright (c) 2019 Connor McDermid
  *
  * This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -15,22 +15,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.Save;
+package com.Game.security;
 
-public class ItemMemory {
-    public int id;
-    public int amount;
-
-    public ItemMemory(int id, int amount) {
-        this.id = id;
-        this.amount = amount;
-    }
-
-    public String toString() {
-        return "ITEM: " + id + ", " + amount;
-    }
-
-    public ItemMemory clone() {
-        return new ItemMemory(id, amount);
-    }
+public enum PasswordState {
+    UNHASHED,
+    HASHED,
+    UNREGISTERED;
 }
