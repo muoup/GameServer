@@ -49,7 +49,7 @@ public class ManageSave {
                     for (int i = 1; i < parts.length; i++) {
                         password += parts[i];
                     }
-                    data.password = password;
+                    data.setPassword(password);
                     break;
                 case "Pos:":
                     data.x = Integer.parseInt(parts[1]);
@@ -116,7 +116,7 @@ public class ManageSave {
         }
 
         writer.println("Login: " + data.username);
-        writer.println("Password: " + data.password);
+        writer.println("Password: " + data.getPassword());
         writer.println("Pos: " + data.x + " " + data.y);
 
         String skillsLine = "Skills:";
