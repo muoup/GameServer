@@ -17,6 +17,12 @@ import java.util.Scanner;
 public class ManageSave {
     public static DecimalFormat df = new DecimalFormat("0.00");
 
+    /**
+     * Used for creating a PlayerConnection from a saved file.
+     * @param playername Username and name of player save file (without file type).
+     * @param packet Player's packet to send player's information.
+     * @return PlayerConnection loaded from a .psave file.
+     */
     public static PlayerConnection loadPlayerData(String playername, DatagramPacket packet) {
         File getFile = new File("src/saves/" + playername.toLowerCase() + ".psave");
         PlayerConnection data = new PlayerConnection(packet.getAddress(), packet.getPort());
@@ -77,6 +83,13 @@ public class ManageSave {
         return data;
     }
 
+    /**
+     * Creates a blank PlayerConnection and saves it to /saves/
+     * @param playername Name of new player
+     * @param password Password of new player
+     * @param packet Packet of new player for Server UDP
+     * @return PlayerConnection that was just created/
+     */
     public static PlayerConnection createPlayerData(String playername, String password, DatagramPacket packet) {
         PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
         connection.setUsername(playername);
@@ -87,6 +100,11 @@ public class ManageSave {
         return connection;
     }
 
+    /**
+     * Saves a PlayerConnection to a saved file. File should exist from createPlayerData()
+     * @param data PlayerConnection to save to a file.
+     * @return PlayerConnection that was sent it for some cleaner syntax.
+     */
     public static PlayerConnection savePlayerData(PlayerConnection data) {
         File getFile = new File("src/saves/" + data.username.toLowerCase() + ".psave");;
         PrintWriter writer;
@@ -124,6 +142,12 @@ public class ManageSave {
         return data;
     }
 
+    /**
+     * Determines if the login given is correct. Tests login from /"username".psave
+     * @param username Username to test against file
+     * @param password Password to test against file
+     * @return True or false dependant on if the login is correct.
+     */
     public static boolean loginCorrect(String username, String password) {
         File file = new File("src/saves/" + username.toLowerCase() + ".psave");
 
@@ -144,6 +168,11 @@ public class ManageSave {
         return pass.trim().equalsIgnoreCase(password);
     }
 
+    /**
+     * This method does not entirely work, this was just used to return the case sensitive username for the chatbox ingame
+     * @param username File Username
+     * @return How the username was capitalized when registered (not working) not worth working on rn however.
+     */
     public static String getUsername(String username) {
         File file = new File("src/saves/" + username.toLowerCase() + ".psave");
 
