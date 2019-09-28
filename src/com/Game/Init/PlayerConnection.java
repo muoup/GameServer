@@ -33,7 +33,7 @@ public class PlayerConnection {
     private static ItemMemory[] invTemp;
     private static ItemMemory[] accTemp;
     public int x, y, subWorld;
-    private String username;
+    public String username;
     /**
      * The Password, when set using {@link #setPassword(Password)}.
      * Typically, when set through this method, the password will be hashed.

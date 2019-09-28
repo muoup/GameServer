@@ -62,9 +62,13 @@ public class ManageSave {
                     data.setUsername(username);
                     break;
                 case "Password:":
-                    String password = "";
-                    for (int i = 1; i < parts.length; i++) {
-                        password += parts[i];
+                    String pass = "";
+                    pass = parts[1];
+                    Password password;
+                    if (Integer.parseInt(parts[2]) == 1) {
+                        password = new Password(pass, true, true);
+                    } else {
+                        password = new Password(pass, true, false);
                     }
                     data.setPassword(password);
                     break;
@@ -108,7 +112,7 @@ public class ManageSave {
      * @param packet Packet of new player for Server UDP
      * @return PlayerConnection that was just created/
      */
-    public static PlayerConnection createPlayerData(String playername, String password, DatagramPacket packet) {
+    public static PlayerConnection createPlayerData(String playername, Password password, DatagramPacket packet) {
         PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
         connection.setUsername(playername);
         connection.setPassword(password);
@@ -136,7 +140,7 @@ public class ManageSave {
         if (data.password.getState() == PasswordState.HASHED) {
             writer.println("Password: " + data.password.getPassword(new ManageSave()) + " " + "1");
         } else {
-            writer.println("Password: " + data.password.getPassword(new VulnerableLogin(data.password)) + " " + "0"); //Must be passed an instance of VulnerableLogin
+            writer.println("Password: " + data.password.getPassword(new VulnerableLogin(data.password)) + " " + "0"); //Must be passed an instance of VulnerableLogin to bypass security measures
         }
         writer.println("Pos: " + data.x + " " + data.y);
 
