@@ -1,13 +1,26 @@
+/*
+ * Copyright (c) 2019 Zachary Verlardi
+ *
+ * This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.Game.Init;
 
 import com.Game.Save.*;
+import com.Game.security.*;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 
 public class PlayerConnection {
     private InetAddress ipAddress;
@@ -22,12 +35,10 @@ public class PlayerConnection {
     public int x, y, subWorld;
     private String username;
     /**
-     * The Password, when set using {@link #setPassword(String)}.
+     * The Password, when set using {@link #setPassword(Password)}.
      * Typically, when set through this method, the password will be hashed.
      */
-    private String password;
-    private byte[] salt = getSalt(); // Salt is added to the password to make the hash more secure.
-    public boolean isPasswordHashed = false; // By default, the password should not be considered hashed.
+    public Password password;
 
     public static void init() {
         invTemp = new ItemMemory[SaveSettings.inventoryAmount];
@@ -58,7 +69,7 @@ public class PlayerConnection {
         this.x = 0;
         this.y = 0;
         this.username = "";
-        this.password = "";
+        this.password = new Password("", false, false);
         this.inventoryItems = new ItemMemory[invTemp.length];
         this.accessoryItems = new ItemMemory[accTemp.length];
         this.subWorld = 0;
@@ -87,7 +98,7 @@ public class PlayerConnection {
         return username;
     }
 
-    public String getPassword() {
+    public Password getPassword() {
         return password;
     }
 
@@ -103,8 +114,8 @@ public class PlayerConnection {
         this.username = username;
     }
 
-    // TODO: Change setPassword back so that it changes to hashed password
-    public void setPassword(String password) {
+
+    public void setPassword(Password password) {
         this.password = password;
     }
 
@@ -114,53 +125,4 @@ public class PlayerConnection {
         this.subWorld = subWorld;
     }
 
-    /**
-     * This takes the unhashed password typically set by {@link #setPassword(String)} and securely hashes it with
-     * a salted SHA-256 hash.
-     * @param unhashed The unhashed password in String format from {@link #setPassword(String)}.
-     * @return The hashed password. This also overrides the password field with the hashed password, which may cause errors in the future.
-     */
-    private String hashPassword(String unhashed)  {
-        MessageDigest md;
-        byte[] bytes = null;
-        StringBuilder sb = new StringBuilder();
-        try {
-            md = MessageDigest.getInstance("SHA-256");
-            md.update(salt);
-
-            bytes = md.digest(unhashed.getBytes(StandardCharsets.UTF_8));
-
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            //Implement failure code here. The program shouldn't exit, but clearly shouldn't be silent.
-        }
-        for (int i = 0; i < bytes.length; i++) {
-            sb.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
-
-
-        }
-        String hashed = sb.toString();
-        password = hashed;
-        isPasswordHashed = true;
-        return hashed;
-    }
-
-    /**
-     * This method uses a Secure Random pseudo-random generation method to generate a byte array to be used as the password
-     * salt.
-     * @return The password salt
-     */
-    public static byte[] getSalt() {
-        SecureRandom sr = null;
-        try {
-            sr = SecureRandom.getInstance("SHA1PRNG");
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-        }
-        byte[] salt = new byte[16];
-
-        sr.nextBytes(salt);
-
-        return salt;
-    }
 }

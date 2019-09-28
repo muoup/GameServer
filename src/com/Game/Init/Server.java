@@ -1,8 +1,26 @@
+/*
+ * Copyright (c) 2019 Zachary Verlardi
+ *
+ * This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.Game.Init;
 
 import com.Game.Save.ItemMemory;
 import com.Game.Save.ManageSave;
 import com.Game.Save.SaveSettings;
+import com.Game.security.*;
 
 import java.io.*;
 import java.net.*;
@@ -104,6 +122,9 @@ public class Server {
                     send("99", c.getIpAddress(), c.getPort());
                 }
                 System.exit(0);
+                break;
+            case "finger":
+                connections.forEach(System.out::println);
                 break;
         }
     }
@@ -274,14 +295,17 @@ public class Server {
      * @param clientVersion Version of the player's client. Used to prevent old versions from connecting to the server.
      * @return
      */
-    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
         // TODO: Reimplement login once Connor Finishes.
+
+    //TODO implement a LoginHandler
+    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
+        Password pass = new Password(password, true, false); //Encode password as Password
         if (!clientVersion.equals(serverVersion)) {
             send("02" + "v", packet.getAddress(), packet.getPort());
             return false;
         }
         if (connection == 0) {
-            boolean isConnect = ManageSave.loginCorrect(username, password);
+            boolean isConnect = ManageSave.loginCorrect(username, pass);
             if (findPlayer(username) != null && isConnect) {
                 send("02" + "p", packet.getAddress(), packet.getPort());
                 return false;

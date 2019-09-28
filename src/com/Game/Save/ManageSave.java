@@ -1,9 +1,29 @@
+/*
+ * Copyright (c) 2019 Zachary Verlardi
+ *
+ * This program is free software: you can redistribute it and/or modify
+ *     it under the terms of the GNU General Public License as published by
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
+ *
+ *     This program is distributed in the hope that it will be useful,
+ *     but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *     GNU General Public License for more details.
+ *
+ *     You should have received a copy of the GNU General Public License
+ *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.Game.Save;
 
 import com.Game.Init.PlayerConnection;
+import com.Game.exceptions.InvalidSaveFileException;
+import com.Game.security.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
 import java.security.MessageDigest;
@@ -112,11 +132,13 @@ public class ManageSave {
         } catch (FileNotFoundException e) {
             return null;
         }
-
-        writer.println("Login: " + data.getUsername());
-
-        writer.println("Password: " + data.getPassword());
-        writer.println("Pos: " + data.x + " " + data.y + " " + data.subWorld);
+        writer.println("Login: " + data.username);
+        if (data.password.getState() == PasswordState.HASHED) {
+            writer.println("Password: " + data.password.getPassword(new ManageSave()) + " " + "1");
+        } else {
+            writer.println("Password: " + data.password.getPassword(new VulnerableLogin(data.password)) + " " + "0"); //Must be passed an instance of VulnerableLogin
+        }
+        writer.println("Pos: " + data.x + " " + data.y);
 
         String skillsLine = "Skills:";
 
@@ -147,7 +169,8 @@ public class ManageSave {
      * @param password Password to test against file
      * @return True or false dependant on if the login is correct.
      */
-    public static boolean loginCorrect(String username, String password) {
+
+    public static boolean loginCorrect(String username, Password password) {
         File file = new File("src/saves/" + username.toLowerCase() + ".psave");
 
         Scanner scanner;
@@ -159,12 +182,19 @@ public class ManageSave {
         }
         scanner.nextLine();
         String[] loginLine = scanner.nextLine().split(" ");
-        String pass = loginLine[1]; // Hashed passwords are one word (?) so the for loop is no longer needed.
-
-        // TODO: Fix password system so that it uses hashed password eventually.
-        // For now, passwords and usernames can only be one word long, until they are hashed.
-
-        return pass.equals(password.trim());
+        LoginHandler handler = new HashedLogin(password);
+        File saveFile = new File("src");
+        Password toMatch = new Password("", false, false); //marked for garbage collection
+        boolean success = false;
+        try {
+            saveFile = handler.findSave(username);
+            toMatch = handler.readPassword(saveFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            success = handler.match(toMatch);
+        }
+        return success;
     }
 
     /**

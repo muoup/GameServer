@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Zachary Verlardi
+ * Copyright (c) 2019 Connor McDermid
  *
  * This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -15,26 +15,24 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.Save;
+package com.Game.security;
+
+
+import java.io.File;
+import java.io.IOException;
 
 /**
- * Used to mimic an ItemStack from the client. Holds an id and an amount
- * which is easy to send over the network in the form of a packet.
+ * Objects instantiated off of this interface
  */
-public class ItemMemory {
-    public int id;
-    public int amount;
+public interface LoginHandler {
 
-    public ItemMemory(int id, int amount) {
-        this.id = id;
-        this.amount = amount;
-    }
+    void setPassword(Password p);
 
-    public String toString() {
-        return "ITEM: " + id + ", " + amount;
-    }
+    String takeUserInput();
 
-    public ItemMemory clone() {
-        return new ItemMemory(id, amount);
-    }
+    boolean match(Password p);
+
+    Password readPassword(File save) throws IOException;
+
+    File findSave(String username) throws IOException;
 }
