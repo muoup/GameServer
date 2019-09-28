@@ -35,6 +35,8 @@ public class Server {
             e.printStackTrace();
         }
 
+        // Starts up threads for different tasks.
+        // See method documentation for explanations.
         listening = true;
 
         listenThread = new Thread(() -> listen());
@@ -63,6 +65,9 @@ public class Server {
         }
     }
 
+    /**
+     * Constant listening for console commands. Running on separate thread.
+     */
     private void commands() {
         String listen;
         Scanner scanner = new Scanner(System.in);
@@ -72,6 +77,12 @@ public class Server {
         }
     }
 
+    /**
+     * Do not call this method. Used for console commands in the server.
+     * Say does not work rn.
+     * Stop saves all player data and shuts down the server/
+     * @param command String form of the command, does not start with any prefix.
+     */
     private void handleCommands(String command) {
         String[] parts = command.split(" ");
         switch (parts[0]) {
@@ -97,6 +108,10 @@ public class Server {
         }
     }
 
+    /**
+     * Every 25 seconds, all player data is saved in case the server crashes
+     * or in case I forget to run stop in the console before hand.
+     */
     private void savePlayerData() {
         while (true) {
             for (PlayerConnection c : connections) {
@@ -111,6 +126,13 @@ public class Server {
         }
     }
 
+    /**
+     * Basic method of detecting if a player has timed out.
+     * Every ten seconds every client is sent a ping message which requires a pong.
+     * If the client does not respond to the ping in another ten seconds, they are timed out.
+     * This is mostly used to determine if a player's client has crashed so that the player can re-log
+     * without having to restart the server.
+     */
     private void checkConnection() {
         while (listening) {
             try {
@@ -132,6 +154,11 @@ public class Server {
         }
     }
 
+    /**
+     * If the player times out or logs out, all other clients are told
+     * that the player has logged out and to stop rendering them.
+     * @param connection PlayerConnection file, get from handleLogin();
+     */
     private void playerDisconnect(PlayerConnection connection) {
         ManageSave.savePlayerData(connection);
         for (PlayerConnection c : connections) {
@@ -139,6 +166,11 @@ public class Server {
         }
     }
 
+    /**
+     * Never call this method except from listen().
+     * Used for interpreting packet data.
+     * @param packet Packet that was received.
+     */
     private void process(DatagramPacket packet) {
         //dumpPacket(packet);
 
@@ -155,12 +187,12 @@ public class Server {
                 String username = index[0].trim();
                 String password = index[1].trim();
                 String clientVersion = index[5].trim();
-                boolean connect = canLogin(username, password, Integer.parseInt(index[2]), packet, clientVersion);
+                boolean connect = handleLogin(username, password, Integer.parseInt(index[2]), packet, clientVersion);
                 if (!connect)
                     break;
                 connection = handleLogin(packet, username, password, Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
                 for (PlayerConnection c : connections) {
-                    if (c.getUsername() != connection.getUsername()) {
+                    if (!c.getUsername().equals(connection.getUsername())) {
                         send((12 + "" + c.getX() + ":" + c.getY() + ":" + c.getUsername()).getBytes(), packet.getAddress(), packet.getPort());
                         send((12 + "" + connection.getX() + ":" + connection.getY() + ":" + connection.getUsername()).getBytes(), c.getIpAddress(), c.getPort());
                     }
@@ -182,12 +214,12 @@ public class Server {
             case "15":
                 index = message.split(":");
                 PlayerConnection movement = findPlayer(index[0]);
-                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
+                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
                 if (movement == null)
                     break;
                 for (PlayerConnection c : connections) {
                     if (c.getUsername() != movement.getUsername()) {
-                        send(("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY()).getBytes(), c.getIpAddress(), c.getPort());
+                        send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + movement.subWorld, c.getIpAddress(), c.getPort());
                     }
                 }
                 break;
@@ -218,6 +250,12 @@ public class Server {
         }
     }
 
+    /**
+     * Takes in a username and searches all connected players and returns
+     * a PlayerConnection if the usernames match. Returns null if it fails.
+     * @param username Username of Requested Player
+     * @return The PlayerConnection file of the requested player.
+     */
     public PlayerConnection findPlayer(String username) {
         for (PlayerConnection c : connections) {
             if (c.getUsername().equalsIgnoreCase(username.trim()))
@@ -227,7 +265,17 @@ public class Server {
         return null;
     }
 
-    public boolean canLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
+    /**
+     * Takes in information about the player and sends packets to the player if their connection fails or succeeds.
+     * @param username Player's Username
+     * @param password Player's Password
+     * @param connection The type of connection from the player (0 - login, 1 - register)
+     * @param packet Packet of the Connected Player
+     * @param clientVersion Version of the player's client. Used to prevent old versions from connecting to the server.
+     * @return
+     */
+    public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
+        // TODO: Reimplement login once Connor Finishes.
         if (!clientVersion.equals(serverVersion)) {
             send("02" + "v", packet.getAddress(), packet.getPort());
             return false;
@@ -252,11 +300,31 @@ public class Server {
         return false;
     }
 
+    /**
+     * Sends a message to all connected player's chatbars.
+     * @param message Message to broadcast.
+     */
+    public void chatMessage(String message) {
+        for (PlayerConnection c : connections) {
+            send(message.getBytes(), c.getIpAddress(), c.getPort());
+        }
+    }
+
+    /**
+     * Creates a PlayerConnection object for new player, and sends the player data from their save file.
+     * Make sure to run boolean handleLogin first to make sure it is a legal login.
+     * @param packet Packet of Connecting Player
+     * @param username Username of Connecting PLayer
+     * @param password Password of Connecting Player
+     * @param connectionCode Connection Code of Player (0 - login, 1 - register, more..?);
+     * @param x Player x-coordinate
+     * @param y Player y-coordinate
+     * @return PlayerConnection Object of the newly connected player to add to the ArrayList of players.
+     */
     public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
-        // This is wear loading and saving would go, nothing for now
         PlayerConnection connection = (connectionCode == 0) ? ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
         connections.add(connection);
-        String send = "04" + username + ":" + connection.getX() + ":" + connection.getY();
+        String send = "04" + username + ":" + connection.getX() + ":" + connection.getY() + ":" + connection.subWorld;
         for (int i = 0; i < SaveSettings.skillAmount; i++) {
             send += ":" + connection.skillXP[i];
         }
@@ -276,12 +344,6 @@ public class Server {
         return connection;
     }
 
-    public void chatMessage(String message) {
-        for (PlayerConnection c : connections) {
-            send(message.getBytes(), c.getIpAddress(), c.getPort());
-        }
-    }
-
     public void send(byte[] data, InetAddress address, int port) {
         assert(socket.isConnected());
 //        System.out.println("Packet Sent: " + new String(data) + " " + address.getHostAddress() + ":" + port + " Length: " + data.length);
@@ -293,6 +355,12 @@ public class Server {
         }
     }
 
+    /**
+     * Sends a string to a specified address and port (UDP).
+     * @param data Message to send to client.
+     * @param address Address of client.
+     * @param port Port of Client.
+     */
     public void send(String data, InetAddress address, int port) {
         send(data.getBytes(), address, port);
     }

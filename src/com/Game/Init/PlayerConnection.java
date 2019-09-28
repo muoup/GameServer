@@ -103,13 +103,15 @@ public class PlayerConnection {
         this.username = username;
     }
 
+    // TODO: Change setPassword back so that it changes to hashed password
     public void setPassword(String password) {
-        this.password = hashPassword(password);
+        this.password = password;
     }
 
-    public void setPos(int x, int y) {
+    public void setPos(int x, int y, int subWorld) {
         this.x = x;
         this.y = y;
+        this.subWorld = subWorld;
     }
 
     /**
