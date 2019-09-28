@@ -55,10 +55,11 @@ public class ManageSave {
             parts = scanner.nextLine().split(" ");
             switch (parts[0]) {
                 case "Login:":
-                    String username = "";
+                    StringBuilder usr = new StringBuilder();
                     for (int i = 1; i < parts.length; i++) {
-                        username += parts[i];
+                        usr.append(parts[i]);
                     }
+                    String username = usr.toString();
                     data.setUsername(username);
                     break;
                 case "Password:":
