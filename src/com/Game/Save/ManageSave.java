@@ -67,7 +67,6 @@ public class ManageSave {
                     }
                     break;
                 case "Accessory:":
-                    System.out.println(data + " " + data.accessoryItems.length);
                     for (int i = 1; i < parts.length; i++) {
                         if (i % 2 == 1)
                             data.accessoryItems[(i - 1) / 2].id = Integer.parseInt(parts[i]);

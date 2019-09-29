@@ -136,6 +136,7 @@ public class Server {
     private void checkConnection() {
         while (listening) {
             try {
+                ArrayList<PlayerConnection> removes = new ArrayList<PlayerConnection>();
                 for (PlayerConnection c : connections) {
                     if (c.connected) {
                         send("76".getBytes(), c.getIpAddress(), c.getPort());
@@ -143,10 +144,11 @@ public class Server {
                     } else {
                         send("99".getBytes(), c.getIpAddress(), c.getPort());
                         playerDisconnect(c);
-                        connections.remove(c);
+                        removes.add(c);
                         break;
                     }
                 }
+                connections.removeAll(removes);
                 checkConnect.sleep(10000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -214,9 +216,10 @@ public class Server {
             case "15":
                 index = message.split(":");
                 PlayerConnection movement = findPlayer(index[0]);
-                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
                 if (movement == null)
                     break;
+                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
+                movement.subWorld = Integer.parseInt(index[3].trim());
                 for (PlayerConnection c : connections) {
                     if (c.getUsername() != movement.getUsername()) {
                         send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + movement.subWorld, c.getIpAddress(), c.getPort());
