@@ -105,6 +105,21 @@ public class Server {
                 }
                 System.exit(0);
                 break;
+            case "signout":
+                if (parts.length == 1)
+                    break;
+                String msg = "";
+                for (int i = 1; i < parts.length; i++) {
+                    msg += parts[i];
+                }
+                PlayerConnection so = findPlayer(msg);
+                if (so == null) {
+                    System.out.println(msg + " could not be found.");
+                } else {
+                    System.out.println("Disconnected " + msg);
+                    playerDisconnect(so);
+                }
+                break;
         }
     }
 
@@ -163,9 +178,11 @@ public class Server {
      */
     private void playerDisconnect(PlayerConnection connection) {
         ManageSave.savePlayerData(connection);
+        send("99", connection.getIpAddress(), connection.getPort());
         for (PlayerConnection c : connections) {
             send("66" + connection.getUsername(), c.getIpAddress(), c.getPort());
         }
+        connections.remove(connection);
     }
 
     /**
