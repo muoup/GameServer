@@ -377,7 +377,7 @@ public class Server {
     }
 
     /**
-     * Sends a string to a specified address and port (UDP).
+     * Sends a string to a specified address and port.
      * @param data Message to send to client.
      * @param address Address of client.
      * @param port Port of Client.
