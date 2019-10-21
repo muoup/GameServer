@@ -113,10 +113,10 @@ public class ManageSave {
      * @param packet Packet of new player for Server UDP
      * @return PlayerConnection that was just created/
      */
-    public static PlayerConnection createPlayerData(String playername, Password password, DatagramPacket packet) {
+    public static PlayerConnection createPlayerData(String playername, String password, DatagramPacket packet) {
         PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
         connection.setUsername(playername);
-        connection.setPassword(password);
+        connection.createPassword(password);
         connection.setPos(SaveSettings.startX, SaveSettings.startY, 0);
         savePlayerData(connection);
 
@@ -143,7 +143,7 @@ public class ManageSave {
         } else {
             writer.println("Password: " + data.password.getPassword(new VulnerableLogin(data.password)) + " " + "0"); //Must be passed an instance of VulnerableLogin to bypass security measures
         }
-        writer.println("Pos: " + data.x + " " + data.y);
+        writer.println("Pos: " +  data.x + " " + data.y + " " + data.subWorld);
 
         String skillsLine = "Skills:";
 
@@ -175,31 +175,17 @@ public class ManageSave {
      * @return True or false dependant on if the login is correct.
      */
 
-    public static boolean loginCorrect(String username, Password password) {
-        File file = new File("src/saves/" + username.toLowerCase() + ".psave");
-
-        Scanner scanner;
-        try {
-            scanner = new Scanner(file);
-        } catch (FileNotFoundException e) {
-            System.err.println("FILE NOT FOUND: " + username.toLowerCase() + ".psave");
-            return false;
-        }
-        scanner.nextLine();
-        String[] loginLine = scanner.nextLine().split(" ");
+    public static boolean loginCorrect(String username, String password) {
         LoginHandler handler = new HashedLogin(password);
-        File saveFile = new File("src");
         Password toMatch = new Password("", false, false); //marked for garbage collection
-        boolean success = false;
         try {
-            saveFile = handler.findSave(username);
+            File saveFile = handler.findSave(username);
             toMatch = handler.readPassword(saveFile);
         } catch (IOException e) {
             e.printStackTrace();
         } finally {
-            success = handler.match(toMatch);
+            return handler.match(toMatch);
         }
-        return success;
     }
 
     /**

@@ -299,13 +299,12 @@ public class Server {
 
     //TODO implement a LoginHandler
     public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
-        Password pass = new Password(password, true, false); //Encode password as Password
         if (!clientVersion.equals(serverVersion)) {
             send("02" + "v", packet.getAddress(), packet.getPort());
             return false;
         }
         if (connection == 0) {
-            boolean isConnect = ManageSave.loginCorrect(username, pass);
+            boolean isConnect = ManageSave.loginCorrect(username, password);
             if (findPlayer(username) != null && isConnect) {
                 send("02" + "p", packet.getAddress(), packet.getPort());
                 return false;
@@ -350,7 +349,7 @@ public class Server {
         connections.add(connection);
         String send = "04" + username + ":" + connection.getX() + ":" + connection.getY() + ":" + connection.subWorld;
         for (int i = 0; i < SaveSettings.skillAmount; i++) {
-            send += ":" + connection.skillXP[i];
+            send  += ":" + connection.skillXP[i];
         }
         send(send, packet.getAddress(), packet.getPort());
         send = "05";

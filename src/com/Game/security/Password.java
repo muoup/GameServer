@@ -18,6 +18,7 @@
 package com.Game.security;
 
 import com.Game.Save.ManageSave;
+import com.Game.exceptions.InvalidSaveFileException;
 
 import java.util.Objects;
 
@@ -54,10 +55,10 @@ public class Password implements Comparable<Password> {
         state = s;
     }
 
-
     @Override
     public int compareTo(Password o) {
-        if (Objects.equals(this.getPassword(this), o.getPassword(this))) {
+        System.out.println("Compare: " + getPassword(this) + " " + o.getPassword(this));
+        if (getPassword(this).equals(o.getPassword(this))) {
             return 0;
         } else {
             return -1;

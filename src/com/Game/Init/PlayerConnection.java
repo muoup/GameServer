@@ -114,9 +114,13 @@ public class PlayerConnection {
         this.username = username;
     }
 
-
     public void setPassword(Password password) {
         this.password = password;
+    }
+
+    public void createPassword(String string) {
+        Obfuscator obfuscator = new Obfuscator();
+        password = new Password(obfuscator.hashPassword(string), true, true);
     }
 
     public void setPos(int x, int y, int subWorld) {

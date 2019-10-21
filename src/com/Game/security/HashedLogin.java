@@ -50,11 +50,13 @@ public class HashedLogin implements LoginHandler {
 
     @Override
     public Password readPassword(File save) throws IOException {
-        Obfuscator obf = new Obfuscator();
-        BufferedReader reader = new BufferedReader(new FileReader(save));
-        String logins = reader.readLine();
-        String[] usrpass = logins.split(" ");
-        return new Password(usrpass[1], true, true);
+        Scanner reader = new Scanner(save);
+        reader.nextLine();
+        String passString = reader.nextLine().split(" ")[1];
+        Password password = new Password(passString, true, true);
+        if (password == null)
+            System.err.println("No Password in File: " + save.getPath());
+        return password;
     }
 
     @Override
@@ -70,5 +72,10 @@ public class HashedLogin implements LoginHandler {
 
     public HashedLogin(Password p) {
         this.pass = p;
+    }
+
+    public HashedLogin(String pass) {
+        Obfuscator obf = new Obfuscator();
+        this.pass = new Password(obf.hashPassword(pass), true, true);
     }
 }
