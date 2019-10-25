@@ -355,13 +355,13 @@ public class Server {
         send = "05";
         for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
             ItemMemory mem = connection.inventoryItems[i];
-            send += ":" + mem.id + ":" + mem.amount;
+            send += ":" + mem.id + " " + mem.amount + " " + mem.data;
         }
         send(send, packet.getAddress(), packet.getPort());
         send = "06";
         for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
             ItemMemory mem = connection.accessoryItems[i];
-            send += ":" + mem.id + ":" + mem.amount;
+            send += ":" + mem.id + " " + mem.amount + " " + mem.data;
         }
         send(send, packet.getAddress(), packet.getPort());
         return connection;

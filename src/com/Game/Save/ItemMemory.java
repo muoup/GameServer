@@ -24,10 +24,17 @@ package com.Game.Save;
 public class ItemMemory {
     public int id;
     public int amount;
+    public int data;
 
     public ItemMemory(int id, int amount) {
         this.id = id;
         this.amount = amount;
+    }
+
+    public ItemMemory(int id, int amount, int data) {
+        this.id = id;
+        this.amount = amount;
+        this.data = data;
     }
 
     public String toString() {

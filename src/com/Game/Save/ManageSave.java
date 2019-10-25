@@ -84,21 +84,21 @@ public class ManageSave {
                     }
                     break;
                 case "Inventory:":
-                    for (int i = 1; i < parts.length; i++) {
-                        if (i % 2 == 1)
-                            data.inventoryItems[(i - 1) / 2].id = Integer.parseInt(parts[i]);
-                        else
-                            data.inventoryItems[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
+                    String line = scanner.nextLine();
+                    for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
+                        String[] cut = line.split(" ");
+                        data.inventoryItems[i] =
+                                new ItemMemory(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3]));
+                        line = scanner.nextLine();
                     }
                     break;
-                case "Accessory:":
-                    System.out.println(data + " " + data.accessoryItems.length);
-                    for (int i = 1; i < parts.length; i++) {
-                        if (i % 2 == 1)
-                            data.accessoryItems[(i - 1) / 2].id = Integer.parseInt(parts[i]);
-                         else
-                            data.accessoryItems[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
-
+                case "Accessories:":
+                    String aline = scanner.nextLine();
+                    for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
+                        String[] cut = aline.split(" ");
+                        data.accessoryItems[i] =
+                                new ItemMemory(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3]));
+                        aline = scanner.nextLine();
                     }
                     break;
             }
@@ -150,17 +150,21 @@ public class ManageSave {
         for (float i : data.skillXP)
             skillsLine += " " + df.format(i);
 
-        String invLine = "Inventory:";
-        for (ItemMemory mem : data.inventoryItems)
-            invLine += " " + mem.id + " " + mem.amount;
+        writer.println("\nInventory:");
 
-        writer.println(invLine);
+        ItemMemory[] inventoryItems = data.inventoryItems;
+        for (int i = 0; i < inventoryItems.length; i++) {
+            ItemMemory mem = inventoryItems[i];
+            writer.println(i + " " + mem.id + " " + mem.amount + " " + mem.data);
+        }
 
-        String accLine = "Accessory:";
-        for (ItemMemory mem : data.accessoryItems)
-            accLine += " " + mem.id + " " + mem.amount;
+        writer.println("\nAccessories:");
 
-        writer.println(accLine);
+        ItemMemory[] accessoryItems = data.accessoryItems;
+        for (int i = 0, accessoryItemsLength = accessoryItems.length; i < accessoryItemsLength; i++) {
+            ItemMemory mem = accessoryItems[i];
+            writer.println(i + " " + mem.id + " " + mem.amount + " " + mem.data);
+        }
 
         writer.println(skillsLine);
         writer.close();
