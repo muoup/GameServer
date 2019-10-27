@@ -57,7 +57,6 @@ public class Password implements Comparable<Password> {
 
     @Override
     public int compareTo(Password o) {
-        System.out.println("Compare: " + getPassword(this) + " " + o.getPassword(this));
         if (getPassword(this).equals(o.getPassword(this))) {
             return 0;
         } else {

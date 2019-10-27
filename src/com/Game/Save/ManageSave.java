@@ -103,6 +103,7 @@ public class ManageSave {
                     break;
             }
         }
+
         return data;
     }
 
@@ -165,6 +166,8 @@ public class ManageSave {
             ItemMemory mem = accessoryItems[i];
             writer.println(i + " " + mem.id + " " + mem.amount + " " + mem.data);
         }
+
+        writer.println("");
 
         writer.println(skillsLine);
         writer.close();

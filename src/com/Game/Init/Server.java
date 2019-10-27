@@ -20,7 +20,6 @@ package com.Game.Init;
 import com.Game.Save.ItemMemory;
 import com.Game.Save.ManageSave;
 import com.Game.Save.SaveSettings;
-import com.Game.security.*;
 
 import java.io.*;
 import java.net.*;
@@ -138,7 +137,6 @@ public class Server {
             for (PlayerConnection c : connections) {
                 ManageSave.savePlayerData(c);
             }
-            System.out.println("Saved player data.");
             try {
                 saveThread.sleep(25000);
             } catch (InterruptedException e) {
@@ -255,18 +253,22 @@ public class Server {
                 int slot = Integer.parseInt(index[0]);
                 int id = Integer.parseInt(index[1]);
                 int amount = Integer.parseInt(index[2]);
-                connection = findPlayer(index[3]);
+                int data = Integer.parseInt(index[3]);
+                connection = findPlayer(index[4]);
                 connection.inventoryItems[slot].id = id;
                 connection.inventoryItems[slot].amount = amount;
+                connection.inventoryItems[slot].data = data;
                 break;
             case "09":
                 index = message.split(":");
                 int aslot = Integer.parseInt(index[0]);
                 int aid = Integer.parseInt(index[1]);
                 int aamount = Integer.parseInt(index[2]);
-                connection = findPlayer(index[3]);
+                int adata = Integer.parseInt(index[3]);
+                connection = findPlayer(index[4]);
                 connection.accessoryItems[aslot].id = aid;
                 connection.accessoryItems[aslot].amount = aamount;
+                connection.accessoryItems[aslot].data = adata;
                 break;
         }
     }
@@ -295,9 +297,6 @@ public class Server {
      * @param clientVersion Version of the player's client. Used to prevent old versions from connecting to the server.
      * @return
      */
-        // TODO: Reimplement login once Connor Finishes.
-
-    //TODO implement a LoginHandler
     public boolean handleLogin(String username, String password, int connection, DatagramPacket packet, String clientVersion) {
         if (!clientVersion.equals(serverVersion)) {
             send("02" + "v", packet.getAddress(), packet.getPort());
