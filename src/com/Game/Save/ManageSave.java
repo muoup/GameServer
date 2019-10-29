@@ -18,7 +18,6 @@
 package com.Game.Save;
 
 import com.Game.Init.PlayerConnection;
-import com.Game.exceptions.InvalidSaveFileException;
 import com.Game.security.*;
 
 import java.io.File;
@@ -26,8 +25,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.DatagramPacket;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
 import java.util.Scanner;
 
@@ -92,6 +89,7 @@ public class ManageSave {
                         line = scanner.nextLine();
                     }
                     break;
+
                 case "Accessories:":
                     String aline = scanner.nextLine();
                     for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
@@ -99,6 +97,13 @@ public class ManageSave {
                         data.accessoryItems[i] =
                                 new ItemMemory(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3]));
                         aline = scanner.nextLine();
+                    }
+                case "Accessory:":
+                    for (int i = 1; i < parts.length; i++) {
+                        if (i % 2 == 1)
+                            data.accessoryItems[(i - 1) / 2].id = Integer.parseInt(parts[i]);
+                        else
+                            data.accessoryItems[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
                     }
                     break;
             }
