@@ -1,0 +1,15 @@
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/security/Obfuscator.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/security/LoginHandler.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/security/Password.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/Init/Server.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/Save/ManageSave.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/exceptions/InvalidSaveFileException.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/Save/SaveSettings.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/security/PasswordReader.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/security/HashedLogin.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/Init/GameServer.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/Save/ItemMemory.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/security/PasswordState.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/exceptions/InvalidPasswordException.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/security/VulnerableLogin.java
+/home/cam-o/development/masterdust/GameServer/src/main/java/com/Game/Init/PlayerConnection.java
