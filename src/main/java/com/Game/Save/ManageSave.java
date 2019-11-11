@@ -194,7 +194,7 @@ public class ManageSave {
             File saveFile = handler.findSave(username);
             toMatch = handler.readPassword(saveFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("Failed Login: " + username);
         } finally {
             return handler.match(toMatch);
         }
