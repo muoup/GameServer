@@ -97,7 +97,7 @@ public class Server {
     /**
      * Do not call this method. Used for console commands in the server.
      * Say does not work rn.
-     * Stop saves all player data and shuts down the server/
+     * Stop saves all player data and shuts down the server.
      * @param command String form of the command, does not start with any prefix.
      */
     private void handleCommands(String command) {
