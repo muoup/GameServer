@@ -25,15 +25,17 @@ import java.net.InetAddress;
 public class PlayerConnection {
     private InetAddress ipAddress;
     private int port;
-    public boolean connected = true;
+    public int connected = 0;
 
     public float[] skillXP;
     public ItemMemory[] inventoryItems;
     public ItemMemory[] accessoryItems;
+    public int[] questSaves;
     private static ItemMemory[] invTemp;
     private static ItemMemory[] accTemp;
     public int x, y, subWorld;
     public String username;
+
     /**
      * The Password, when set using {@link #setPassword(Password)}.
      * Typically, when set through this method, the password will be hashed.
@@ -72,6 +74,7 @@ public class PlayerConnection {
         this.password = new Password("", false, false);
         this.inventoryItems = new ItemMemory[invTemp.length];
         this.accessoryItems = new ItemMemory[accTemp.length];
+        this.questSaves = new int[SaveSettings.questAmount];
         this.subWorld = 0;
 
         for (int i = 0; i < invTemp.length; i++) {

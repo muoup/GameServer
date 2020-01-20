@@ -106,6 +106,13 @@ public class ManageSave {
                             data.accessoryItems[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
                     }
                     break;
+                case "Quests:":
+                    String qline = scanner.nextLine();
+                    for (int i = 0; i < SaveSettings.questAmount; i++) {
+                        String[] cut = qline.split(" ");
+                        data.questSaves[i] = Integer.parseInt(cut[1]);
+                    }
+                    break;
             }
         }
 
@@ -175,6 +182,15 @@ public class ManageSave {
         writer.println("");
 
         writer.println(skillsLine);
+
+        writer.println("\nQuests:");
+
+        int[] quests = data.questSaves;
+
+        for (int i = 0; i < quests.length; i++) {
+            writer.println(i + " " + quests[i]);
+        }
+
         writer.close();
 
         return data;
@@ -194,7 +210,7 @@ public class ManageSave {
             File saveFile = handler.findSave(username);
             toMatch = handler.readPassword(saveFile);
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println("File not found: " + username + ".psave");
         } finally {
             return handler.match(toMatch);
         }

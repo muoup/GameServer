@@ -156,9 +156,9 @@ public class Server {
         while (listening) {
             try {
                 for (PlayerConnection c : connections) {
-                    if (c.connected) {
+                    if (c.connected < 3) {
                         send("76".getBytes(), c.getIpAddress(), c.getPort());
-                        c.connected = false;
+                        c.connected++;
                     } else {
                         send("99".getBytes(), c.getIpAddress(), c.getPort());
                         playerDisconnect(c);
@@ -166,7 +166,7 @@ public class Server {
                         break;
                     }
                 }
-                checkConnect.sleep(10000);
+                checkConnect.sleep(3000);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -220,7 +220,7 @@ public class Server {
             case "76":
                 connection = findPlayer(message);
                 if (connection != null)
-                    connection.connected = true;
+                    connection.connected = 0;
                 break;
             case "13": // Chat box message code
                 chatMessage(contents);
@@ -269,6 +269,13 @@ public class Server {
                 connection.accessoryItems[aslot].id = aid;
                 connection.accessoryItems[aslot].amount = aamount;
                 connection.accessoryItems[aslot].data = adata;
+                break;
+            case "57":
+                index = message.split(":");
+                int qid = Integer.parseInt(index[0]);
+                int qdata = Integer.parseInt(index[1]);
+                connection = findPlayer(index[2]);
+                connection.questSaves[qid] = qdata;
                 break;
         }
     }
@@ -362,13 +369,16 @@ public class Server {
             ItemMemory mem = connection.accessoryItems[i];
             send += ":" + mem.id + " " + mem.amount + " " + mem.data;
         }
+        send = "07";
+        for (int i = 0; i < SaveSettings.questAmount; i++) {
+            send += ":" + i + " " + connection.questSaves[i];
+        }
         send(send, packet.getAddress(), packet.getPort());
         return connection;
     }
 
     public void send(byte[] data, InetAddress address, int port) {
         assert(socket.isConnected());
-//        System.out.println("Packet Sent: " + new String(data) + " " + address.getHostAddress() + ":" + port + " Length: " + data.length);
         DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
         try {
             socket.send(packet);
