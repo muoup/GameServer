@@ -351,7 +351,8 @@ public class Server {
      * @return PlayerConnection Object of the newly connected player to add to the ArrayList of players.
      */
     public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
-        PlayerConnection connection = (connectionCode == 0) ? ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
+        PlayerConnection connection = (connectionCode == 0) ?
+                ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
         connections.add(connection);
         String send = "04" + username + ":" + connection.getX() + ":" + connection.getY() + ":" + connection.subWorld;
         for (int i = 0; i < SaveSettings.skillAmount; i++) {
@@ -369,6 +370,7 @@ public class Server {
             ItemMemory mem = connection.accessoryItems[i];
             send += ":" + mem.id + " " + mem.amount + " " + mem.data;
         }
+        send(send, packet.getAddress(), packet.getPort());
         send = "07";
         for (int i = 0; i < SaveSettings.questAmount; i++) {
             send += ":" + i + " " + connection.questSaves[i];
