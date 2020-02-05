@@ -21,6 +21,7 @@ import com.Game.Save.*;
 import com.Game.security.*;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 
 public class PlayerConnection {
     private InetAddress ipAddress;
@@ -30,6 +31,7 @@ public class PlayerConnection {
     public float[] skillXP;
     public ItemMemory[] inventoryItems;
     public ItemMemory[] accessoryItems;
+    public ArrayList<ItemMemory> bankItems;
     public int[] questSaves;
     private static ItemMemory[] invTemp;
     private static ItemMemory[] accTemp;
@@ -57,12 +59,14 @@ public class PlayerConnection {
     public PlayerConnection() {
         this.ipAddress = null;
         this.port = -1;
+        bankItems = new ArrayList();
         initSkills();
     }
 
     public PlayerConnection(InetAddress ipAddress, int port) {
         this.ipAddress = ipAddress;
         this.port = port;
+        bankItems = new ArrayList();
         initSkills();
     }
 
