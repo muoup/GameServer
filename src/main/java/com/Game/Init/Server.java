@@ -38,7 +38,7 @@ public class Server {
     private List<PlayerConnection> connections;
     private final int MAX_PACKET_SIZE = 1024;
     private byte[] dataBuffer = new byte[MAX_PACKET_SIZE * 10];
-    private static final String serverVersion = "0.0.1a";
+    private static final String serverVersion = "0.0.2a";
 
     public Server(int port) {
         this.port = port;
@@ -159,9 +159,11 @@ public class Server {
                     if (c.connected < 3) {
                         send("76".getBytes(), c.getIpAddress(), c.getPort());
                         c.connected++;
+                        System.out.println(c.getUsername());
                     } else {
                         send("99".getBytes(), c.getIpAddress(), c.getPort());
                         playerDisconnect(c);
+                        System.err.println(c.getUsername());
                         connections.remove(c);
                         break;
                     }
@@ -227,15 +229,17 @@ public class Server {
                 break;
             case "55": // Disconnect code
                 connection = findPlayer(message);
-                connections.remove(connection);
                 playerDisconnect(connection);
+                connections.remove(connection);
                 break;
             case "15":
                 index = message.split(":");
                 PlayerConnection movement = findPlayer(index[0]);
-                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
+
                 if (movement == null)
                     break;
+
+                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
                 for (PlayerConnection c : connections) {
                     if (c.getUsername() != movement.getUsername()) {
                         send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + movement.subWorld, c.getIpAddress(), c.getPort());
@@ -276,6 +280,26 @@ public class Server {
                 int qdata = Integer.parseInt(index[1]);
                 connection = findPlayer(index[2]);
                 connection.questSaves[qid] = qdata;
+                break;
+            case "6e":
+                index = message.split(":");
+                int bindex = Integer.parseInt(index[0]);
+                int bid = Integer.parseInt(index[1]);
+                int bamount = Integer.parseInt(index[2]);
+                int bdata = Integer.parseInt(index[3]);
+                connection = findPlayer(index[4]);
+                ItemMemory bankItem = connection.bankItems.get(bindex);
+                bankItem.id = bid;
+                bankItem.amount = bamount;
+                bankItem.data = bdata;
+                break;
+            case "6c":
+                index = message.split(":");
+                int baid = Integer.parseInt(index[0]);
+                int baamount = Integer.parseInt(index[1]);
+                int badata = Integer.parseInt(index[2]);
+                connection = findPlayer(index[3]);
+                connection.bankItems.add(new ItemMemory(baid, baamount, badata));
                 break;
         }
     }
@@ -374,6 +398,11 @@ public class Server {
         send = "07";
         for (int i = 0; i < SaveSettings.questAmount; i++) {
             send += ":" + i + " " + connection.questSaves[i];
+        }
+        send(send, packet.getAddress(), packet.getPort());
+        send = "08";
+        for (ItemMemory item : connection.bankItems) {
+            send += item.id + " " + item.amount + " " + item.data;
         }
         send(send, packet.getAddress(), packet.getPort());
         return connection;
