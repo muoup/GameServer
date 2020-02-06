@@ -102,7 +102,7 @@ public class Server {
      */
     private void handleCommands(String command) {
         String[] parts = command.split(" ");
-        switch (parts[0]) {
+        /*switch (parts[0]) {
             case "say":
                 if (parts.length == 1) {
                     System.out.println("say [message]");
@@ -125,7 +125,53 @@ public class Server {
             case "finger":
                 connections.forEach(System.out::println);
                 break;
-        }
+        }*/
+        System.out.println(switch(parts[0]) { //inline for now, switch expr val can be passed to temp val if needed
+            case "say":
+                if (parts.length == 1) {
+                    yield "say [message]";
+                }
+                String message = "";
+                for (int i = 1; i < parts.length; i++) {
+                    try {
+                        message += parts[i];
+                    } catch (Exception e) {
+                        System.out.println(e.getStackTrace());
+                        break; //can use break inside thanks to switch expressions
+                    }
+                }
+                chatMessage("[Server] " + message);
+                yield "Command completed successfully.";
+            case "stop":
+                chatMessage("Server shutting down...");
+                for (PlayerConnection c : connections) {
+                    ManageSave.savePlayerData(c);
+                    send("99", c.getIpAddress(), c.getPort());
+                }
+                System.exit(0);
+                yield null;
+            case "finger":
+                connections.forEach(System.out::println);
+                yield "Command completed successfully.";
+
+                //Here, new commands can be easily added, and they can even have multiple names
+                //e.g. case "foo", "bar" is now allowed
+                //just make sure they're above default
+            case "help":
+                yield """
+                        say [message]: say a message to chat
+
+                        stop: stop the server
+
+                        finger: list all users on the server
+
+                        help: display this menu
+                        """;
+
+            default:
+                yield "Command not understood.";
+        });
+
     }
 
     /**
