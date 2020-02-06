@@ -126,6 +126,7 @@ public class Server {
                 connections.forEach(System.out::println);
                 break;
         }
+
     }
 
     /**

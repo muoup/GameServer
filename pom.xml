@@ -6,7 +6,7 @@
 
     <groupId>com.game.server</groupId>
     <artifactId>Server</artifactId>
-    <version>0.1.0</version>
+    <version>0.0.3a</version>
     <build>
         <plugins>
             <plugin>
@@ -16,6 +16,18 @@
                     <archive>
                         <manifestFile>src/main/resources/META-INF/MANIFEST.MF</manifestFile>
                     </archive>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <compilerArgs>
+                        <arg>-verbose</arg>
+                    </compilerArgs>
+                    <source>13</source>
+                    <target>13</target>
                 </configuration>
             </plugin>
         </plugins>
