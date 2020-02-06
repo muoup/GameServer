@@ -114,14 +114,12 @@ public class ManageSave {
                     }
                     break;
                 case "Bank:":
-                    if (!scanner.hasNext())
-                        break;
-                    String bline = scanner.nextLine();
-                    while (bline.trim() != "" && scanner.hasNext()) {
+                    String bline;
+                    do {
+                        bline = scanner.nextLine();
                         String[] cut = bline.split(" ");
-                        System.out.println(cut);
                         data.bankItems.add(new ItemMemory(Integer.parseInt(cut[0]), Integer.parseInt(cut[1]), Integer.parseInt(cut[2])));
-                    }
+                    } while (bline.trim() != "" && scanner.hasNext());
                     break;
             }
         }
@@ -201,10 +199,12 @@ public class ManageSave {
             writer.println(i + " " + quests[i]);
         }
 
-        writer.println("\nBank:");
+        if (data.bankItems.size() > 0) {
+            writer.println("\nBank:");
 
-        for (ItemMemory item : data.bankItems) {
-            writer.println(item.id + " " + item.amount + " " + item.data);
+            for (ItemMemory item : data.bankItems) {
+                writer.println(item.id + " " + item.amount + " " + item.data);
+            }
         }
 
         writer.close();

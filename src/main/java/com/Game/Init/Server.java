@@ -159,11 +159,9 @@ public class Server {
                     if (c.connected < 3) {
                         send("76".getBytes(), c.getIpAddress(), c.getPort());
                         c.connected++;
-                        System.out.println(c.getUsername());
                     } else {
                         send("99".getBytes(), c.getIpAddress(), c.getPort());
                         playerDisconnect(c);
-                        System.err.println(c.getUsername());
                         connections.remove(c);
                         break;
                     }
@@ -400,9 +398,11 @@ public class Server {
             send += ":" + i + " " + connection.questSaves[i];
         }
         send(send, packet.getAddress(), packet.getPort());
-        send = "08";
-        for (ItemMemory item : connection.bankItems) {
-            send += item.id + " " + item.amount + " " + item.data;
+        if (connection.bankItems.size() > 0) {
+            send = "08";
+            for (ItemMemory item : connection.bankItems) {
+                send += ":" + item.id + " " + item.amount + " " + item.data;
+            }
         }
         send(send, packet.getAddress(), packet.getPort());
         return connection;
