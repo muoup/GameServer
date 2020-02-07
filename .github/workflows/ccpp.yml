@@ -1,8 +1,6 @@
 name: C/C++ CI
 
-on:
-  push:
-    branches: updater
+on: [push]
 
 jobs:
   build:
