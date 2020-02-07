@@ -8,15 +8,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    
-    - name: move
-      run: cd updater                                                                                                                                                             
+    - uses: actions/checkout@v2                                                                                                                                                           
     - name: configure
-      run: ./configure
+      run: updater/configure
     - name: make
-      run: make
+      run: updater/make
     - name: make check
-      run: make check
+      run: updater/make check
     - name: make distcheck
-      run: make distcheck
+      run: updater/make distcheck
