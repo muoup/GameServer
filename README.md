@@ -8,8 +8,8 @@ Current Status
 | Component | Status |  
 |:----------|-------:|
 | Server    |![Java CI](https://github.com/Masterdust12/GameServer/workflows/Java%20CI/badge.svg?branch=master)|
+| Server Updater | ![C/C++ CI](https://github.com/Masterdust12/GameServer/workflows/C/C++%20CI/badge.svg)|
 | Client Stable |![Java CI](https://github.com/Masterdust12/Game/workflows/Java%20CI/badge.svg?branch=master)|
-| Client Experimental |![Java CI](https://github.com/Masterdust12/Game/workflows/Java%20CI/badge.svg?branch=temp)|
 
 ***
 ### Installation:
