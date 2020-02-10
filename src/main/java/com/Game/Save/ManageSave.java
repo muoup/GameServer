@@ -107,8 +107,8 @@ public class ManageSave {
                     }
                     break;
                 case "Quests:":
-                    String qline = scanner.nextLine();
                     for (int i = 0; i < SaveSettings.questAmount; i++) {
+                        String qline = scanner.nextLine();
                         String[] cut = qline.split(" ");
                         data.questSaves[i] = Integer.parseInt(cut[1]);
                     }
@@ -150,6 +150,9 @@ public class ManageSave {
      * @return PlayerConnection that was sent it for some cleaner syntax.
      */
     public static PlayerConnection savePlayerData(PlayerConnection data) {
+        if (data == null)
+            return null;
+
         File getFile = new File("src/saves/" + data.getUsername().toLowerCase() + ".psave");;
         PrintWriter writer;
 

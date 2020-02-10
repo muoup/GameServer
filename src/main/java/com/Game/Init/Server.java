@@ -241,7 +241,7 @@ public class Server {
                 movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
                 for (PlayerConnection c : connections) {
                     if (c.getUsername() != movement.getUsername()) {
-                        send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + movement.subWorld, c.getIpAddress(), c.getPort());
+                        send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + movement.subWorld + ":" + index[4], c.getIpAddress(), c.getPort());
                     }
                 }
                 break;

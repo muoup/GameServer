@@ -26,15 +26,15 @@
                     <compilerArgs>
                         <arg>-verbose</arg>
                     </compilerArgs>
-                    <source>13</source>
-                    <target>13</target>
+                    <source>12</source>
+                    <target>12</target>
                 </configuration>
             </plugin>
         </plugins>
     </build>
     <properties>
-        <maven.compiler.source>13</maven.compiler.source>
-        <maven.compiler.target>13</maven.compiler.target>
+        <maven.compiler.source>12</maven.compiler.source>
+        <maven.compiler.target>12</maven.compiler.target>
     </properties>
 
     
