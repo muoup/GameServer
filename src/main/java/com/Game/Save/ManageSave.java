@@ -20,13 +20,21 @@ package com.Game.Save;
 import com.Game.Init.PlayerConnection;
 import com.Game.security.*;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.DatagramPacket;
+import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Scanner;
+
+//for testing purposes only
+import org.w3c.dom.*;
+import org.xml.sax.SAXException;
+
+import javax.xml.parsers.*;
+import javax.xml.transform.*;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+//end testing imports
 
 public class ManageSave {
     public static DecimalFormat df = new DecimalFormat("0.00");
@@ -232,9 +240,8 @@ public class ManageSave {
             toMatch = handler.readPassword(saveFile);
         } catch (IOException e) {
             System.err.println("File not found: " + username + ".psave");
-        } finally {
-            return handler.match(toMatch);
         }
+        return handler.match(toMatch);
     }
 
     /**
@@ -243,7 +250,7 @@ public class ManageSave {
      * @return How the username was capitalized when registered (not working) not worth working on rn however.
      */
     public static String getUsername(String username) {
-        File file = new File("src/saves/" + username.toLowerCase() + ".psave");
+        File file = new File("src/resources/saves/" + username.toLowerCase() + ".psave");
 
         Scanner scanner;
         try {
@@ -257,7 +264,8 @@ public class ManageSave {
     }
 
     public static boolean usernameExists(String username) {
-        File getFile = new File("src/saves/" + username.toLowerCase() + ".psave");
+        File getFile = new File("src/resources/saves/" + username.toLowerCase() + ".psave");
         return getFile.exists();
     }
+    
 }
