@@ -109,6 +109,8 @@ public class ManageSave {
                 case "Quests:":
                     for (int i = 0; i < SaveSettings.questAmount; i++) {
                         String qline = scanner.nextLine();
+                        if (qline.trim().equals(""))
+                            break;
                         String[] cut = qline.split(" ");
                         data.questSaves[i] = Integer.parseInt(cut[1]);
                     }
