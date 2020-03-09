@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Zachary Verlardi
+ * Copyright (c) 2019 Connor McDermid
  *
  * This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -15,12 +15,10 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.Init;
+package com.Game.ConnectionHandling.security;
 
-public class GameServer {
-    public static void main(String[] args) {
-        PlayerConnection.init();
-        Server server = new Server(3112);
-        server.start();
-    }
+public enum PasswordState {
+    UNHASHED,
+    HASHED,
+    UNREGISTERED;
 }

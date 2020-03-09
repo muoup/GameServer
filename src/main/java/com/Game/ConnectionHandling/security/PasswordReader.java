@@ -1,4 +1,4 @@
-package com.Game.security;
+package com.Game.ConnectionHandling.security;
 
 import java.io.*;
 

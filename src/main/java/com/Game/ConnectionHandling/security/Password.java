@@ -15,12 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.security;
-
-import com.Game.Save.ManageSave;
-import com.Game.exceptions.InvalidSaveFileException;
-
-import java.util.Objects;
+package com.Game.ConnectionHandling.security;
 
 public class Password implements Comparable<Password> {
     private final String password;

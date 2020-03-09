@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Connor McDermid
+ * Copyright (c) 2019 Zachary Verlardi
  *
  * This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -15,10 +15,14 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.security;
+package com.Game.ConnectionHandling.Save;
 
-public enum PasswordState {
-    UNHASHED,
-    HASHED,
-    UNREGISTERED;
+public class SaveSettings {
+    public static final int skillAmount = 7;
+    public static final int inventoryAmount = 20;
+    public static final int accessoryAmount = 23;
+    public static final int questAmount = 2;
+
+    public static final int startX = 1500;
+    public static final int startY = 1500;
 }

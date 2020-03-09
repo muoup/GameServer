@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 Connor McDermid
+ * Copyright (c) 2019 Zachary Verlardi
  *
  * This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -15,24 +15,14 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.security;
+package com.Game.ConnectionHandling.Init;
 
+import com.Game.Player.Player;
 
-import java.io.File;
-import java.io.IOException;
-
-/**
- * Objects instantiated off of this interface
- */
-public interface LoginHandler {
-
-    void setPassword(Password p);
-
-    String takeUserInput();
-
-    boolean match(Password p);
-
-    Password readPassword(File save) throws IOException;
-
-    File findSave(String username) throws IOException;
+public class GameServer {
+    public static void main(String[] args) {
+        Player.init();
+        Server server = new Server(3112);
+        server.start();
+    }
 }

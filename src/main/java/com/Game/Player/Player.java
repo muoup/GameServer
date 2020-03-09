@@ -15,28 +15,39 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.Init;
+package com.Game.Player;
 
-import com.Game.Save.*;
-import com.Game.security.*;
+import com.Game.ConnectionHandling.Save.ItemMemory;
+import com.Game.ConnectionHandling.Save.SaveSettings;
+import com.Game.ConnectionHandling.security.Obfuscator;
+import com.Game.ConnectionHandling.security.Password;
+import com.Game.Skills.SkillsManager;
+import com.Game.Util.Math.Vector2;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
 
-public class PlayerConnection {
+public class Player {
+
+    // Connection Settings
     private InetAddress ipAddress;
     private int port;
     public int connected = 0;
 
-    public float[] skillXP;
+    // Item Inventories Section
     public ItemMemory[] inventoryItems;
     public ItemMemory[] accessoryItems;
     public ArrayList<ItemMemory> bankItems;
+
+    // Stats
     public int[] questSaves;
-    private static ItemMemory[] invTemp;
-    private static ItemMemory[] accTemp;
-    public int x, y, subWorld;
+    public SkillsManager skills;
+
+    // Player Properties
     public String username;
+    public Vector2 pos;
+    public int subWorld;
+
 
     /**
      * The Password, when set using {@link #setPassword(Password)}.
@@ -44,26 +55,7 @@ public class PlayerConnection {
      */
     public Password password;
 
-    public static void init() {
-        invTemp = new ItemMemory[SaveSettings.inventoryAmount];
-        accTemp = new ItemMemory[SaveSettings.accessoryAmount];
-
-        for (int i = 0; i < invTemp.length; i++) {
-            invTemp[i] = new ItemMemory(0, 0);
-        }
-        for (int i = 0; i < accTemp.length; i++) {
-            accTemp[i] = new ItemMemory(0, 0);
-        }
-    }
-
-    public PlayerConnection() {
-        this.ipAddress = null;
-        this.port = -1;
-        bankItems = new ArrayList();
-        initSkills();
-    }
-
-    public PlayerConnection(InetAddress ipAddress, int port) {
+    public Player(InetAddress ipAddress, int port) {
         this.ipAddress = ipAddress;
         this.port = port;
         bankItems = new ArrayList();
@@ -71,20 +63,19 @@ public class PlayerConnection {
     }
 
     public void initSkills() {
-        this.skillXP = new float[SaveSettings.skillAmount];
-        this.x = 0;
-        this.y = 0;
+        this.skills = new SkillsManager(this);
+        this.pos = Vector2.zero();
         this.username = "";
         this.password = new Password("", false, false);
-        this.inventoryItems = new ItemMemory[invTemp.length];
-        this.accessoryItems = new ItemMemory[accTemp.length];
+        this.inventoryItems = new ItemMemory[SaveSettings.inventoryAmount];
+        this.accessoryItems = new ItemMemory[SaveSettings.accessoryAmount];
         this.questSaves = new int[SaveSettings.questAmount];
         this.subWorld = 0;
 
-        for (int i = 0; i < invTemp.length; i++) {
+        for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
             inventoryItems[i] = new ItemMemory(0, 0);
         }
-        for (int i = 0; i < accTemp.length; i++) {
+        for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
             accessoryItems[i] = new ItemMemory(0, 0);
         }
     }
@@ -109,12 +100,12 @@ public class PlayerConnection {
         return password;
     }
 
-    public int getX() {
-        return x;
+    public float getX() {
+        return pos.x;
     }
 
-    public int getY() {
-        return y;
+    public float getY() {
+        return pos.y;
     }
 
     public void setUsername(String username) {
@@ -131,8 +122,7 @@ public class PlayerConnection {
     }
 
     public void setPos(int x, int y, int subWorld) {
-        this.x = x;
-        this.y = y;
+        pos = new Vector2(x, y);
         this.subWorld = subWorld;
     }
 

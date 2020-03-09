@@ -15,7 +15,7 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.Save;
+package com.Game.ConnectionHandling.Save;
 
 /**
  * Used to mimic an ItemStack from the client. Holds an id and an amount

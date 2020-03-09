@@ -15,48 +15,42 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.security;
+package com.Game.ConnectionHandling.security;
 
-import com.Game.exceptions.InvalidPasswordException;
-
-import java.io.*;
-import java.util.Comparator;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.Scanner;
-import java.util.function.Function;
-import java.util.function.ToDoubleFunction;
-import java.util.function.ToIntFunction;
-import java.util.function.ToLongFunction;
 
-public class HashedLogin implements LoginHandler {
+public class VulnerableLogin implements LoginHandler {
 
     private Password pass;
     private String username;
 
+    @Override
     public void setPassword(Password p) {
-        pass = p;
+        if (p.state == PasswordState.UNHASHED) {
+            this.pass = p;
+        }
     }
 
     @Override
     public String takeUserInput() {
         Scanner input = new Scanner(System.in);
-        String usr = input.nextLine();
-        return usr;
+        return input.nextLine();
     }
 
     @Override
     public boolean match(Password p) {
-        return pass.compareTo(p) == 0;
+        return this.pass.compareTo(p) == 0;
     }
 
     @Override
     public Password readPassword(File save) throws IOException {
-        Scanner reader = new Scanner(save);
-        reader.nextLine();
-        String passString = reader.nextLine().split(" ")[1];
-        Password password = new Password(passString, true, true);
-        if (password == null)
-            System.err.println("No Password in File: " + save.getPath());
-        return password;
+        BufferedReader reader = new BufferedReader(new FileReader(save));
+        String[] logins = reader.readLine().split(" ");
+        return new Password(logins[1], true, false);
     }
 
     @Override
@@ -64,18 +58,7 @@ public class HashedLogin implements LoginHandler {
         return new File("src/saves/" + username + ".psave");
     }
 
-    public Password hashPass(Password p) {
-        Obfuscator obs = new Obfuscator();
-        String temp = obs.hashPassword(p.getPassword(this));
-        return new Password(temp, true, true);
-    }
-
-    public HashedLogin(Password p) {
+    public VulnerableLogin(Password p) {
         this.pass = p;
-    }
-
-    public HashedLogin(String pass) {
-        Obfuscator obf = new Obfuscator();
-        this.pass = new Password(obf.hashPassword(pass), true, true);
     }
 }

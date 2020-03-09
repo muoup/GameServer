@@ -15,25 +15,18 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.Save;
+package com.Game.ConnectionHandling.Save;
 
-import com.Game.Init.PlayerConnection;
-import com.Game.security.*;
+import com.Game.Player.Player;
+import com.Game.ConnectionHandling.security.*;
 
 import java.io.*;
 import java.net.DatagramPacket;
-import java.nio.charset.StandardCharsets;
 import java.text.DecimalFormat;
 import java.util.Scanner;
 
 //for testing purposes only
-import org.w3c.dom.*;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.*;
-import javax.xml.transform.*;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
 //end testing imports
 
 public class ManageSave {
@@ -45,9 +38,9 @@ public class ManageSave {
      * @param packet Player's packet to send player's information.
      * @return PlayerConnection loaded from a .psave file.
      */
-    public static PlayerConnection loadPlayerData(String playername, DatagramPacket packet) {
+    public static Player loadPlayerData(String playername, DatagramPacket packet) {
         File getFile = new File("src/saves/" + playername.toLowerCase() + ".psave");
-        PlayerConnection data = new PlayerConnection(packet.getAddress(), packet.getPort());
+        Player data = new Player(packet.getAddress(), packet.getPort());
         Scanner scanner;
         try {
             scanner = new Scanner(getFile);
@@ -144,8 +137,8 @@ public class ManageSave {
      * @param packet Packet of new player for Server UDP
      * @return PlayerConnection that was just created/
      */
-    public static PlayerConnection createPlayerData(String playername, String password, DatagramPacket packet) {
-        PlayerConnection connection = new PlayerConnection(packet.getAddress(), packet.getPort());
+    public static Player createPlayerData(String playername, String password, DatagramPacket packet) {
+        Player connection = new Player(packet.getAddress(), packet.getPort());
         connection.setUsername(playername);
         connection.createPassword(password);
         connection.setPos(SaveSettings.startX, SaveSettings.startY, 0);
@@ -159,7 +152,7 @@ public class ManageSave {
      * @param data PlayerConnection to save to a file.
      * @return PlayerConnection that was sent it for some cleaner syntax.
      */
-    public static PlayerConnection savePlayerData(PlayerConnection data) {
+    public static Player savePlayerData(Player data) {
         if (data == null)
             return null;
 

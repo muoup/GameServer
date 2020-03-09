@@ -1,4 +1,4 @@
-package com.Game.exceptions;
+package com.Game.ConnectionHandling.exceptions;
 
 /**
  * The class {@code Exception} and its subclasses are a form of

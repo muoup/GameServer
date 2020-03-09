@@ -1,4 +1,4 @@
-package com.Game.exceptions;
+package com.Game.ConnectionHandling.exceptions;
 
 
 /**

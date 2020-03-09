@@ -15,11 +15,12 @@
  *     along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.Game.Init;
+package com.Game.ConnectionHandling.Init;
 
-import com.Game.Save.ItemMemory;
-import com.Game.Save.ManageSave;
-import com.Game.Save.SaveSettings;
+import com.Game.ConnectionHandling.Save.ItemMemory;
+import com.Game.ConnectionHandling.Save.ManageSave;
+import com.Game.ConnectionHandling.Save.SaveSettings;
+import com.Game.Player.Player;
 
 import java.io.*;
 import java.net.*;
@@ -34,15 +35,15 @@ public class Server {
     private Thread commandThread;
     private Thread saveThread;
     private boolean listening = false;
-    private DatagramSocket socket;
-    private List<PlayerConnection> connections;
+    private static DatagramSocket socket;
+    private List<Player> connections;
     private final int MAX_PACKET_SIZE = 1024;
     private byte[] dataBuffer = new byte[MAX_PACKET_SIZE * 10];
     private static final String serverVersion = "0.0.2a";
 
     public Server(int port) {
         this.port = port;
-        connections = new ArrayList<PlayerConnection>();
+        connections = new ArrayList<Player>();
     }
 
     public void start() {
@@ -116,7 +117,7 @@ public class Server {
                 break;
             case "stop":
                 chatMessage("Server shutting down...");
-                for (PlayerConnection c : connections) {
+                for (Player c : connections) {
                     ManageSave.savePlayerData(c);
                     send("99", c.getIpAddress(), c.getPort());
                 }
@@ -135,7 +136,7 @@ public class Server {
      */
     private void savePlayerData() {
         while (true) {
-            for (PlayerConnection c : connections) {
+            for (Player c : connections) {
                 ManageSave.savePlayerData(c);
             }
             try {
@@ -156,7 +157,7 @@ public class Server {
     private void checkConnection() {
         while (listening) {
             try {
-                for (PlayerConnection c : connections) {
+                for (Player c : connections) {
                     if (c.connected < 3) {
                         send("76".getBytes(), c.getIpAddress(), c.getPort());
                         c.connected++;
@@ -179,9 +180,9 @@ public class Server {
      * that the player has logged out and to stop rendering them.
      * @param connection PlayerConnection file, get from handleLogin();
      */
-    private void playerDisconnect(PlayerConnection connection) {
+    private void playerDisconnect(Player connection) {
         ManageSave.savePlayerData(connection);
-        for (PlayerConnection c : connections) {
+        for (Player c : connections) {
             send("66" + connection.getUsername(), c.getIpAddress(), c.getPort());
         }
     }
@@ -200,7 +201,7 @@ public class Server {
         String code = contents.substring(0, 2);
         String message = contents.substring(2).trim();
         String[] index;
-        PlayerConnection connection;
+        Player connection;
         switch (code) {
             case "69": // connection code
                 index = message.split(":");
@@ -211,7 +212,7 @@ public class Server {
                 if (!connect)
                     break;
                 connection = handleLogin(packet, username, password, Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
-                for (PlayerConnection c : connections) {
+                for (Player c : connections) {
                     if (!c.getUsername().equals(connection.getUsername())) {
                         send((12 + "" + c.getX() + ":" + c.getY() + ":" + c.getUsername()).getBytes(), packet.getAddress(), packet.getPort());
                         send((12 + "" + connection.getX() + ":" + connection.getY() + ":" + connection.getUsername()).getBytes(), c.getIpAddress(), c.getPort());
@@ -233,13 +234,13 @@ public class Server {
                 break;
             case "15":
                 index = message.split(":");
-                PlayerConnection movement = findPlayer(index[0]);
+                Player movement = findPlayer(index[0]);
 
                 if (movement == null)
                     break;
 
                 movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
-                for (PlayerConnection c : connections) {
+                for (Player c : connections) {
                     if (c.getUsername() != movement.getUsername()) {
                         send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + movement.subWorld + ":" + index[4], c.getIpAddress(), c.getPort());
                     }
@@ -309,8 +310,8 @@ public class Server {
      * @param username Username of Requested Player
      * @return The PlayerConnection file of the requested player.
      */
-    public PlayerConnection findPlayer(String username) {
-        for (PlayerConnection c : connections) {
+    public Player findPlayer(String username) {
+        for (Player c : connections) {
             if (c.getUsername().equalsIgnoreCase(username.trim()))
                 return c;
         }
@@ -357,7 +358,7 @@ public class Server {
      * @param message Message to broadcast.
      */
     public void chatMessage(String message) {
-        for (PlayerConnection c : connections) {
+        for (Player c : connections) {
             send(message.getBytes(), c.getIpAddress(), c.getPort());
         }
     }
@@ -373,8 +374,8 @@ public class Server {
      * @param y Player y-coordinate
      * @return PlayerConnection Object of the newly connected player to add to the ArrayList of players.
      */
-    public PlayerConnection handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
-        PlayerConnection connection = (connectionCode == 0) ?
+    public Player handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
+        Player connection = (connectionCode == 0) ?
                 ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
         connections.add(connection);
         String send = "04" + username + ":" + connection.getX() + ":" + connection.getY() + ":" + connection.subWorld;
@@ -409,7 +410,7 @@ public class Server {
         return connection;
     }
 
-    public void send(byte[] data, InetAddress address, int port) {
+    public static void send(byte[] data, InetAddress address, int port) {
         assert(socket.isConnected());
         DatagramPacket packet = new DatagramPacket(data, data.length, address, port);
         try {
@@ -425,7 +426,11 @@ public class Server {
      * @param address Address of client.
      * @param port Port of Client.
      */
-    public void send(String data, InetAddress address, int port) {
+    public static void send(String data, InetAddress address, int port) {
         send(data.getBytes(), address, port);
+    }
+
+    public static void send(String data, Player player) {
+        send(data.getBytes(), player.getIpAddress(), player.getPort());
     }
 }
