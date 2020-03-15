@@ -17,10 +17,12 @@
 
 package com.Game.Player;
 
+import com.Game.ConnectionHandling.Client;
 import com.Game.ConnectionHandling.Save.ItemMemory;
 import com.Game.ConnectionHandling.Save.SaveSettings;
 import com.Game.ConnectionHandling.security.Obfuscator;
 import com.Game.ConnectionHandling.security.Password;
+import com.Game.Inventory.InventoryManager;
 import com.Game.Skills.SkillsManager;
 import com.Game.Util.Math.Vector2;
 
@@ -35,19 +37,23 @@ public class Player {
     public int connected = 0;
 
     // Item Inventories Section
-    public ItemMemory[] inventoryItems;
+    public InventoryManager inventory;
     public ItemMemory[] accessoryItems;
     public ArrayList<ItemMemory> bankItems;
 
     // Stats
     public int[] questSaves;
     public SkillsManager skills;
+    public int maxHealth = 100;
+
+    // Real-Time Data
+    public int health = 100;
+    public float timer = 1.0f;
 
     // Player Properties
     public String username;
     public Vector2 pos;
     public int subWorld;
-
 
     /**
      * The Password, when set using {@link #setPassword(Password)}.
@@ -67,14 +73,11 @@ public class Player {
         this.pos = Vector2.zero();
         this.username = "";
         this.password = new Password("", false, false);
-        this.inventoryItems = new ItemMemory[SaveSettings.inventoryAmount];
+        this.inventory = new InventoryManager();
         this.accessoryItems = new ItemMemory[SaveSettings.accessoryAmount];
         this.questSaves = new int[SaveSettings.questAmount];
         this.subWorld = 0;
 
-        for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
-            inventoryItems[i] = new ItemMemory(0, 0);
-        }
         for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
             accessoryItems[i] = new ItemMemory(0, 0);
         }
@@ -126,4 +129,7 @@ public class Player {
         this.subWorld = subWorld;
     }
 
+    public void sendMessage(String message) {
+        Client.sendMessage(this, message);
+    }
 }

@@ -1,5 +1,6 @@
 package com.Game.Inventory;
 
+import com.Game.ItemData.Requirement.ActionRequirement;
 import com.Game.Player.Player;
 import com.Game.PseudoData.ImageIdentifier;
 
@@ -10,7 +11,7 @@ public class Item {
     protected int equipStatus;
     protected double armor;
     protected float damageMulti;
-    protected ItemRequirement requirement;
+    protected ActionRequirement requirement;
 
     public int id;
     public int worth;

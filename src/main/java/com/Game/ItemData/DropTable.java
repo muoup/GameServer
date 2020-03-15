@@ -1,4 +1,4 @@
-package com.Game.Items;
+package com.Game.ItemData;
 
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;

@@ -23,11 +23,11 @@ public class ImageIdentifier {
     }
 
     public static ImageIdentifier singleImage(String root) {
-        return new ImageIdentifier("nr--" + root);
+        return new ImageIdentifier("nr|" + root);
     }
 
-    public static ImageIdentifier spriteSheet(String root, int x, int y) {
-        return new ImageIdentifier(String.format("ss;%s,%s--%s", x, y, root));
+    public static ImageIdentifier subImage(String root, int x, int y, int w, int h) {
+        return new ImageIdentifier(String.format("ss|%s,%s;%s,%s;%s", x, y, w, h, root));
     }
 
     public String getToken() {

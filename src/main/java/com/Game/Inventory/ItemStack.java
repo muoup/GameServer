@@ -47,4 +47,16 @@ public class ItemStack {
     public String getName(Player player, int data) {
         return item.getName();
     }
+
+    public Item getItem() {
+        return this.item;
+    }
+
+    public int getAmount() {
+        return amount;
+    }
+
+    public int getData() {
+        return data;
+    }
 }

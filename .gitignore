@@ -1,4 +1,5 @@
 .idea/
 ignored/
 target/
-src/Saves/
+out/
+src/saves/

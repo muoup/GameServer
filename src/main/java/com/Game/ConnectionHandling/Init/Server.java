@@ -250,7 +250,7 @@ public class Server {
                 index = message.split(":");
                 int skill = Integer.parseInt(index[0]);
                 float xp = Float.parseFloat(index[1]);
-                findPlayer(index[2]).skillXP[skill] += xp;
+                findPlayer(index[2]).skills.xp[skill] += xp;
                 break;
             case "08":
                 index = message.split(":");
@@ -380,7 +380,7 @@ public class Server {
         connections.add(connection);
         String send = "04" + username + ":" + connection.getX() + ":" + connection.getY() + ":" + connection.subWorld;
         for (int i = 0; i < SaveSettings.skillAmount; i++) {
-            send  += ":" + connection.skillXP[i];
+            send  += ":" + connection.skills.xp[i];
         }
         send(send, packet.getAddress(), packet.getPort());
         send = "05";
