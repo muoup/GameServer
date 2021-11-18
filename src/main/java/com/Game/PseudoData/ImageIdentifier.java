@@ -3,9 +3,12 @@ package com.Game.PseudoData;
 /*
     Image Code List
     emp -> empty image
-    nr -> normal image
+    sf -> normal image
     ss;x,y -> sprite sheet image
+    an;w,h,amt -> sprite sheet animation
  */
+
+import com.Game.Util.Math.Vector2;
 
 /**
  * Used to send image data over a packet. All images are stored in the client, so they are editable, but the server
@@ -14,23 +17,44 @@ package com.Game.PseudoData;
 public class ImageIdentifier {
     private String token;
 
+    private Vector2 scale = null;
+    private double rotation = 0;
+
     private ImageIdentifier(String token) {
         this.token = token;
     }
 
     public static ImageIdentifier emptyImage() {
-        return new ImageIdentifier("emp");
+        return new ImageIdentifier("em");
     }
 
     public static ImageIdentifier singleImage(String root) {
-        return new ImageIdentifier("nr|" + root);
+        return new ImageIdentifier("sf" + root);
     }
 
-    public static ImageIdentifier subImage(String root, int x, int y, int w, int h) {
-        return new ImageIdentifier(String.format("ss|%s,%s;%s,%s;%s", x, y, w, h, root));
+    public static ImageIdentifier subImage(String root, int x, int y, int width, int height) {
+        return new ImageIdentifier(String.format("ss%s<->%s,%s>-<%s,%s", root, x, y, width, height));
+    }
+
+    public static ImageIdentifier animatedImage(String root, int width, int height, int frames, int fps) {
+        return new ImageIdentifier(String.format("an%s<->%s,%s>-<%s,%s", root, width, height, frames, fps));
+    }
+
+    public void setScale(Vector2 scale) {
+        this.scale = scale;
+    }
+
+    public void setScale(int x, int y) {
+        this.scale = new Vector2(x, y);
+    }
+
+    public void setRotation(double rotation) {
+        this.rotation = rotation;
     }
 
     public String getToken() {
         return token;
     }
+
+    public String toString() { return token; }
 }

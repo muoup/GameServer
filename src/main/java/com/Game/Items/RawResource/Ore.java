@@ -1,15 +1,18 @@
 package com.Game.Items.RawResource;
 
-import com.Game.Items.Item;
-import com.Game.Items.ItemStack;
-import com.Util.Other.SpriteSheet;
+import com.Game.Inventory.Item;
+import com.Game.Inventory.ItemStack;
+import com.Game.PseudoData.ImageIdentifier;
+import com.Game.Util.Other.SpriteSheet;
 
 public class Ore extends Item {
     private int imageColumn;
 
-    public Ore(int id, int imageColumn, String name, String examineText, int maxStack, int worth) {
-        super(id, SpriteSheet.oreSheet.getCell(imageColumn, 0), name, examineText, maxStack, worth);
+    public Ore(int id, int imageColumn, String name, String examineText, int worth, boolean stackable) {
+        super(id, name, examineText, worth, false);
         this.imageColumn = imageColumn;
+
+        setImage(ImageIdentifier.subImage("Items/ore_sheet.png", imageColumn, 0, 48, 48));
     }
 
     public void setData(ItemStack stack) {

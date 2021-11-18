@@ -1,5 +1,7 @@
 package com.Game.ItemData.Requirement;
 
+import com.Game.Entity.Player.Player;
+
 import java.util.ArrayList;
 
 public class ActionRequirement {
@@ -11,6 +13,17 @@ public class ActionRequirement {
 
     public static ActionRequirement create() {
         return new ActionRequirement();
+    }
+
+    public static ActionRequirement skill(int skill, int level) {
+        ActionRequirement req = new ActionRequirement();
+        req.addLevelReqs(skill, level);
+        return req;
+    }
+
+    public static ActionRequirement none() {
+        ActionRequirement req = new ActionRequirement();
+        return req;
     }
 
     public void addLevelReqs(int... data) {
@@ -28,5 +41,30 @@ public class ActionRequirement {
         for (int quest : data) {
             // TODO: Quest requirement functionality
         }
+    }
+
+    public boolean meetsRequirement(Player player) {
+        for (Req requirement : requirements) {
+            if (!requirement.isValid(player, false))
+                return false;
+        }
+
+        return true;
+    }
+
+    public Req getRequirement(int index) {
+        return requirements.get(index);
+    }
+
+    public int getLevelReq(int skill) {
+        for (Req req : requirements) {
+            if (req instanceof LevelReq) {
+                LevelReq levelReq = (LevelReq) req;
+                if (levelReq.getSkill() == skill)
+                    return levelReq.getLevel();
+            }
+        }
+
+        return -1;
     }
 }

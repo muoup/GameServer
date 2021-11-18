@@ -6,9 +6,11 @@ import com.Game.PseudoData.ImageIdentifier;
 
 public class RockArrowItem extends Item {
 
-    public RockArrowItem(int id, String name, String examineText, ImageIdentifier image, int worth) {
-        super(id, name, examineText, image, worth);
+    public RockArrowItem(int id, String name, String examineText, int worth, boolean stackable) {
+        super(id, name, examineText, worth, stackable);
         this.equipStatus = AccessoriesManager.AMMO_SLOT;
+
+        setImage("rock_arrow.png");
     }
 
     // TODO: Fix

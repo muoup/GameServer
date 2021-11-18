@@ -17,11 +17,10 @@
 
 package com.Game.ConnectionHandling.Init;
 
-import com.Game.Player.Player;
+import com.Game.Entity.Player.Player;
 
 public class GameServer {
     public static void main(String[] args) {
-        Player.init();
         Server server = new Server(3112);
         server.start();
     }

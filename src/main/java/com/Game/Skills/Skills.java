@@ -2,10 +2,10 @@ package com.Game.Skills;
 
 import com.Game.ConnectionHandling.Client;
 import com.Game.ConnectionHandling.Save.SaveSettings;
-import com.Game.Player.Player;
+import com.Game.Entity.Player.Player;
 import com.Game.PseudoData.ImageIdentifier;
 
-public class SkillsManager {
+public class Skills {
     public static int RANGED = 0;
     public static int MELEE = 1;
     public static int FISHING = 2;
@@ -34,31 +34,31 @@ public class SkillsManager {
     };
 
     public int levels[];
-    public int xp[];
+    public float xp[];
 
     private Player player;
 
-    public SkillsManager(Player player) {
+    public Skills(Player player) {
         this.player = player;
         this.levels = new int[SaveSettings.skillAmount];
-        this.xp = new int[SaveSettings.skillAmount];
+        this.xp = new float[SaveSettings.skillAmount];
     }
 
-    public void setExperience(int skill, int amount) {
+    public void setExperience(int skill, float amount) {
         xp[skill] = amount;
         deltaLevel(skill, 0, false);
 
-        Client.sendSkill(player, skill, amount);
+        Client.sendSkill(player, skill);
     }
 
-    public void addExperience(int skill, int amount) {
+    public void addExperience(int skill, float amount) {
         xp[skill] += amount;
         deltaLevel(skill, amount, true);
 
-        Client.sendSkill(player, skill, amount);
+        Client.sendSkill(player, skill);
     }
 
-    private void deltaLevel(int skill, int added, boolean levelUp) {
+    public void deltaLevel(int skill, float added, boolean levelUp) {
         int initialLevel = expToLevel(xp[skill] - added);
         int level = expToLevel(xp[skill]);
         levels[skill] = level;

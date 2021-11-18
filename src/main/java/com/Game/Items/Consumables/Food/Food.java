@@ -1,20 +1,17 @@
 package com.Game.Items.Consumables.Food;
 
-import com.Game.ConnectionHandling.Client;
-import com.Game.Inventory.InventoryManager;
 import com.Game.Inventory.Item;
 import com.Game.Inventory.ItemStack;
-import com.Game.Player.Player;
+import com.Game.Entity.Player.Player;
 import com.Game.PseudoData.ImageIdentifier;
-import com.sun.tools.javac.Main;
 
 public class Food extends Item {
 
     int healAmount = 0;
     String eatText;
 
-    public Food(int id, String name, String examineText, ImageIdentifier image, int worth, int healAmount) {
-        super(id, name, examineText, image, worth);
+    public Food(int id, String name, String examineText, int worth, boolean stackable, int healAmount) {
+        super(id, name, examineText, worth, stackable);
         this.healAmount = healAmount;
         this.eatText = "You eat the " + name + " and it heals some health.";
     }

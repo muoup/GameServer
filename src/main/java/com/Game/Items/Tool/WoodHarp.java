@@ -1,29 +1,32 @@
 package com.Game.Items.Tool;
 
-import com.Game.GUI.Chatbox.ChatBox;
-import com.Game.GUI.Inventory.InventoryManager;
-import com.Game.Items.Item;
-import com.Game.Items.ItemList;
-import com.Game.Items.ItemStack;
+import com.Game.ConnectionHandling.Client;
+import com.Game.Entity.Player.Player;
+import com.Game.Inventory.InventoryManager;
+import com.Game.Inventory.Item;
+import com.Game.Inventory.ItemList;
+import com.Game.Inventory.ItemStack;
 
 public class WoodHarp extends Usable {
 
-    public WoodHarp(int id, String imageName, String name, String examineText, int maxStack, int worth) {
-        super(id, imageName, name, examineText, maxStack, worth);
+    public WoodHarp(int id, String name, String examineText, int worth, boolean stackable) {
+        super(id, name, examineText, worth, stackable);
+
+        setImage("wood_harp.png");
     }
 
-    public void use(int index) {
-        ItemStack stack = InventoryManager.getStack(index);
+    public void use(Player player, int index) {
+        ItemStack stack = player.inventory.getStack(index);
         int worth = stack.getWorth();
         if (worth <= 0) {
-            ChatBox.sendMessage("You cannot cash that item.");
+            Client.sendMessage(player, "You cannot cash that item.");
             return;
         } else if (worth * 0.35 < 1) {
-            ChatBox.sendMessage("That item would grant you less than a coin. It was not harmonised.");
+            Client.sendMessage(player,"That item would grant you less than a coin. It was not harmonised.");
             return;
         }
 
-        InventoryManager.setItem(index, Item.emptyStack());
-        InventoryManager.addItem(ItemList.gold, (int) (worth * 0.35));
+        player.inventory.setItem(index, Item.emptyStack());
+        player.addItem(ItemList.gold, (int) (worth * 0.35));
     }
 }

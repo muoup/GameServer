@@ -17,8 +17,10 @@
 
 package com.Game.ConnectionHandling.Save;
 
-import com.Game.Player.Player;
+import com.Game.Inventory.ItemStack;
+import com.Game.Entity.Player.Player;
 import com.Game.ConnectionHandling.security.*;
+import com.Game.WorldManagement.WorldHandler;
 
 import java.io.*;
 import java.net.DatagramPacket;
@@ -61,8 +63,7 @@ public class ManageSave {
                     data.setUsername(username);
                     break;
                 case "Password:":
-                    String pass = "";
-                    pass = parts[1];
+                    String pass = parts[1];
                     Password password;
                     if (Integer.parseInt(parts[2]) == 1) {
                         password = new Password(pass, true, true);
@@ -72,21 +73,21 @@ public class ManageSave {
                     data.setPassword(password);
                     break;
                 case "Pos:":
-                    data.x = Integer.parseInt(parts[1]);
-                    data.y = Integer.parseInt(parts[2]);
-                    data.subWorld = Integer.parseInt(parts[3]);
+                    data.setPos(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
+                    data.setWorld(WorldHandler.getWorld(Integer.parseInt(parts[3])));
                     break;
                 case "Skills:":
                     for (int i = 1; i < parts.length; i++) {
-                        data.skillXP[i - 1] = Float.parseFloat(parts[i]);
+                        data.setExperience(i - 1, Float.parseFloat(parts[i]));
                     }
                     break;
                 case "Inventory:":
                     String line = scanner.nextLine();
                     for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
                         String[] cut = line.split(" ");
-                        data.inventoryItems[i] =
-                                new ItemMemory(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3]));
+                        if (cut[1] != "0")
+                            data.inventory.setItem(i,
+                                new ItemStack(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3])));
                         line = scanner.nextLine();
                     }
                     break;
@@ -95,16 +96,16 @@ public class ManageSave {
                     String aline = scanner.nextLine();
                     for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
                         String[] cut = aline.split(" ");
-                        data.accessoryItems[i] =
-                                new ItemMemory(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3]));
+                        data.accessory.setSlot(i,
+                                new ItemStack(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3])));
                         aline = scanner.nextLine();
                     }
                 case "Accessory:":
                     for (int i = 1; i < parts.length; i++) {
                         if (i % 2 == 1)
-                            data.accessoryItems[(i - 1) / 2].id = Integer.parseInt(parts[i]);
+                            data.accessory.accessories[(i - 1) / 2].id = Integer.parseInt(parts[i]);
                         else
-                            data.accessoryItems[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
+                            data.accessory.accessories[(i - 1) / 2].amount = Integer.parseInt(parts[i]);
                     }
                     break;
                 case "Quests:":
@@ -113,7 +114,7 @@ public class ManageSave {
                         if (qline.trim().equals(""))
                             break;
                         String[] cut = qline.split(" ");
-                        data.questSaves[i] = Integer.parseInt(cut[1]);
+                        data.setQuestData(i, Integer.parseInt(cut[1]));
                     }
                     break;
                 case "Bank:":
@@ -141,7 +142,7 @@ public class ManageSave {
         Player connection = new Player(packet.getAddress(), packet.getPort());
         connection.setUsername(playername);
         connection.createPassword(password);
-        connection.setPos(SaveSettings.startX, SaveSettings.startY, 0);
+        connection.teleport(SaveSettings.startX, SaveSettings.startY, 0);
         savePlayerData(connection);
 
         return connection;
@@ -156,7 +157,7 @@ public class ManageSave {
         if (data == null)
             return null;
 
-        File getFile = new File("src/saves/" + data.getUsername().toLowerCase() + ".psave");;
+        File getFile = new File("src/saves/" + data.getUsername().toLowerCase() + ".psave");
         PrintWriter writer;
 
         try {
@@ -170,27 +171,27 @@ public class ManageSave {
         } else {
             writer.println("Password: " + data.password.getPassword(new VulnerableLogin(data.password)) + " " + "0"); //Must be passed an instance of VulnerableLogin to bypass security measures
         }
-        writer.println("Pos: " +  data.x + " " + data.y + " " + data.subWorld);
+        writer.println("Pos: " + data.getX() + " " + data.getY() + " " + data.getWorld().id);
 
         String skillsLine = "Skills:";
 
-        for (float i : data.skillXP)
+        for (float i : data.skills.xp)
             skillsLine += " " + df.format(i);
 
         writer.println("\nInventory:");
 
-        ItemMemory[] inventoryItems = data.inventoryItems;
+        ItemStack[] inventoryItems = data.inventory.inventory;
         for (int i = 0; i < inventoryItems.length; i++) {
-            ItemMemory mem = inventoryItems[i];
-            writer.println(i + " " + mem.id + " " + mem.amount + " " + mem.data);
+            ItemStack item = inventoryItems[i];
+            writer.println(i + " " + item.id + " " + item.amount + " " + item.data);
         }
 
         writer.println("\nAccessories:");
 
-        ItemMemory[] accessoryItems = data.accessoryItems;
-        for (int i = 0, accessoryItemsLength = accessoryItems.length; i < accessoryItemsLength; i++) {
-            ItemMemory mem = accessoryItems[i];
-            writer.println(i + " " + mem.id + " " + mem.amount + " " + mem.data);
+        ItemStack[] accessoryItems = data.accessory.accessories;
+        for (int i = 0; i < accessoryItems.length; i++) {
+            ItemStack item = accessoryItems[i];
+            writer.println(i + " " + item.id + " " + item.amount + " " + item.data);
         }
 
         writer.println("");
@@ -199,7 +200,7 @@ public class ManageSave {
 
         writer.println("\nQuests:");
 
-        int[] quests = data.questSaves;
+        int[] quests = data.questData.getDataArray();
 
         for (int i = 0; i < quests.length; i++) {
             writer.println(i + " " + quests[i]);
@@ -243,7 +244,7 @@ public class ManageSave {
      * @return How the username was capitalized when registered (not working) not worth working on rn however.
      */
     public static String getUsername(String username) {
-        File file = new File("src/resources/saves/" + username.toLowerCase() + ".psave");
+        File file = new File("src/Saves/" + username.toLowerCase() + ".psave");
 
         Scanner scanner;
         try {
@@ -257,7 +258,7 @@ public class ManageSave {
     }
 
     public static boolean usernameExists(String username) {
-        File getFile = new File("src/resources/saves/" + username.toLowerCase() + ".psave");
+        File getFile = new File("src/Saves/" + username.toLowerCase() + ".psave");
         return getFile.exists();
     }
     

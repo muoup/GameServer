@@ -26,7 +26,7 @@ public class Vector2 {
     }
 
     public String toString() {
-        return x + ", " + y;
+        return x + " " + y;
     }
 
     public Vector2 add(Vector2 other) {

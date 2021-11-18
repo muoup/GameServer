@@ -1,16 +1,17 @@
 package com.Game.Items.Tool;
 
-import com.Game.GUI.Inventory.InventoryManager;
-import com.Game.Items.Item;
-import com.Game.Items.ItemStack;
+
+import com.Game.Entity.Player.Player;
+import com.Game.Inventory.Item;
+import com.Game.Inventory.ItemStack;
 
 public class Usable extends Item {
-    public Usable(int id, String imageName, String name, String examineText, int maxStack, int worth) {
-        super(id, imageName, name, examineText, maxStack, worth);
+    public Usable(int id, String name, String examineText, int worth, boolean stackable) {
+        super(id, name, examineText, worth, stackable);
     }
 
-    public void OnClick(int index) {
-        InventoryManager.useIndex = index;
+    public void OnClick(Player player, int index) {
+
     }
 
     public void setData(ItemStack stack) {

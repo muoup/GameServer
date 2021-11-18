@@ -17,33 +17,36 @@
 
 package com.Game.ConnectionHandling.Init;
 
-import com.Game.ConnectionHandling.Save.ItemMemory;
+
 import com.Game.ConnectionHandling.Save.ManageSave;
 import com.Game.ConnectionHandling.Save.SaveSettings;
-import com.Game.Player.Player;
+import com.Game.Inventory.ItemStack;
+import com.Game.Entity.Player.Player;
+import com.Game.WorldManagement.WorldHandler;
 
-import java.io.*;
-import java.net.*;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Server {
     private int port;
-    private Thread listenThread;
-    private Thread checkConnect;
-    private Thread commandThread;
-    private Thread saveThread;
+    private Thread gameLoop, listenThread, checkConnect, commandThread, saveThread;
     private boolean listening = false;
     private static DatagramSocket socket;
     private List<Player> connections;
     private final int MAX_PACKET_SIZE = 1024;
     private byte[] dataBuffer = new byte[MAX_PACKET_SIZE * 10];
     private static final String serverVersion = "0.0.2a";
+    private static float deltaTime;
 
     public Server(int port) {
         this.port = port;
-        connections = new ArrayList<Player>();
+        connections = new ArrayList();
     }
 
     public void start() {
@@ -68,6 +71,21 @@ public class Server {
 
         saveThread = new Thread(() -> savePlayerData());
         saveThread.start();
+
+        gameLoop = new Thread(() -> gameLoop());
+        gameLoop.start();
+    }
+
+    private void gameLoop() {
+        long lastTime = System.nanoTime();
+
+        while (true) {
+            long time = System.nanoTime();
+            deltaTime = (time - lastTime) / 1000000000;
+            lastTime = time;
+
+            WorldHandler.update();
+        }
     }
 
     private void listen() {
@@ -125,6 +143,10 @@ public class Server {
                 break;
             case "finger":
                 connections.forEach(System.out::println);
+                break;
+            case "ping":
+
+
                 break;
         }
 
@@ -207,14 +229,16 @@ public class Server {
                 index = message.split(":");
                 String username = index[0].trim();
                 String password = index[1].trim();
-                String clientVersion = index[5].trim();
-                boolean connect = handleLogin(username, password, Integer.parseInt(index[2]), packet, clientVersion);
+                String connectionCode = index[2].trim();
+                String clientVersion = index[3].trim();
+                boolean connect = handleLogin(username, password, Integer.parseInt(connectionCode), packet, clientVersion);
+                send("00" + SaveSettings.questAmount + ":" + SaveSettings.skillAmount, packet.getAddress(), packet.getPort());
                 if (!connect)
                     break;
-                connection = handleLogin(packet, username, password, Integer.parseInt(index[2].trim()), Integer.parseInt(index[3].trim()), Integer.parseInt(index[4].trim()));
+                connection = getPlayerObject(packet, username, password, Integer.parseInt(connectionCode));
                 for (Player c : connections) {
                     if (!c.getUsername().equals(connection.getUsername())) {
-                        send((12 + "" + c.getX() + ":" + c.getY() + ":" + c.getUsername()).getBytes(), packet.getAddress(), packet.getPort());
+                        //send((12 + "" + c.getX() + ":" + c.getY() + ":" + c.getUsername()).getBytes(), packet.getAddress(), packet.getPort());
                         send((12 + "" + connection.getX() + ":" + connection.getY() + ":" + connection.getUsername()).getBytes(), c.getIpAddress(), c.getPort());
                     }
                 }
@@ -239,14 +263,25 @@ public class Server {
                 if (movement == null)
                     break;
 
-                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]), Integer.parseInt(index[3]));
+                movement.setPos(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
+
                 for (Player c : connections) {
-                    if (c.getUsername() != movement.getUsername()) {
-                        send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + movement.subWorld + ":" + index[4], c.getIpAddress(), c.getPort());
+                    if (!c.getUsername().equals(movement.getUsername())) {
+                        // TODO: IMPLEMENT PLAYER WORLD CHANGE PACKET
+                        send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + index[4], c.getIpAddress(), c.getPort());
                     }
                 }
                 break;
-            case "07":
+            case "oi": // Object Interaction
+                Player objectInteracter = findPlayer(message);
+                objectInteracter.interactWithObject();
+                break;
+            case "lf": // Lose Focus
+                Player focusLost = findPlayer(message);
+                focusLost.loseFocus();
+                break;
+
+            /*case "07":
                 index = message.split(":");
                 int skill = Integer.parseInt(index[0]);
                 float xp = Float.parseFloat(index[1]);
@@ -259,9 +294,7 @@ public class Server {
                 int amount = Integer.parseInt(index[2]);
                 int data = Integer.parseInt(index[3]);
                 connection = findPlayer(index[4]);
-                connection.inventoryItems[slot].id = id;
-                connection.inventoryItems[slot].amount = amount;
-                connection.inventoryItems[slot].data = data;
+                connection.inventory.clientSetItem(id, amount);
                 break;
             case "09":
                 index = message.split(":");
@@ -300,7 +333,7 @@ public class Server {
                 int badata = Integer.parseInt(index[2]);
                 connection = findPlayer(index[3]);
                 connection.bankItems.add(new ItemMemory(baid, baamount, badata));
-                break;
+                break;*/
         }
     }
 
@@ -370,43 +403,41 @@ public class Server {
      * @param username Username of Connecting PLayer
      * @param password Password of Connecting Player
      * @param connectionCode Connection Code of Player (0 - login, 1 - register, more..?);
-     * @param x Player x-coordinate
-     * @param y Player y-coordinate
-     * @return PlayerConnection Object of the newly connected player to add to the ArrayList of players.
+     * @return PlayerConnection Objects of the newly connected player to add to the ArrayList of players.
      */
-    public Player handleLogin(DatagramPacket packet, String username, String password, int connectionCode, int x, int y) {
+    public Player getPlayerObject(DatagramPacket packet, String username, String password, int connectionCode) {
         Player connection = (connectionCode == 0) ?
                 ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
         connections.add(connection);
-        String send = "04" + username + ":" + connection.getX() + ":" + connection.getY() + ":" + connection.subWorld;
+        String send = "04" + username;
         for (int i = 0; i < SaveSettings.skillAmount; i++) {
-            send  += ":" + connection.skills.xp[i];
+            send += ":" + connection.skills.xp[i];
         }
         send(send, packet.getAddress(), packet.getPort());
-        send = "05";
-        for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
-            ItemMemory mem = connection.inventoryItems[i];
-            send += ":" + mem.id + " " + mem.amount + " " + mem.data;
-        }
-        send(send, packet.getAddress(), packet.getPort());
-        send = "06";
-        for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
-            ItemMemory mem = connection.accessoryItems[i];
-            send += ":" + mem.id + " " + mem.amount + " " + mem.data;
-        }
-        send(send, packet.getAddress(), packet.getPort());
-        send = "07";
+//        send = "05";
+//        for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
+//            ItemStack mem = connection.inventory.getStack(i);
+//            send += ":" + mem.id + " " + mem.amount + " " + mem.data;
+//        }
+//        send(send, packet.getAddress(), packet.getPort());
+//        send = "06";
+//        for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
+//            ItemStack mem = connection.accessory.getSlot(i);
+//            send += ":" + mem.id + " " + mem.amount + " " + mem.data;
+//        }
+//        send(send, packet.getAddress(), packet.getPort());
+        // --------------
         for (int i = 0; i < SaveSettings.questAmount; i++) {
-            send += ":" + i + " " + connection.questSaves[i];
+            send("07:" + i + ":" + connection.questData.getInfoForPacket(i), packet.getAddress(), packet.getPort());
         }
         send(send, packet.getAddress(), packet.getPort());
-        if (connection.bankItems.size() > 0) {
-            send = "08";
-            for (ItemMemory item : connection.bankItems) {
-                send += ":" + item.id + " " + item.amount + " " + item.data;
-            }
-        }
-        send(send, packet.getAddress(), packet.getPort());
+//        if (connection.bankItems.size() > 0) {
+//            send = "08";
+//            for (ItemMemory item : connection.bankItems) {
+//                send += ":" + item.id + " " + item.amount + " " + item.data;
+//            }
+//        }
+//        send(send, packet.getAddress(), packet.getPort());
         return connection;
     }
 
@@ -430,7 +461,27 @@ public class Server {
         send(data.getBytes(), address, port);
     }
 
-    public static void send(String data, Player player) {
+    public static void send(Player player, String data) {
         send(data.getBytes(), player.getIpAddress(), player.getPort());
+    }
+
+    public static void send(Player player, String tag, Object... data) {
+        StringBuilder packetContents = new StringBuilder(tag);
+
+        for (Object part : data) {
+            packetContents.append(part + ";");
+        }
+
+        // TAG;Data1;Data2;Data3...
+        send(player, packetContents.toString().substring(0, packetContents.length() - 1));
+    }
+
+    /**
+     * Returns the delta time of each server frame.
+     * If the player moves at some speed times delta time, the movement will be constant no matter the frame rate.
+     * @return Delta Time
+     */
+    public static float dTime() {
+        return deltaTime;
     }
 }

@@ -27,8 +27,8 @@ public class SpriteSheet {
         this.height = sH;
     }
 
-    public ImageIdentifier image(int x, int y) {
-        return ImageIdentifier.subImage(image, x * width - 1, y * width - 1, width, height);
+    public ImageIdentifier getCell(int x, int y) {
+        return ImageIdentifier.subImage(image, x * width, y * height, width, height);
     }
 
 }

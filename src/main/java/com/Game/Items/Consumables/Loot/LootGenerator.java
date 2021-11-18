@@ -1,23 +1,24 @@
 package com.Game.Items.Consumables.Loot;
 
-import com.Game.GUI.Inventory.InventoryManager;
-import com.Game.Items.DropTable;
-import com.Game.Items.Item;
-import com.Game.Items.ItemStack;
+import com.Game.Inventory.Item;
+import com.Game.Inventory.ItemStack;
+import com.Game.ItemData.DropTable;
+import com.Game.Entity.Player.Player;
+import com.Game.PseudoData.ImageIdentifier;
 
 import java.util.ArrayList;
 
 public class LootGenerator extends Item {
     protected DropTable table;
 
-    public LootGenerator(int id, String imageName, String name, String examineText, int maxStack, int worth) {
-        super(id, imageName, name, examineText, maxStack, worth);
+    public LootGenerator(int id, String name, String examineText, int worth, boolean stackable) {
+        super(id, name, examineText, worth, stackable);
         table = new DropTable();
     }
 
-    public void OnClick(int index) {
-        getItems().forEach(InventoryManager::addItem);
-        InventoryManager.addAmount(index, -1);
+    public void OnClick(Player player, int index) {
+        getItems().forEach(player.inventory::addItem);
+        player.inventory.addAmount(index, -1);
     }
 
     protected void setTable(DropTable table) {

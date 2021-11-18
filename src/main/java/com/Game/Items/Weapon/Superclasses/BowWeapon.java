@@ -1,25 +1,26 @@
 package com.Game.Items.Weapon.Superclasses;
 
-import com.Game.GUI.Inventory.AccessoriesManager;
-import com.Game.GUI.Skills.Skills;
-import com.Game.Items.ItemList;
-import com.Game.Items.ItemRequirement;
-import com.Game.Items.ItemSets;
-import com.Game.Items.ItemStack;
+import com.Game.Inventory.AccessoriesManager;
+import com.Game.Inventory.ItemList;
+import com.Game.Inventory.ItemSets;
+import com.Game.Inventory.ItemStack;
+import com.Game.ItemData.Requirement.ActionRequirement;
 import com.Game.Items.Weapon.Weapon;
-import com.Util.Other.SpriteSheet;
-
-import java.awt.image.BufferedImage;
+import com.Game.Entity.Player.Player;
+import com.Game.PseudoData.ImageIdentifier;
+import com.Game.Skills.Skills;
+import com.Game.Util.Other.SpriteSheet;
 
 /**
  * The superclass for bow fishing. Extend if creating a new bow item.
  */
 public class BowWeapon extends Weapon {
-    BufferedImage unstrung;
-    BufferedImage strung;
+    ImageIdentifier unstrung;
+    ImageIdentifier strung;
+    private int tier;
 
-    public BowWeapon(int id, int cell, int tier, String name, String examineText, int maxStack, int worth) {
-        super(id, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB), name, examineText, maxStack, worth);
+    public BowWeapon(int id, int cell, int tier, String name, String examineText, int worth, boolean stackable) {
+        super(id, name, examineText, worth, stackable);
         this.itemSet = ItemSets.arrows;
         this.equipStatus = AccessoriesManager.WEAPON_SLOT;
 
@@ -45,18 +46,18 @@ public class BowWeapon extends Weapon {
     public void setWeaponTier(int tier) {
         // For now this just 0.3 times the tier (including 1)
         weaponDamage = (float) (Math.floor(tier / 10) + 1) * 0.365f + 1.785f;
-        requirement = new ItemRequirement(0, tier);
-        expMultiplier = 1 + 0.125f * tier;
+        requirement = ActionRequirement.skill(0, tier);
+        this.tier = tier;
     }
 
-    public float getMultiplier() {
-        return 1 + 0.0125f * Skills.getLevel(Skills.RANGED);
+    public float getMultiplier(Player player) {
+        return 1 + 0.0125f * player.getLevel(Skills.RANGED);
     }
 
-    public void OnClick(int index) {
-        if (getData(index) == 0) {
-            if (combine(index, ItemList.bowString, 1, 1))
-                Skills.addExperience(Skills.FLETCHING, 30 * (1 + requirement.getLevel() / 5));
+    public void OnClick(Player player, int index) {
+        if (player.inventory.getData(index) == 0) {
+            if (combine(player, index, ItemList.bowString, 1, 1))
+                player.skills.addExperience(Skills.FLETCHING, 30 * (1 + tier / 5));
         }
     }
 
@@ -66,14 +67,11 @@ public class BowWeapon extends Weapon {
             stack.setImage(unstrung);
             stack.setEquipStatus(-1);
             stack.name = "Unstrung " + name;
+            stack.setOptions("String " + stack.getName().replace("Unstrung ", ""));
         } else {
             stack.setImage(strung);
             stack.setEquipStatus(equipStatus);
-            stack.name = name;
+            stack.setName(name);
         }
-    }
-
-    public String getOptionText(int i, int data, ItemStack stack) {
-        return "String " + stack.name.replace("Unstrung ", "");
     }
 }

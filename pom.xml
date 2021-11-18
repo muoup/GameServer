@@ -27,6 +27,8 @@
                         <arg>-verbose</arg>
                         <arg>--enable-preview</arg>
                     </compilerArgs>
+                    <source>12</source>
+                    <target>12</target>
                 </configuration>
             </plugin>
         </plugins>
