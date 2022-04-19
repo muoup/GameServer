@@ -5,7 +5,7 @@ import com.Game.ConnectionHandling.Save.SaveSettings;
 import com.Game.Entity.Player.Player;
 
 public class InventoryManager {
-    public ItemStack[] inventory;
+    public ItemStack[] inventory = new ItemStack[20];
     private Player player;
 
     public InventoryManager(ItemStack[] itemsSaved) {
@@ -16,8 +16,11 @@ public class InventoryManager {
     }
 
     public InventoryManager(Player player) {
-        inventory = new ItemStack[20];
         this.player = player;
+
+        for (int i = 0; i < inventory.length; i++) {
+            inventory[i] = ItemStack.empty();
+        }
     }
 
 
@@ -180,11 +183,11 @@ public class InventoryManager {
     public void setItem(int slot, ItemStack item) {
         inventory[slot] = item;
 
-        if (inventory[slot].amount <= 0) {
+        if (item.getAmount() <= 0) {
             inventory[slot] = new ItemStack(ItemList.empty, 0);
         }
 
-        Client.sendInventorySlot(player, slot, item);
+        Client.sendInventorySlot(player, slot, inventory[slot]);
     }
 
     public void swapSlots(int slot1, int slot2) {
@@ -198,22 +201,25 @@ public class InventoryManager {
     }
 
     public int addItem(ItemList item, int amount, int data) {
+        // amt - total amount added, amount - items remaining to add, add - local variable
         int amt = amount;
-        int add = amount;
+        int add;
 
         for (int i = 0; i < inventory.length; i++) {
             add = amount;
-
-            if (inventory[i].getID() == item.getID()
-                    && inventory[i].getData() == data
-                    && inventory[i].getAmount() < item.maxStack()) {
-                if (add > item.maxStack() - inventory[i].getAmount()) {
-                    add = item.maxStack() - inventory[i].getAmount();
+            ItemStack stack = inventory[i];
+            if (stack.getID() == item.getID()
+                    && stack.getData() == data) {
+                if (add > stack.getMaxAmount() - stack.getAmount()) {
+                    add = stack.getMaxAmount() - stack.getAmount();
                 }
 
                 addAmount(i, add);
 
                 amount -= add;
+
+                if (amount == 0)
+                    return amt;
             }
         }
 
@@ -237,7 +243,7 @@ public class InventoryManager {
                 return amt;
         }
 
-        return amt - add;
+        return amt - amount;
     }
 
     public int addItem(Item item, int amount, int data) {
@@ -253,7 +259,7 @@ public class InventoryManager {
     }
 
     public int addItem(ItemStack stack) {
-        return addItem(stack.getItem(), stack.getAmount());
+        return addItem(stack.getItem(), stack.getAmount(), stack.getData());
     }
 
     public ItemStack getStack(int inventoryIndex) {
@@ -293,5 +299,17 @@ public class InventoryManager {
         }
 
         return amount;
+    }
+
+    public void setItemAmount(int slot, int amount) {
+        ItemStack stack = getStack(slot).clone();
+
+        stack.amount = amount;
+
+        setItem(slot, stack);
+    }
+
+    public void changeItemAmount(int slot, int amount) {
+        setItemAmount(slot, getStack(slot).amount + amount);
     }
 }

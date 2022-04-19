@@ -1,6 +1,7 @@
 package com.Game.Entity.Enemy;
 
 import com.Game.ConnectionHandling.Init.Server;
+import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Projectile.RockPellet;
@@ -12,16 +13,16 @@ import java.util.ArrayList;
 
 public class BabyRockEnemy extends Enemy {
     float piecePercent = 1f;
-    private float speed = 1.25f;
     private float maxDistance = 80f;
     private float timer = 0f;
 
     public BabyRockEnemy(World world, int x, int y) {
         super(world, x, y);
 
-        setImage("babyRock.png");
-        this.respawnTimer = 5f;
-        this.maxTarget = 7.5f;
+        setImage("babyRock.png", 64 ,64);
+        this.respawnTime = 5000;
+        this.targetLostTime = 7500;
+        this.speed = 125;
         this.name = "Baby Rock";
         setMaxHealth(100);
     }
@@ -39,7 +40,7 @@ public class BabyRockEnemy extends Enemy {
     }
 
     public void handleDrops() {
-        ArrayList stacks = new ArrayList<ItemStack>();
+        ArrayList<ItemStack> stacks = new ArrayList<>();
         stacks.add(new ItemStack(ItemList.rockArrow, (int) DeltaMath.range(1, 10)));
         float rand = DeltaMath.range(0, 100);
         while (rand <= piecePercent) {

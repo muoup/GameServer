@@ -6,12 +6,14 @@ import com.Game.Skills.Skills;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.WorldManagement.World;
 
+import java.util.ArrayList;
+
 public class MiningRock extends GameObject {
 
     private int rocks;
     private RockType rockType;
-    private float rpTimer;
-    private long resetTime = 0L;
+    private long nextReset;
+    private ArrayList<Player> interacters;
 
     public MiningRock(World world, int x, int y, RockType rockType) {
         super(world, x, y);
@@ -20,6 +22,7 @@ public class MiningRock extends GameObject {
         this.maxDistance = 48;
         this.rocks = (int) DeltaMath.range(rockType.minRocks, rockType.maxRocks);
         this.maxTimer = getTime();
+        this.interacters = new ArrayList<>();
 
         setImage(rockType.imageName);
         setScale(128, 128);
@@ -29,25 +32,46 @@ public class MiningRock extends GameObject {
         if (rockType == null) {
             return -1;
         }
-        return DeltaMath.range(rockType.minTime, rockType.maxTime);
+        return DeltaMath.range(rockType.minTimer, rockType.maxTimer);
     }
 
     public void update() {
         if (rocks == 0) {
-            if (System.currentTimeMillis() > resetTime) {
+            if (System.currentTimeMillis() > nextReset) {
                 setImage(rockType.imageName);
+                setScale(128, 128);
                 rocks = (int) DeltaMath.range(rockType.minRocks, rockType.maxRocks);
+            }
+        }
+
+        for (int i = 0; i < interacters.size(); i++) {
+            Player player = interacters.get(i);
+
+            if (System.currentTimeMillis() >= player.completionTime) {
+                onInteract(player);
+                rocks--;
+                rockType.drops.determineOutput().forEach(player.inventory::addItem);
+                player.addExperience(Skills.MINING, rockType.xp);
+
+                if (rocks == 0) {
+                    nextReset = System.currentTimeMillis() + (long) DeltaMath.range(rockType.minTimer, rockType.maxTimer);
+                    setImage(RockType.stone.imageName);
+                    setScale(128, 128);
+                    player.loseFocus();
+                }
             }
         }
     }
 
     public boolean onInteract(Player player) {
+        player.loseFocus();
+
         if (rocks == 0) {
             return false;
         }
 
-        if (player.getLevel(Skills.MINING) < rockType.level) {
-            player.sendMessage("You do not have the requirement of " + rockType.level + " to mine this rock.");
+        if (player.getLevel(Skills.MINING) < rockType.lvlReq) {
+            player.sendMessage("You do not have the requirement of " + rockType.lvlReq + " to mine this rock.");
             return false;
         }
 
@@ -56,26 +80,20 @@ public class MiningRock extends GameObject {
             return false;
         }
 
-        if (player.objectInteration != this) {
-            initInteraction(player);
-        }
+        initInteraction(player);
 
-        if (System.currentTimeMillis() >= player.completionTime) {
-            initInteraction(player);
-            rocks--;
-            rockType.drops.determineOutput().forEach(player.inventory::addItem);
-            player.addExperience(Skills.MINING, rockType.xp);
-
-            if (rocks == 0) {
-                rpTimer = DeltaMath.range(rockType.minTime, rockType.maxTime);
-                setImage("empty_rock.png");
-            }
+        if (!interacters.contains(player)) {
+            interacters.add(player);
         }
 
         return true;
     }
 
-    public void loseFocus() {
+    public int getMillisTimer(Player player) {
+        return rockType.getTimer(player);
+    }
 
+    public void loseFocus(Player player) {
+        interacters.remove(player);
     }
 }

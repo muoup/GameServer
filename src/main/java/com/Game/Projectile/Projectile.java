@@ -1,6 +1,8 @@
 package com.Game.Projectile;
 
-import com.Game.Entity.Enemy.Enemy;
+import com.Game.ConnectionHandling.Client;
+import com.Game.ConnectionHandling.Init.Server;
+import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Entity.Entity;
 import com.Game.Entity.Player.Player;
 import com.Game.PseudoData.ImageIdentifier;
@@ -12,6 +14,7 @@ import com.Game.WorldManagement.World;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 
 public class Projectile {
     protected Vector2 initPos;
@@ -20,8 +23,6 @@ public class Projectile {
     protected Vector2 direction;
 
     protected boolean rotate;
-
-    protected boolean friendly = false;
 
     protected Entity owner;
     protected World world;
@@ -33,15 +34,17 @@ public class Projectile {
 
     protected Vector2 scale;
 
+    protected int randomToken;
+
     public ImageIdentifier image;
 
     public int attackStyle;
 
     public Projectile(Entity owner, Vector2 aim, float damage, float speed, long duration) {
-        this.position = owner.getPosition();
+        this.position = owner.getPosition().clone();
         this.aim = aim.clone();
         this.damage = damage;
-        this.speed = speed * Settings.projLengthMultiplier;
+        this.speed = speed;
         this.world = owner.getWorld();
         this.rotate = false;
         this.endTime = System.currentTimeMillis() + duration;
@@ -49,14 +52,9 @@ public class Projectile {
 
         initPos = position.clone();
 
-        direction = Vector2.magnitudeDirection(position, aim).scale(speed);
+        direction = Vector2.magnitudeDirection(position, aim);
 
-        image = ImageIdentifier.emptyImage();
-
-        // If the bullet is not going to move, there is no point in spawning it in.
-        if (!position.equalTo(aim)) {
-            setCooldown(0.35f);
-        }
+        setRandomToken();
     }
 
     public Projectile(Vector2 position, Vector2 aim, Projectile arrow) {
@@ -75,10 +73,24 @@ public class Projectile {
 
         direction = Vector2.magnitudeDirection(position, aim).scale(speed);
 
-        // If the bullet is not going to move, there is no point in spawning it in.
-        if (!position.equalTo(aim)) {
-            setCooldown(0.35f);
+        setRandomToken();
+    }
+
+    private void setRandomToken() {
+        while (tokenNotUnique() || randomToken == 0) {
+            randomToken = (int) DeltaMath.range(0, 10000);
         }
+    }
+
+    private boolean tokenNotUnique() {
+        ArrayList<Projectile> projectiles = world.projectiles;
+        for (int i = 0; i < projectiles.size(); i++) {
+            Projectile p = projectiles.get(i);
+            if (p.randomToken == randomToken)
+                return true;
+        }
+
+        return false;
     }
 
     protected Object clone() {
@@ -98,9 +110,9 @@ public class Projectile {
         return owner instanceof Player;
     }
 
-    public void setCooldown(float timer) {
+    public void setCooldown(long timer) {
         if (friendly())
-            player().shootTimer = timer;
+            player().shootTimer = System.currentTimeMillis() + timer;
     }
 
     public void setAim(Vector2 aim) {
@@ -109,7 +121,7 @@ public class Projectile {
     }
 
     public void setImage(String root) {
-        image = ImageIdentifier.singleImage("/images/Projectiles/" + root);
+        image = ImageIdentifier.singleImage("Projectiles/" + root);
 
         if (scale == null) {
             scale = Vector2.identity(8);
@@ -125,6 +137,9 @@ public class Projectile {
 
             image.setRotation(radians);
         }
+
+        Client.projectileSpawn(world, position, this.image.getToken(), direction, speed, friendly(), randomToken);
+        world.projectiles.add(this);
     }
 
     public void setScale(int scale) {
@@ -132,20 +147,22 @@ public class Projectile {
         this.position.subtractClone(scale / 2, scale / 2);
     }
 
-    public void projectileUpdate() {
-        position.add(direction.scaleClone(speed));
+    public void updateProjectile() {
+        Vector2 movement = direction.scaleClone(speed * (float) Server.dTime());
 
-        if (endTime > System.currentTimeMillis())
+        position.add(movement);
+
+        if (System.currentTimeMillis() > endTime)
             destroy();
 
         if (friendly()) {
             for (int i = 0; i < world.enemies.size(); i++) {
                 Enemy e = world.enemies.get(i);
-                if (!e.enabled)
+                if (!e.isEnabled())
                     continue;
 
-                if (Vector2.distance(e.getPosition(), position) < scale.x) {
-                    e.damage(damage);
+                if (Vector2.distance(e.getPosition(), position) < scale.x / 2 + e.image.getScale().x / 2) {
+                    e.damage(player(), damage);
                     onHit(e, damage);
                     destroy();
                 }
@@ -154,7 +171,7 @@ public class Projectile {
             for (int i = 0; i < world.players.size(); i++) {
                 Player e = world.players.get(i);
 
-                if (Vector2.distance(e.getPosition(), position) < scale.x) {
+                if (Vector2.distance(e.getPosition(), position) < scale.x + 48) {
                     e.damage(damage);
                     destroy();
                 }
@@ -174,6 +191,8 @@ public class Projectile {
                 player().addExperience(Skills.MELEE, (int) (damage * Settings.meleeXPMultiplier));
                 break;
         }
+
+        player().addExperience(Skills.LIFEPOINTS, (int) damage);
     }
 
     public void render() {
@@ -183,6 +202,7 @@ public class Projectile {
     }
 
     protected void destroy() {
+        Client.projectileDestroy(world, randomToken);
         world.projectiles.remove(this);
     }
 

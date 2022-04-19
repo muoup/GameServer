@@ -2,6 +2,7 @@ package com.Game.Objects;
 
 import com.Game.ConnectionHandling.Client;
 import com.Game.Entity.Player.Player;
+import com.Game.Inventory.ItemList;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Util.Math.Vector2;
 import com.Game.WorldManagement.World;
@@ -30,7 +31,7 @@ public class GameObject {
 
     }
 
-    public void loseFocus() {
+    public void loseFocus(Player player) {
 
     }
 
@@ -55,6 +56,9 @@ public class GameObject {
 
     public void setScale(int x, int y) {
         this.scale = new Vector2(x, y);
+        this.image.setScale(x, y);
+
+        Client.sendObjectUpdate(this);
     }
 
     public void setImage(String root) {

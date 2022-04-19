@@ -1,33 +1,32 @@
 package com.Game.Entity.Enemy;
 
 import com.Game.ConnectionHandling.Init.Server;
+import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Projectile.RockPellet;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Vector2;
-import com.Game.WorldManagement.GroundItem;
 import com.Game.WorldManagement.World;
 
 import java.util.ArrayList;
 
 public class RockEnemy extends Enemy {
 
-    private float speed = 1.5f;
     private float maxDistance = 128f;
     private float piecePercent = 5f;
     private float timer = 0f;
 
     public RockEnemy(World world, int x, int y) {
         super(world, x, y);
-        this.maxHealth = 250f;
         this.id = 1;
-        this.respawnTimer = 7.5f;
-        this.maxTarget = 10f;
+        this.respawnTime = 7500;
+        this.speed = 150f;
+        this.targetLostTime = 10000;
         this.name = "Bigger Rock";
 
-        setImage("rock.png");
         setMaxHealth(250);
+        setImage("rock.png", 96, 96);
     }
 
     public void AI() {

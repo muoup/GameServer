@@ -29,7 +29,6 @@ public class Tree extends GameObject {
 
     public void update() {
         if (woodAmount == 0) {
-
             if (System.currentTimeMillis() - delta > resetTime) {
                 setImage(preset.imageName);
                 woodAmount = preset.getWoodAmount();
@@ -42,8 +41,6 @@ public class Tree extends GameObject {
                 woodAmount--;
                 player.addItem(preset.wood, 1);
                 player.addExperience(Skills.WOODCUTTING, preset.getXp());
-
-                initInteraction(player);
 
                 // If the 'Bird Watching' Quest is underway, there is a chance that the player collects
                 // a bird that is needed in order to finish the quest.
@@ -64,30 +61,34 @@ public class Tree extends GameObject {
                     resetTime = (preset.getTimer(player) * 2) * 1000;
                     setImage("toppled_" + preset.imageName);
 
-                    for (Player p : interacters) {
+                    for (int i1 = 0; i1 < interacters.size(); i1++) {
+                        Player p = interacters.get(i1);
                         p.loseFocus();
                     }
 
                     interacters.clear();
                 }
+
+                onInteract(player);
             }
         }
     }
 
     public boolean onInteract(Player player) {
+        player.loseFocus();
+        player.resetAnimation();
+
         if (woodAmount == 0) {
-            //player.changeSprite(Player.idleAnimation);
+            player.changeSprite("idle");
             return false;
         }
 
         if (player.getLevel(Skills.WOODCUTTING) < preset.lvlReq) {
-            //player.changeSprite(Player.idleAnimation);
             player.sendMessage("You do not have the required woodcutting level of " + preset.lvlReq);
             return false;
         }
 
         if (player.inventory.isFull()) {
-            //player.changeSprite(Player.idleAnimation);
             player.sendMessage("You do not have any inventory space!");
             return false;
         }
@@ -98,7 +99,7 @@ public class Tree extends GameObject {
             interacters.add(player);
         }
 
-        //player.changeSprite(Player.chopAnimation);
+        player.changeSprite("chop");
 
         return true;
     }
@@ -107,6 +108,7 @@ public class Tree extends GameObject {
         return preset.getTimer(player);
     }
 
-    public void loseFocus() {
+    public void loseFocus(Player player) {
+        interacters.remove(player);
     }
 }

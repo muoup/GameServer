@@ -8,7 +8,7 @@ public class ActionRequirement {
     private ArrayList<Req> requirements;
 
     private ActionRequirement() {
-        requirements = new ArrayList();
+        requirements = new ArrayList<>();
     }
 
     public static ActionRequirement create() {
@@ -18,6 +18,12 @@ public class ActionRequirement {
     public static ActionRequirement skill(int skill, int level) {
         ActionRequirement req = new ActionRequirement();
         req.addLevelReqs(skill, level);
+        return req;
+    }
+
+    public static ActionRequirement quest(int... quests) {
+        ActionRequirement req = new ActionRequirement();
+        req.addQuestReqs(quests);
         return req;
     }
 
@@ -37,10 +43,8 @@ public class ActionRequirement {
         }
     }
 
-    public void addQuestReq(int... data) {
-        for (int quest : data) {
-            // TODO: Quest requirement functionality
-        }
+    public void addQuestReqs(int... data) {
+        requirements.add(new QuestReq(data));
     }
 
     public boolean meetsRequirement(Player player) {
@@ -66,5 +70,14 @@ public class ActionRequirement {
         }
 
         return -1;
+    }
+
+    public void sendNonComplete(Player player) {
+        player.sendMessage("Sorry! You do not meet the requirements to complete this action: ");
+
+        for (Req req : requirements) {
+            if (!req.isValid(player, false))
+                player.sendMessage(req.getReqMessage());
+        }
     }
 }

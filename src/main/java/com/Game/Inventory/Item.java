@@ -1,11 +1,13 @@
 package com.Game.Inventory;
 
+import com.Game.Entity.Entity;
 import com.Game.ItemData.Requirement.ActionRequirement;
 import com.Game.Entity.Player.Player;
 import com.Game.Projectile.Projectile;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Vector2;
+import com.Game.WorldManagement.GroundItem;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,8 +16,7 @@ import java.util.Arrays;
  * Contains the functionality of an item, one instance of this is held in an ItemList
  */
 public class Item {
-    protected double armor;
-    protected float damageMulti;
+    protected float armor = 0, damage = 0, speed = 0;
     protected ActionRequirement requirement;
     protected boolean stackable;
 
@@ -34,6 +35,8 @@ public class Item {
         this.examineText = examineText;
         this.image = ImageIdentifier.emptyImage();
         this.stackable = stackable;
+        this.equipStatus = -1;
+        this.requirement = ActionRequirement.none();
     }
 
     // For unspecial items like fish bait that don't need any special functionality as they exist as a middleman.
@@ -71,55 +74,13 @@ public class Item {
         this.image = ImageIdentifier.singleImage("Items/" + image);
     }
 
-    public void ClickIdentities(Player player, int index) {
-        //if (GUI.currentShop.empty()) {
-        if (player.inventory.getStack(index).getEquipStatus() != -1) {
-            equipItem(player, index);
-        } else {
-            player.inventory.useIndex = -1;
-            onClick(player, index);
-        }
-//        } else {
-//            ItemStack selected = InventoryManager.getStack(index);
-//
-//            ChatBox.sendMessage(selected.name + " will sell for " + (int) (selected.item.worth * 0.95f) + " coins each.");
-//
-//            if (selected.getAmount() > 1)
-//                ChatBox.sendMessage("The whole stack is worth: " + (int) (selected.getWorth() * 0.95f) + " coins.");
-//        }
-    }
+    public void OnClick(Player player, int index) {
 
-    public void onClick(Player player, int index) {
-
-    }
-
-    public void onOptionUse(Player player) {
-
-    }
-
-    public void examineItem(Player player, int index) {
-        String text = examineText;
-        text = text.replace("[amt]", Integer.toString(player.inventory.getStack(index).getAmount()));
-        player.sendMessage(text);
-    }
-
-    public void RightClickIdentities(Player player, int index, int option) {
-        if (option == 0) {
-            ClickIdentities(player, index);
-        }
-
-//        if (option == RightClick.options.size() - 1)
-//            examineItem(index);
-//
-//        if (option == RightClick.options.size() - 2)
-//            dropItem(index);
-
-        OnRightClick(player, index, option);
     }
 
     private void dropItem(Player player, int index) {
         ItemStack stack = player.inventory.getStack(index).clone();
-        //TODO: GroundItem.createGroundItem(player.getPosition(), stack);
+        player.getWorld().createGroundItem(player.getPosition(), stack);
 
         player.inventory.setItem(index, ItemStack.empty());
     }
@@ -128,7 +89,7 @@ public class Item {
 
     }
 
-    public void setData(ItemStack stack) {
+    public void dataItemChange(ItemStack stack) {
 
     }
 
@@ -136,7 +97,7 @@ public class Item {
 
     }
 
-    public Projectile createProjectile(Vector2 position, Vector2 direction, float damageMultiplier) {
+    public Projectile createProjectile(Entity entity, Vector2 direction, float damageMultiplier) {
         return null;
     }
 
@@ -145,7 +106,7 @@ public class Item {
         ItemStack slotStack = player.accessory.getSlot(stack.getEquipStatus());
 
         if (!stack.requirement.meetsRequirement(player)) {
-            player.sendMessage(stack.requirement.toString());
+            stack.requirement.sendNonComplete(player);
             return;
         }
 
@@ -234,18 +195,6 @@ public class Item {
 
     public ItemList getItemList() {
         return ItemList.values()[id];
-    }
-
-    public ArrayList<String> createOptions(String... optionList) {
-        return (ArrayList<String>) Arrays.asList(optionList);
-    }
-
-    public String getOptionText(int index, ItemStack stack) {
-        if (stack.options.size() == 0) {
-            return "Examine " + stack.getName();
-        }
-
-        return stack.options.get(index);
     }
 
     public int getMaxAmount() {

@@ -1,5 +1,6 @@
 package com.Game.Entity.NPC;
 
+import com.Game.Entity.Player.Player;
 import com.Game.WorldManagement.World;
 
 public class Fisher extends NPC {
@@ -9,8 +10,7 @@ public class Fisher extends NPC {
         setImage("fish_npc.png");
     }
 
-    // TODO: Shops
-    public void onInteract() {
-        //GUI.enableShop(Shop.fishing);
+    public void onInteract(Player player) {
+        player.enableShop(Shop.fishing);
     }
 }

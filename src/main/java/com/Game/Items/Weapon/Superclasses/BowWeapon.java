@@ -9,6 +9,7 @@ import com.Game.Items.Weapon.Weapon;
 import com.Game.Entity.Player.Player;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Skills.Skills;
+import com.Game.Util.Other.RCOption;
 import com.Game.Util.Other.SpriteSheet;
 
 /**
@@ -22,7 +23,7 @@ public class BowWeapon extends Weapon {
     public BowWeapon(int id, int cell, int tier, String name, String examineText, int worth, boolean stackable) {
         super(id, name, examineText, worth, stackable);
         this.itemSet = ItemSets.arrows;
-        this.equipStatus = AccessoriesManager.WEAPON_SLOT;
+        this.equipStatus = -1;
 
         setImage(cell);
         setWeaponTier(tier);
@@ -47,31 +48,26 @@ public class BowWeapon extends Weapon {
         // For now this just 0.3 times the tier (including 1)
         weaponDamage = (float) (Math.floor(tier / 10) + 1) * 0.365f + 1.785f;
         requirement = ActionRequirement.skill(0, tier);
+        shotCooldown = 650 - 50 * tier / 10;
+
         this.tier = tier;
     }
 
-    public float getMultiplier(Player player) {
-        return 1 + 0.0125f * player.getLevel(Skills.RANGED);
+    public void string(Player player, int index) {
+        if (combine(player, index, ItemList.bowString, 1, 1))
+            player.addExperience(Skills.FLETCHING, 30 * (1 + tier / 5));
     }
 
-    public void OnClick(Player player, int index) {
-        if (player.inventory.getData(index) == 0) {
-            if (combine(player, index, ItemList.bowString, 1, 1))
-                player.skills.addExperience(Skills.FLETCHING, 30 * (1 + tier / 5));
-        }
-    }
-
-    public void setData(ItemStack stack) {
+    public void dataItemChange(ItemStack stack) {
         if (stack.getData() == 0) {
-            stack.options.add("Craft Bow");
             stack.setImage(unstrung);
-            stack.setEquipStatus(-1);
-            stack.name = "Unstrung " + name;
-            stack.setOptions("String " + stack.getName().replace("Unstrung ", ""));
+            stack.setOptions(
+                    new RCOption("String " + stack.getName().replace("Unstrung ", ""), this::string));
         } else {
             stack.setImage(strung);
-            stack.setEquipStatus(equipStatus);
-            stack.setName(name);
+            stack.setEquipStatus(AccessoriesManager.WEAPON_SLOT);
+            stack.setName(name.replace("Unstrung ", ""));
+            stack.setOptions();
         }
     }
 }

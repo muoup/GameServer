@@ -10,7 +10,7 @@ public class RockArrow extends Projectile {
         this.attackStyle = 1;
         setScale(16);
         setImage("rock_arrow.png");
-        setCooldown(0.4f);
+        setCooldown(400);
     }
 
     public RockArrow(Entity owner, Vector2 aim, Projectile projectile) {
@@ -19,6 +19,6 @@ public class RockArrow extends Projectile {
         this.attackStyle = 1;
         setScale(16);
         setImage("rock_arrow.png");
-        setCooldown(0.4f);
+        setCooldown(400);
     }
 }

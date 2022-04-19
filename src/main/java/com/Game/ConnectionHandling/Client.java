@@ -1,6 +1,7 @@
 package com.Game.ConnectionHandling;
 
 import com.Game.ConnectionHandling.Init.Server;
+import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Entity.Player.Player;
 import com.Game.Objects.GameObject;
@@ -9,40 +10,29 @@ import com.Game.Util.Math.Vector2;
 import com.Game.WorldManagement.World;
 
 public class Client {
-    public static void changeItem(Player player, int index, ItemStack stack) {
-        StringBuilder options = new StringBuilder();
-
-        for (String s : stack.getOptions()) {
-            options.append(s + ",");
-        }
-
-        options.delete(options.length() - 1, options.length() - 1);
-
-        Server.send(player, "it", index, stack.getImage(), stack.getAmount(), options.toString());
-    }
-
-    public static void sendSkill(Player player, int skill) {
-        Server.send(player,"sk", skill, player.skills.levels, player.skills.xp[skill]);
+    public static void sendSkill(Player player, int skill, boolean popup) {
+        Server.send(player,"sk", skill, player.skills.levels[skill], player.skills.xp[skill], (popup) ? "p" : "np");
     }
 
     public static void sendInventorySlot(Player player, int slot, ItemStack item) {
-        Server.send(player, "in", slot, item.getName(), item.getAmount(), item.getImage().getToken(), item.getExamineText(), item.optionsString());
+        Server.send(player, "in", slot, item.getServerPacket());
     }
 
     public static void sendAccessorySlot(Player player, int slot, ItemStack item) {
-        Server.send(player, "ac", slot, item.getName(), item.getAmount(), item.getImage().getToken(), item.getExamineText());
+        Server.send(player, "ac", slot, item.getServerPacket());
     }
 
-    public static void sendMessage(Player player, String... message) {
-        Server.send(player, "me", message);
+    public static void sendMessage(Player player, String... messages) {
+        for (String message : messages)
+            Server.send(player, "me", formatText(player, message));
     }
 
     public static void playSound(Player player, String sound) {
         Server.send(player, "so" + sound);
     }
 
-    public static void openGUI(Player player, String bankType) {
-        Server.send(player, "ui", bankType);
+    public static void openGUI(Player player, String type) {
+        Server.send(player, "ui", type);
     }
 
     public static void sendObjectUpdate(GameObject object) {
@@ -64,15 +54,83 @@ public class Client {
         player.sendMessage("You are moving to fast! This may be an issue with the server, but your movement speed may be illegitimate!");
     }
 
-    public static void sendChoice(Player player, String text, String... choices) {
-        Server.send(player, "ch", text, choices);
+    public static void sendChoice(Player player, int npcID, String text, String... choices) {
+        Object[] sendObjs = new Object[choices.length + 2];
+        sendObjs[0] = npcID;
+        sendObjs[1] = formatText(player, text);
+
+        for (int i = 0; i < choices.length; i ++) {
+            sendObjs[i + 2] = choices[i];
+        }
+
+        Server.send(player, "ch", sendObjs);
     }
 
     public static void sendText(Player player, String... text) {
-        Server.send(player, "te", text);
+        for (String message : text)
+            Server.send(player, "te", formatText(player, message));
     }
 
     public static void clearTextBox(Player player) {
         Server.send(player, "cleartextbox");
+    }
+
+    public static void sendBankChange(Player player, Object... info) {
+        Server.send(player, "bc", info);
+    }
+
+    public static void enemyUpdate(World world, int randomToken, String variable, Object newValue) {
+        for (Player player : world.players)
+            enemyUpdateToPlayer(player, randomToken, variable, newValue);
+    }
+
+    public static void enemyUpdateToPlayer(Player player, int randomToken, String variable, Object newValue) {
+        if (newValue.toString().contains("null")) {
+            System.err.println("Strange");
+            System.err.printf("%s: %s\n", variable, newValue);
+            return;
+        }
+
+        //System.out.println(player.username + "eu: " + randomToken + ", " + variable + ", " + newValue);
+        Server.send(player, "eu", randomToken, variable, newValue);
+    }
+
+    public static void projectileSpawn(World world, Vector2 position, String imageToken, Vector2 direction, float speed, boolean friendly, int randomToken) {
+        for (Player player : world.players) {
+            Server.send(player, "ps", position, imageToken, direction, speed, friendly, randomToken);
+        }
+    }
+
+    public static void projectileDestroy(World world, int randomToken) {
+        for (Player player : world.players) {
+            Server.send(player, "pd", randomToken);
+        }
+    }
+
+    public static void hprojectileSpawn(World world, Vector2 position, String imageToken, float speed, String playerName, int randomToken) {
+        for (Player player : world.players) {
+            Server.send(player, "hs", position, imageToken, speed, "p_" + playerName, randomToken);
+        }
+    }
+
+    public static void hprojectileSpawn(World world, Vector2 position, String imageToken, float speed, int enemyToken, int randomToken) {
+        for (Player player : world.players) {
+            Server.send(player, "hs", position, imageToken, speed, "e_" + enemyToken, randomToken);
+        }
+    }
+
+    public static void sendHealth(Player player) {
+        Server.send(player, "ph", player.health, player.maxHealth);
+    }
+
+    public static void informPlayerLeft(Player player, String username) {
+        Server.send(player, "pl", username);
+    }
+
+    private static String formatText(Player player, String text) {
+        String newText = text;
+        newText = newText.replace("[name]", player.username);
+        newText = newText.replace("[gold]", Integer.toString(player.inventory.itemCount(ItemList.gold, 0)));
+        return newText;
     }
 }

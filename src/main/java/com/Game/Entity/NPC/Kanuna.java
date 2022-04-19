@@ -11,6 +11,6 @@ public class Kanuna extends NPC {
 
     // TODO: Shops
     public void onInteract(Player player) {
-        //Client.openShop(Shop.kanuna);
+        player.enableShop(Shop.kanuna);
     }
 }

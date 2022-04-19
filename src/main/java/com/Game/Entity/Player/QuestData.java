@@ -40,4 +40,8 @@ public class QuestData {
     public int[] getDataArray() {
         return questData;
     }
+
+    public boolean isComplete(int id) {
+        return QuestList.getIndex(id).isComplete(player);
+    }
 }

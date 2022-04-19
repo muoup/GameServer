@@ -12,7 +12,7 @@ public class LevelReq extends Req {
     }
 
     public boolean isValid(Player player, boolean print) {
-        return player.skills.levels[skill] > level;
+        return player.skills.levels[skill] >= level;
     }
 
     public int getSkill() {

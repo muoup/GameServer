@@ -25,6 +25,7 @@ import com.Game.WorldManagement.WorldHandler;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 //for testing purposes only
@@ -73,8 +74,8 @@ public class ManageSave {
                     data.setPassword(password);
                     break;
                 case "Pos:":
-                    data.setPos(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
                     data.setWorld(WorldHandler.getWorld(Integer.parseInt(parts[3])));
+                    data.setPos(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
                     break;
                 case "Skills:":
                     for (int i = 1; i < parts.length; i++) {
@@ -122,7 +123,7 @@ public class ManageSave {
                     do {
                         bline = scanner.nextLine();
                         String[] cut = bline.split(" ");
-                        data.bankItems.add(new ItemMemory(Integer.parseInt(cut[0]), Integer.parseInt(cut[1]), Integer.parseInt(cut[2])));
+                        data.addBankItem(new ItemStack(Integer.parseInt(cut[0]), Integer.parseInt(cut[1]), Integer.parseInt(cut[2])));
                     } while (bline.trim() != "" && scanner.hasNext());
                     break;
             }
@@ -206,10 +207,11 @@ public class ManageSave {
             writer.println(i + " " + quests[i]);
         }
 
-        if (data.bankItems.size() > 0) {
+        ArrayList<ItemStack> bankItems = data.banking.getItems();
+        if (bankItems.size() > 0) {
             writer.println("\nBank:");
 
-            for (ItemMemory item : data.bankItems) {
+            for (ItemStack item : bankItems) {
                 writer.println(item.id + " " + item.amount + " " + item.data);
             }
         }

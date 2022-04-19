@@ -8,6 +8,7 @@ import com.Game.WorldManagement.WorldHandler;
 public class Tropics extends World {
     public Tropics(int id) {
         super(id);
+
         initImage("tribal_lands.png");
     }
 

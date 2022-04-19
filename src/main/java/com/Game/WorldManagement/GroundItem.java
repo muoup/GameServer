@@ -1,6 +1,9 @@
 package com.Game.WorldManagement;
 
+import com.Game.ConnectionHandling.Client;
+import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Inventory.ItemStack;
+import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Vector2;
 import com.Game.Util.Other.Settings;
 
@@ -11,37 +14,44 @@ public class GroundItem {
     public Vector2 position;
     public World world;
     public ArrayList<ItemStack> stack;
-    private Image topImage;
     private static final float maxDistance = 256f;
     private long time = 0;
+    public int randomToken;
 
-    public GroundItem(World world, int x, int y, ArrayList<ItemStack> items) {
-        this.position = new Vector2(x, y);
-        this.stack = new ArrayList<ItemStack>();
+    public GroundItem(World world, Vector2 position, ArrayList<ItemStack> items) {
+        this.position = position.clone();
+        this.stack = new ArrayList<>();
         this.time = System.currentTimeMillis();
         this.world = world;
 
         handleStack(items);
-
-        world.groundItems.add(this);
+        setRandomToken();
+        world.sendGroundItem(this);
     }
 
-    public GroundItem(Vector2 position, ArrayList<ItemStack> items) {
+    public GroundItem(World world, Vector2 position, ItemStack drop) {
         this.position = position.clone();
-        this.stack = new ArrayList<ItemStack>();
+        this.stack = new ArrayList<>();
         this.time = System.currentTimeMillis();
-        handleStack(items);
+        this.world = world;
 
-        world.groundItems.add(this);
-    }
-
-    public GroundItem(Vector2 position, ItemStack drop) {
-        this.position = position.clone();
-        this.stack = new ArrayList<ItemStack>();
-        this.time = System.currentTimeMillis();
         handleItem(drop);
+        setRandomToken();
+        world.sendGroundItem(this);
+    }
 
-        world.groundItems.add(this);
+    private void setRandomToken() {
+        while (tokenNotUnique() || randomToken == 0) {
+            randomToken = (int) DeltaMath.range(0, 10000);
+        }
+    }
+
+    private boolean tokenNotUnique() {
+        for (GroundItem g : world.groundItems)
+            if (g.randomToken == randomToken)
+                return true;
+
+        return false;
     }
 
     public void handleStack(ArrayList<ItemStack> stack) {
@@ -57,20 +67,39 @@ public class GroundItem {
     }
 
     public void addItem(ItemStack item) {
-        for (ItemStack s : stack) {
+        for (int i = 0; i < stack.size(); i++) {
+            ItemStack s = stack.get(i);
             if (s.getID() == item.getID() && s.getData() == s.getData()) {
-                s.amount += item.getAmount();
+                changeAmount(i, item.getAmount());
                 return;
             }
         }
 
         stack.add(item);
-
         time = System.currentTimeMillis();
     }
 
     public void addItems(ArrayList<ItemStack> stack) {
         stack.forEach(this::addItem);
+    }
+
+    public void changeAmount(int index, int amount) {
+        stack.get(index).amount += amount;
+
+        if (stack.get(index).amount <= 0) {
+            removeItem(index);
+        }
+
+        if (stack.size() == 0) {
+            world.removeGroundItem(this);
+            return;
+        }
+
+        world.sendGroundItemChange(this);
+    }
+
+    private void removeItem(int index) {
+        stack.remove(index);
     }
 
     public void update() {
@@ -83,33 +112,17 @@ public class GroundItem {
             world.groundItems.remove(this);
     }
 
-    public static void createGroundItem(World world, Vector2 position, ArrayList<ItemStack> drops) {
-        for (GroundItem i : world.groundItems) {
-            if (Vector2.distance(i.position, position) < maxDistance) {
-                i.addItems(drops);
-                return;
-            }
-        }
-
-        new GroundItem(position, drops);
-
-    }
-
-    public static void createGroundItem(World world, Vector2 position, ItemStack drop) {
-        for (GroundItem i : world.groundItems) {
-            if (Vector2.distance(i.position, position) < maxDistance) {
-                i.addItem(drop);
-                return;
-            }
-        }
-
-        new GroundItem(position, drop);
-    }
-
     public String toString() {
-        StringBuilder ret = new StringBuilder();
-        stack.forEach(ret::append);
+        return packetInfo();
+    }
 
-        return ret.toString();
+    public String packetInfo() {
+        StringBuilder items = new StringBuilder();
+
+        for (ItemStack stack : stack) {
+            items.append("0;" + stack.getServerPacket() + "=>");
+        }
+
+        return position + ";" + randomToken + "=items>" + items.toString();
     }
 }

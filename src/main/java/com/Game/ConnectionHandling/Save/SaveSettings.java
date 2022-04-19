@@ -18,11 +18,12 @@
 package com.Game.ConnectionHandling.Save;
 
 public class SaveSettings {
-    public static final int skillAmount = 7;
+    public static final int skillAmount = 8;
     public static final int inventoryAmount = 20;
     public static final int accessoryAmount = 23;
     public static final int questAmount = 2;
 
-    public static final int startX = 1500;
-    public static final int startY = 1500;
+    public static final int startX = 1660;
+    public static final int startY = 1477;
+    public static final float npcInteractRange = 64;
 }

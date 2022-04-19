@@ -12,10 +12,10 @@ public class Ore extends Item {
         super(id, name, examineText, worth, false);
         this.imageColumn = imageColumn;
 
-        setImage(ImageIdentifier.subImage("Items/ore_sheet.png", imageColumn, 0, 48, 48));
+        setImage(SpriteSheet.oreSheet.getCell(imageColumn, 0));
     }
 
-    public void setData(ItemStack stack) {
+    public void dataItemChange(ItemStack stack) {
         if (stack.data == 0) {
             stack.image = image;
         } else {

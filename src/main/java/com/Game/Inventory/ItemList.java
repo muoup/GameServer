@@ -8,8 +8,10 @@ import com.Game.Items.Consumables.Food.ClownFishFood;
 import com.Game.Items.Consumables.Food.Seaweed;
 import com.Game.Items.Consumables.Loot.BirdNest;
 import com.Game.Items.Misc.QuestItem;
+import com.Game.Items.Perks.ChickenShield;
 import com.Game.Items.RawResource.*;
 import com.Game.Items.RawResource.Log.*;
+import com.Game.Items.Tool.FishBait;
 import com.Game.Items.Tool.WoodHarp;
 import com.Game.Items.Weapon.Bows.CrystalBow;
 import com.Game.Items.Weapon.Superclasses.*;
@@ -20,14 +22,14 @@ import com.Game.PseudoData.*;
  */
 public enum ItemList {
     empty(new Item(0, "/", "/", 0, false)),
-    bow(new BowWeapon(1, 0, 1, "Bow", "Get ready for the power of my bow!", 170, false)),
+    bow(new BowWeapon(1, 0, 1, "Unstrung Bow", "Get ready for the power of my bow!", 170, false)),
     log(new Log(2, 1, ItemList.bow, "Log", "The remnants of a tree.", 150, false)),
     arrow(new ArrowItem(3, "Arrow", "Some sharp arrows!", 10, true)),
     mapleBow(new BowWeapon(4, 5, 50, "Maple Bow", "This is really gonna hurt.", 100, false)),
     clownfish(new ClownFishFood(5, "Clownfish", "This looks quite tasty.", 100, false)),
     bluefish(new BlueFishFood(6, "Bluefish", "This looks very tasty.", 250, false)),
     mapleLog(new Log(7, 50, ItemList.mapleBow, "Maple Log", "A sticky log, sounds useful to me.", 350, false)),
-    gold(new Coins(8, "Coins", "[amt] shiny coins, good for trading..?", 1, false)),
+    gold(new Coins(8, "Coins", "[amt] shiny coins, good for trading..?", -1, true)),
     woodHarp(new WoodHarp(9, "Wooden Harp", "I can get some coins from this. (35% effective)", -1, false)),
     rockHelmet(new ArmorPiece(10, ArmorType.helmet, 1, "Rock Helmet", "Someone went under a dock.", 1000, false)),
     rockChestplate(new ArmorPiece(11, ArmorType.chestplate, 1, "Rock Chestplate", "And there they saw a rock.", 5000, false)),
@@ -36,12 +38,12 @@ public enum ItemList {
     rockArrow(new RockArrowItem(14,"Rock Arrow", "A stick with a rock on the end. A bit barbaric.", 25, true)),
     feather(new Feather(15,"Feather", "Because steel is heavier than feathers.", 20, true)),
     arrowShaft(new ArrowShaft(16, "Arrow Shaft", "Not quite the orange kind.", 10, true)),
-    stringItem(new StringItem(17, "String", "Where does the string come from?", 5)),
-    bowString(new BowString(18, "Bow String", "I can combine this with a bow stock.", 20, false)),
-    ashBow(new BowWeapon(19, 1, 10, "Ash Bow", "Tier 10", 100, false)),
-    pineBow(new BowWeapon(20, 2, 20, "Pine Bow", "Tier 20", 100, false)),
-    oakBow(new BowWeapon(21, 3, 30, "Oak Bow", "Tier 30", 100, false)),
-    spruceBow(new BowWeapon(22, 4, 40, "Spruce Bow", "Tier 40",100, false)),
+    stringItem(new StringItem(17, "String", "Where does the string come from?", 5, false)),
+    bowString(new BowString(18, "Bow string", "I can combine this with a bow stock.", 20, false)),
+    ashBow(new BowWeapon(19, 1, 10, "Unstrung Ash Bow", "Tier 10", 100, false)),
+    pineBow(new BowWeapon(20, 2, 20, "Unstrung Pine Bow", "Tier 20", 100, false)),
+    oakBow(new BowWeapon(21, 3, 30, "Unstrung Oak Bow", "Tier 30", 100, false)),
+    spruceBow(new BowWeapon(22, 4, 40, "Unstrung Spruce Bow", "Tier 40",100, false)),
     oakLog(new Log(23, 30, ItemList.oakBow, "Oak Wood", "Tier 30", 100, false)),
     pineLog(new Log(24, 20, ItemList.pineBow, "Pine Wood", "Tier 20", 100, false)),
     spruceLog(new Log(25, 40, ItemList.spruceBow, "Spruce Wood", "Tier 40",100, false)),
@@ -54,13 +56,14 @@ public enum ItemList {
     goldOre(new Ore(32, 4, "Gold Ore", "Tier 30", 100, false)),
     crystalBow(new CrystalBow(33, "Crystal Bow", "It's shines when I hold it sometimes.", 100, false)),
     parrotBird(new QuestItem(34, 0, "Bird", "I bet the Bird Watcher would like one of these.", -1, false)),
-    bronzeHelmet(new ArmorPiece(40, ArmorType.helmet, 10, "Bronze Helmet", "Someone went under a hopper.", 1000, false)),
-    bronzeChestplate(new ArmorPiece(41, ArmorType.chestplate, 10, "Bronze Chestplate", "And there they saw a copper.", 5000, false)),
-    bronzeLeggings(new ArmorPiece(42, ArmorType.leggings, 10, "Bronze Leggings", "It wasn't a copper.",4000, false)),
-    bronzeBoots(new ArmorPiece(43, ArmorType.boots, 10, "Bronze Boots", "It was a copper lobster.",2000, false)),
-    birdNest(new BirdNest(44,"Bird Nest", "It appears that the bird left some goodies.",-1, false)),
-    fishBait(new Item(45,"Fish Bait", "This will make me fish faster.", 55, true)),
-    kanunaNecklace(new AmuletOfKanuna(46, "Necklace of Kanuna", "Makes me a little bit stronger.",7500, false));
+    bronzeHelmet(new ArmorPiece(35, ArmorType.helmet, 10, "Bronze Helmet", "Someone went under a hopper.", 1000, false)),
+    bronzeChestplate(new ArmorPiece(36, ArmorType.chestplate, 10, "Bronze Chestplate", "And there they saw a copper.", 5000, false)),
+    bronzeLeggings(new ArmorPiece(37, ArmorType.leggings, 10, "Bronze Leggings", "It wasn't a copper.",4000, false)),
+    bronzeBoots(new ArmorPiece(38, ArmorType.boots, 10, "Bronze Boots", "It was a copper lobster.",2000, false)),
+    birdNest(new BirdNest(39,"Bird Nest", "It appears that the bird left some goodies.",-1, false)),
+    fishBait(new FishBait(40,"Fish Bait", "This will make me fish faster.", 55, true)),
+    kanunaNecklace(new AmuletOfKanuna(41, "Necklace of Kanuna", "Makes me a little bit stronger.",7500, false)),
+    chickenShield(new ChickenShield(42, "Chicken Shield", "I can use this to protect myself.", 1000, false));
 
     private Item item;
 
@@ -85,7 +88,7 @@ public enum ItemList {
     }
 
     public int maxStack() {
-        return (item.stackable) ? 2147483647 : 1;
+        return (item.stackable) ? Integer.MAX_VALUE : 1;
     }
 
     public ItemStack singleStack() {

@@ -1,8 +1,13 @@
 package com.Game.Items.Ammo;
 
+import com.Game.Entity.Entity;
 import com.Game.Inventory.AccessoriesManager;
 import com.Game.Inventory.Item;
+import com.Game.Projectile.Projectile;
+import com.Game.Projectile.RockArrow;
 import com.Game.PseudoData.ImageIdentifier;
+import com.Game.Util.Math.Vector2;
+import com.Game.WorldManagement.World;
 
 public class RockArrowItem extends Item {
 
@@ -14,7 +19,7 @@ public class RockArrowItem extends Item {
     }
 
     // TODO: Fix
-//    public Projectile createProjectile(Vector2 position, Vector2 direction, float damageMultiplier, float expMultiplier) {
-//        return new RockArrow(position, direction, 2.5f * damageMultiplier, 2f, expMultiplier, true);
-//    }
+    public Projectile createProjectile(Entity owner, Vector2 position, Vector2 direction, float damageMultiplier, float expMultiplier) {
+        return new RockArrow(owner, direction, 2.5f * damageMultiplier, 2f);
+    }
 }

@@ -3,13 +3,18 @@ package com.Game.ItemData.Requirement;
 import com.Game.Entity.Player.Player;
 
 public class QuestReq extends Req {
-    private int quest;
+    private int[] quest;
 
-    public QuestReq(int quest) {
+    public QuestReq(int[] quest) {
         this.quest = quest;
     }
 
     public boolean isValid(Player player, boolean print) {
-        return true; // TODO: change when quests are implemented server-side
+        for (int id : quest) {
+            if (!player.questData.isComplete(id))
+                return false;
+        }
+
+        return true;
     }
 }

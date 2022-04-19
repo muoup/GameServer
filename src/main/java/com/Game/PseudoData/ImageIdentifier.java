@@ -22,6 +22,7 @@ public class ImageIdentifier {
 
     private ImageIdentifier(String token) {
         this.token = token;
+        this.scale = Vector2.zero();
     }
 
     public static ImageIdentifier emptyImage() {
@@ -53,8 +54,12 @@ public class ImageIdentifier {
     }
 
     public String getToken() {
-        return token;
+        return token + String.format("<-->%s,%s", (scale.equalTo(Vector2.zero())) ? null : scale, rotation);
     }
 
-    public String toString() { return token; }
+    public String toString() { return getToken(); }
+
+    public Vector2 getScale() {
+        return scale;
+    }
 }

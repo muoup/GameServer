@@ -4,7 +4,7 @@ import com.Game.Entity.Player.Player;
 import com.Game.WorldManagement.World;
 
 public class TribalTeleport extends InvisibleTeleporter {
-    public TribalTeleport(World world, int x, int y, World destination, int tx, int ty) {
+    public TribalTeleport(World world, int x, int y, int destination, int tx, int ty) {
         super(world, x, y, destination, tx, ty);
     }
 
@@ -16,6 +16,6 @@ public class TribalTeleport extends InvisibleTeleporter {
     }
 
     public void unSuccessful(Player player) {
-        player.sendMessage("Maybe you should ask the captain before you just ride his ship.");
+        player.sendMessage("Maybe you should ask the captain before you ride his ship.");
     }
 }

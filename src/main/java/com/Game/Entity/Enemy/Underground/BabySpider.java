@@ -1,69 +1,39 @@
 package com.Game.Entity.Enemy.Underground;
 
-import com.Game.ConnectionHandling.Init.Server;
-import com.Game.Entity.Enemy.Enemy;
+
+import com.Game.Entity.Enemy.Generic.AIType;
+import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Projectile.WebProjectile;
-import com.Game.Util.Math.DeltaMath;
-import com.Game.Util.Math.Vector2;
-import com.Game.WorldManagement.GroundItem;
 import com.Game.WorldManagement.World;
 
 import java.util.ArrayList;
 
 public class BabySpider extends Enemy {
-    private float passiveTimer, shotTimer, speed, maxDistance;
-    private Vector2 walkTo = Vector2.zero();
-    private boolean walking;
 
     public BabySpider(World world, int x, int y) {
         super(world, x, y);
-        this.speed = 2.5f;
-        this.maxDistance = 125f;
-        this.shotTimer = DeltaMath.range(0, 0.0525f);
-        this.respawnTimer = 7.5f;
-        this.maxTarget = 7.5f;
+        this.speed = 75f;
+        this.respawnTime = 7500;
+        this.moveRadius = 100f;
         this.name = "Spider";
-        this.passiveTimer = DeltaMath.range(0.25f, 0.75f);
+        this.targetLostTime = 7500;
+        this.idleAI = AIType::passiveRadiusWalk;
+        this.targetAI = AIType::basicChase;
 
-        setImage("babySpider.png");
+        setImage("babySpider.png", 48, 48);
         setMaxHealth(12.5f);
+
+        addProjTimer(3000, this::shootHoming);
     }
 
-    public void AI() {
-        if (maxDistance < Vector2.distance(position, playerTarget.getPosition())) {
-            position.add(Vector2.magnitudeDirection(position, playerTarget.getPosition()).scale(speed));
-        }
-
-        shotTimer -= Server.dTime();
-
-        if (shotTimer < 0) {
-            shotTimer = DeltaMath.range(0.75f, 1.75f);
-            new WebProjectile(this, playerTarget, 12.5f, (speed / shotTimer) * 2.25f, shotTimer * 2.5f);
-        }
-    }
-
-    public void passiveAI() {
-        if (!walking)
-            passiveTimer -= Server.dTime();
-        else {
-            position.add(Vector2.magnitudeDirection(position, walkTo).scale(speed));
-        }
-
-        if (passiveTimer < 0) {
-            walking = true;
-            passiveTimer = DeltaMath.range(0.25f, 0.75f);
-            walkTo = spawnPosition.addClone(DeltaMath.range(0, 60), DeltaMath.range(0, 60));
-        }
-
-        if (Vector2.distance(position, walkTo) < 12.5f) {
-            walking = false;
-        }
+    public void shootHoming() {
+        new WebProjectile(this, playerTarget, 10f, 60f);
     }
 
     public void handleDrops() {
-        ArrayList<ItemStack> drops = new ArrayList<ItemStack>();
+        ArrayList<ItemStack> drops = new ArrayList<>();
         drops.add(new ItemStack(ItemList.stringItem, 1));
         world.createGroundItem(position, drops);
     }

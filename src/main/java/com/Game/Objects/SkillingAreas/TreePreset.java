@@ -7,25 +7,26 @@ import com.Game.Util.Math.DeltaMath;
 
 public enum TreePreset {
 
-    tree("tree.png", 40, 2.5f, 6f,
+    tree("tree.png", 10, 2500, 6000, 1000, 3000,
             2, 9, 1, ItemList.log),
-    ash("ash_tree.png", 60, 2.5f, 6.25f,
+    ash("ash_tree.png", 20, 2500, 6250, 1500, 3500,
             2, 9, 10, ItemList.ashLog),
-    pine("pine_tree.png", 80, 2.75f, 6.5f,
+    pine("pine_tree.png", 30, 2750, 6500, 2000, 4000,
             1, 12, 20, ItemList.pineLog),
-    oakTree("oak_tree.png", 120, 2.75f, 6.5f,
+    oak("oak_tree.png", 40, 2750, 6500, 2500, 4500,
             1, 12, 30, ItemList.oakLog),
-    spruce("spruce_tree.png", 160, 3.25f, 7f,
+    spruce("spruce_tree.png", 50, 3250, 7000, 3000, 5000,
             1, 7, 40, ItemList.spruceLog),
-    mapleTree("maple_tree.png", 200, 3.25f, 7f,
+    maple("maple_tree.png", 60, 3250, 7000, 3500, 5500,
             1, 7, 50, ItemList.mapleLog);
 
-    float xp, minTimer, maxTimer;
+    float xp;
     int minWood, maxWood, lvlReq;
+    long minTimer, maxTimer, minRespawn, maxRespawn;
     ItemList wood;
     String imageName;
 
-    TreePreset(String imageName, float xp, float minTimer, float maxTimer, int minWood, int maxWood, int lvlReq, ItemList wood) {
+    TreePreset(String imageName, float xp, long minTimer, long maxTimer, long minRespawn, long maxRespawn, int minWood, int maxWood, int lvlReq, ItemList wood) {
         this.imageName = imageName;
         this.xp = xp;
         this.minTimer = minTimer;
@@ -37,7 +38,7 @@ public enum TreePreset {
     }
 
     public int getTimer(Player player) {
-        return (int) (DeltaMath.range(minTimer, maxTimer) * (1.0f - 0.005f * (player.getLevel(Skills.FISHING) - lvlReq)) * 1000);
+        return (int) (DeltaMath.range(minTimer, maxTimer) * (1.0f - 0.005f * (player.getLevel(Skills.FISHING) - lvlReq)));
     }
 
     public float getXp() {

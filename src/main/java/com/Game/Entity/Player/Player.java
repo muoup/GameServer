@@ -19,28 +19,37 @@ package com.Game.Entity.Player;
 
 import com.Game.ConnectionHandling.Client;
 import com.Game.ConnectionHandling.Init.Server;
-import com.Game.ConnectionHandling.Save.ItemMemory;
+import com.Game.ConnectionHandling.Save.SaveSettings;
 import com.Game.ConnectionHandling.security.Obfuscator;
 import com.Game.ConnectionHandling.security.Password;
+import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Entity.Entity;
-import com.Game.Inventory.AccessoriesManager;
-import com.Game.Inventory.InventoryManager;
-import com.Game.Inventory.ItemList;
-import com.Game.Inventory.ItemStack;
+import com.Game.Entity.NPC.NPC;
+import com.Game.Entity.NPC.Shop;
+import com.Game.Inventory.*;
+import com.Game.Items.Weapon.Weapon;
 import com.Game.Objects.GameObject;
+import com.Game.Projectile.Fist;
 import com.Game.Questing.QuestList;
 import com.Game.Skills.Skills;
 import com.Game.Util.Math.Vector2;
+import com.Game.Util.Other.ItemAction;
+import com.Game.Util.Other.Perk;
+import com.Game.Util.Other.Settings;
+import com.Game.WorldManagement.GroundItem;
 import com.Game.WorldManagement.World;
 import com.Game.WorldManagement.WorldHandler;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
+import java.util.Dictionary;
+import java.util.Hashtable;
+import java.util.Optional;
 
 public class Player extends Entity {
 
     // Player Constants
-    public final float playerMoveSpeed = 3;
+    public final float playerMoveSpeed = 225f;
     public final float playerInitialHealth = 100;
 
     // Connection Settings
@@ -51,30 +60,40 @@ public class Player extends Entity {
     // Item Inventories Section
     public InventoryManager inventory;
     public AccessoriesManager accessory;
-    public ArrayList<ItemMemory> bankItems;
+    public BankingHandler banking;
+    public ShopHandler shop;
 
     // Stats
     public QuestData questData;
     public Skills skills;
-    public int maxHealth = 100;
+    public float maxHealth = 100;
     public float msMulti = 1;
 
     // Real-Time Data
-    public int health = 100;
+    public float health = 100;
     public float timer = 1.0f;
-    public float shootTimer = 0;
+    public long shootTimer = 0;
+    public float armor, damageMult, defense, speedMult;
+    public boolean joiner = false;
+    public Vector2 lastKnownPosition;
+    public Vector2 estimatedVelocity;
 
     // Player Properties
     public String username;
 
-    // Skill Gather Timers
+    // Timers
     public long completionTime = 0;
+    public long velocityCheckTime = 0;
     public GameObject objectInteration = null;
+    private Hashtable<String, Long> timers;
 
     // Movement Verification
     public long lastMoveTime = 0;
 
     public Runnable[] options = new Runnable[0];
+
+    // On Action Lambdas
+    public Perk onHit = null;
 
     /**
      * The Password, when set using {@link #setPassword(Password)}.
@@ -86,9 +105,24 @@ public class Player extends Entity {
         super(null, Vector2.zero());
         this.ipAddress = ipAddress;
         this.port = port;
-        bankItems = new ArrayList();
+        this.timers = new Hashtable<>();
+        banking = new BankingHandler(this);
 
         initSkills();
+    }
+
+    public void update() {
+        if (System.currentTimeMillis() > velocityCheckTime) {
+            velocityCheckTime = System.currentTimeMillis() + Settings.velocityCheckTime;
+            Vector2 currentPosition = position.clone();
+
+            if (lastKnownPosition != null)
+                estimatedVelocity = Vector2.magnitudeDirection(lastKnownPosition, currentPosition).scale(playerMoveSpeed * (1 + speedMult));
+
+            lastKnownPosition = currentPosition.clone();
+        }
+
+        //Server.send(this, "uu", position);
     }
 
     public void initSkills() {
@@ -98,6 +132,7 @@ public class Player extends Entity {
         this.inventory = new InventoryManager(this);
         this.accessory = new AccessoriesManager(this);
         this.questData = new QuestData(this);
+        this.shop = new ShopHandler(this);
     }
 
     public InetAddress getIpAddress() {
@@ -146,16 +181,39 @@ public class Player extends Entity {
     }
 
     public void setWorld(World world) {
-        world.players.remove(this);
+        velocityCheckTime = 0;
+        estimatedVelocity = null;
+        lastKnownPosition = null;
+
+        if (world == null) {
+            System.err.println("world is null!");
+            return;
+        }
+
+        if (this.world != null) {
+            this.world.removePlayer(this);
+
+            for (Player player : this.world.players) {
+                Client.informPlayerLeft(player, username);
+            }
+        }
 
         this.world = world;
 
-        world.players.add(this);
         world.informPlayer(this);
+        world.addPlayer(this);
     }
 
     public void sendMessage(String message) {
         Client.sendMessage(this, message);
+    }
+
+    public float getExperience(int skill) {
+        return skills.xp[skill];
+    }
+
+    public void setExperience(int skill, float exp) {
+        skills.setExperience(skill, exp);
     }
 
     public void addExperience(int skill, float amount) {
@@ -167,8 +225,8 @@ public class Player extends Entity {
     }
 
     public void teleport(int tx, int ty, World world) {
-        this.position = new Vector2(tx, ty);
-        this.world = world;
+        setPos(tx, ty);
+        setWorld(world);
     }
 
     public void teleport(int tx, int ty, int worldID) {
@@ -176,7 +234,7 @@ public class Player extends Entity {
     }
 
     public void teleport(int tx, int ty) {
-        this.position = new Vector2(tx, ty);
+        setPos(tx, ty);
     }
 
     public int getQuestData(int quest) {
@@ -209,32 +267,64 @@ public class Player extends Entity {
     }
 
     public void showBank() {
-        Client.openGUI(this, "bank");
+        banking.setOpen(true);
+        Client.openGUI(this, "bankon");
     }
 
-    public void addItem(ItemList item, int amount) {
-        inventory.addItem(item, amount);
+    public void hideBank() {
+        banking.setOpen(false);
+        Client.openGUI(this, "bankoff");
     }
 
-    public void addItem(ItemStack stack) {
-        inventory.addItem(stack);
+    private void hideShop() {
+        shop.selectedShop = Shop.empty;
+        Client.openGUI(this, "shopoff");
     }
 
-    public float getExperience(int skill) {
-        return skills.xp[skill];
+    public int addItem(ItemList item, int amount) {
+        return inventory.addItem(item, amount);
     }
 
-    public void setExperience(int skill, float exp) {
-        skills.xp[skill] = exp;
-        skills.deltaLevel(skill, exp, false);
+    public int addItem(ItemStack stack) {
+        return inventory.addItem(stack);
     }
 
-    public World getRoom() {
-        return null;
+    public void setItem(int slot, int amount) {
+        inventory.setItemAmount(slot, amount);
+    }
+
+    public void removeItem(int slot, int amount) {
+        ItemStack type = inventory.getStack(slot).clone();
+        removeItem(type.getItemList(), type.getData(), amount);
+    }
+
+    public void removeItem(ItemList type, int data, int amount) {
+        ItemStack[] itemStacks = inventory.inventory;
+
+        for (int i = 0; i < itemStacks.length; i++) {
+            ItemStack item = itemStacks[i];
+            if (item.getItemList() == type && item.getData() == data) {
+                int subAmount = Math.min(amount, item.getAmount());
+                amount -= subAmount;
+
+                inventory.changeItemAmount(i, -subAmount);
+            }
+
+            if (amount <= 0)
+                break;
+        }
     }
 
     public void damage(float damage) {
-        this.health -= damage;
+        // set damage to what is returned from the onhit lamda
+        if (onHit != null)
+            damage -= onHit.action(damage);
+
+        changeHealth(-damage * getDamageReduction());
+    }
+
+    public float getDamageReduction() {
+        return 1 / (armor / 250f + 1);
     }
 
     public void playSound(String sound) {
@@ -246,11 +336,19 @@ public class Player extends Entity {
                 op1,
                 op2
         };
-
-        // TODO: Re-implement choice box.
     }
 
-    public void interactWithObject() {
+    public void interact() {
+        if (world == null)
+            return;
+
+        for (NPC npc : world.npcs) {
+            if (Vector2.distance(npc.position, position) < SaveSettings.npcInteractRange) {
+                npc.onInteract(this);
+                return;
+            }
+        }
+
         for (GameObject object : world.objects) {
             if (Vector2.distance(object.position, position) < object.maxDistance) {
                 object.onInteract(this);
@@ -260,11 +358,201 @@ public class Player extends Entity {
     }
 
     public void loseFocus() {
+        if (banking.isOpen())
+            hideBank();
+
+        if (shop.selectedShop != Shop.empty)
+            hideShop();
+
         if (objectInteration == null)
             return;
 
-        objectInteration.loseFocus();
+        objectInteration.loseFocus(this);
 
         Client.loseFocus(this);
     }
+
+    public void deposit(int inventoryIndex, int amount) {
+        if (!banking.isOpen()) {
+            sendMessage("Uh oh! Error alert. Please reopen the bank.");
+        }
+
+        banking.depositFromInventory(inventoryIndex, amount);
+    }
+
+    public void withdraw(int bankIndex, int amount) {
+        if (!banking.isOpen()) {
+            sendMessage("Uh oh! Error alert. Please reopen the bank.");
+        }
+
+        banking.withdrawItem(bankIndex, amount);
+    }
+
+    public void handleBankRequest(String[] index) {
+        String request = index[1];
+        int hover = Integer.parseInt(index[2]);
+        int amount = Integer.parseInt(index[3]);
+
+        switch (request.trim()) {
+            case "deposit":
+                deposit(hover, amount);
+                break;
+            case "withdraw":
+                withdraw(hover, amount);
+                break;
+            default:
+                System.err.println("Unknown banking request " + request);
+        }
+    }
+
+    public void addBankItem(ItemStack itemStack) {
+        banking.addBankItem(itemStack);
+    }
+
+    public void swapSlots(int index1, int index2) {
+        ItemStack holder = inventory.inventory[index1].clone();
+        inventory.setItem(index1, inventory.getStack(index2));
+        inventory.setItem(index2, holder);
+    }
+
+    public void swapBankSlots(int index1, int index2) {
+        ItemStack holder = banking.items.get(index1).clone();
+        banking.setBankItem(index1, banking.getStack(index2));
+        banking.setBankItem(index2, holder);
+    }
+
+    public void rightClick(int index, String name) {
+        inventory.getStack(index).rightClick(this, index, name);
+    }
+
+    public void click(int index) {
+        inventory.getStack(index).click(this, index);
+    }
+
+    public void unequip(int index) {
+        accessory.unequip(this, index);
+    }
+
+    public void enableShop(Shop shop) {
+        this.shop.selectedShop = shop;
+
+        StringBuilder builder = new StringBuilder();
+
+        for (ItemStack stack : shop.offeredItems) {
+            builder.append(stack.name).append(";").append(stack.getImage()).append(";").append(stack.getWorth()).append(";").append(stack.getExamineTextAbstract()).append("::");
+        }
+
+        Server.send(this, "ui", "shop", builder.toString());
+    }
+
+    public void shoot(Vector2 shootPos) {
+        if (System.currentTimeMillis() < shootTimer)
+            return;
+
+        ItemStack item = accessory.getSlot(AccessoriesManager.WEAPON_SLOT);
+
+        if (item.getID() == 0) {
+            new Fist(this, shootPos);
+            return;
+        }
+
+        if (!(item.item instanceof Weapon))
+            return;
+
+        Weapon weapon = (Weapon) item.item;
+
+        weapon.useWeapon(this, shootPos);
+    }
+
+    public void setMaxHealth(float maxHealth) {
+        this.maxHealth = maxHealth;
+
+        Client.sendHealth(this);
+    }
+
+    public void changeHealth(float healAmount) {
+        health += healAmount;
+
+        if (health > maxHealth) {
+            health = maxHealth;
+        }
+
+        if (health < 0) {
+            health = maxHealth;
+
+            cleanUpAfterDeath();
+
+            setPos(SaveSettings.startX, SaveSettings.startY);
+            setWorld(WorldHandler.getWorld(WorldHandler.main));
+            sendMessage("Oh no! You have died.");
+        }
+
+        Client.sendHealth(this);
+    }
+
+    private void cleanUpAfterDeath() {
+        ArrayList<Enemy> enemies = world.enemies;
+        for (int i = 0; i < enemies.size(); i++) {
+            Enemy enemy = enemies.get(i);
+            if (enemy.playerTarget.username.equalsIgnoreCase(username)) {
+                enemy.loseTarget();
+            }
+        }
+    }
+
+    public void pickUp(String message) {
+        String[] parts = message.split(";");
+
+        int token = Integer.parseInt(parts[1]);
+        int index = Integer.parseInt(parts[2]);
+
+        for (GroundItem groundItem : world.groundItems) {
+            if (groundItem.randomToken == token) {
+                if (groundItem.stack.size() < index - 1)
+                    continue;
+
+                int removed = addItem(groundItem.stack.get(index));
+
+                groundItem.changeAmount(index, -removed);
+                return;
+            }
+        }
+    }
+
+    public boolean hasItem(ItemList item, int data) {
+        return inventory.itemCount(item, data) > 0;
+    }
+
+    public void changeSprite(String code) {
+        Server.send(this, "sc" + code);
+    }
+
+    public void resetAnimation() {
+        changeSprite("idle");
+    }
+
+    public Long getTimer(String key) {
+        if (timers.containsKey(key))
+            return timers.get(key);
+
+        return 0L;
+    }
+
+    public void setTimer(String key, long timeFromNow) {
+        timers.put(key, System.currentTimeMillis() + timeFromNow);
+    }
+
+    public void setOnHit(Perk onHit) {
+        this.onHit = onHit;
+    }
+
+//    public float getDamageMultiplier() {
+//        float mult = 1;
+//
+//        for (ItemStack item : accessory.accessories) {
+//            mult += item.getDamage();
+//        }
+//
+//        return mult;
+//    }
 }

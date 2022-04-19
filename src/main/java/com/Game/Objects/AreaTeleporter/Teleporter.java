@@ -6,9 +6,9 @@ import com.Game.WorldManagement.World;
 
 public class Teleporter extends GameObject {
     private int tx, ty;
-    private World destination;
+    private int destination;
 
-    public Teleporter (World objectWorld, int x, int y, World destination, int tx, int ty) {
+    public Teleporter (World objectWorld, int x, int y, int destination, int tx, int ty) {
         super(objectWorld, x, y);
         this.tx = tx;
         this.ty = ty;
@@ -23,10 +23,13 @@ public class Teleporter extends GameObject {
 
     }
 
-    public void onInteraction(Player player) {
-        if (isSuccessful(player))
+    public boolean onInteract(Player player) {
+        if (isSuccessful(player)) {
             player.teleport(tx, ty, destination);
-        else
+            return true;
+        } else {
             unSuccessful(player);
+            return false;
+        }
     }
 }

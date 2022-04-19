@@ -26,8 +26,8 @@ public enum FishingPreset {
         this.lvlReq = lvlReq;
     }
 
-    public float getTimer(Player player) {
-        return DeltaMath.range(minTimer, maxTimer) * (1.0f - 0.005f * (player.getLevel(Skills.FISHING) - lvlReq));
+    public int getTimer(Player player) {
+        return (int) (DeltaMath.range(minTimer, maxTimer) * (1.0f - 0.005f * (player.getLevel(Skills.FISHING) - lvlReq)) * 1000);
     }
 
     public float getXp() {

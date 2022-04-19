@@ -18,9 +18,7 @@ public class BirdWatcher extends NPC {
     public void onInteract(Player player) {
         switch (player.getQuestData(0)) {
             case 0:
-                player.setChoice(() -> questStart(player), () -> Client.clearTextBox(player),
-                        "I would like to help.", "Maybe later.",
-                        "I need your help. Would you mind lending me a helping hand?");
+                Client.sendChoice(player, id,"I need your help. Would you mind lending me a helping hand?", "I would like to help.", "Maybe later.");
                 break;
             case 1:
                 if (player.inventory.itemCount(ItemList.parrotBird) >= 1)
@@ -30,6 +28,15 @@ public class BirdWatcher extends NPC {
                 break;
             case 2:
                 Client.sendText(player, "Thank you very much traveller, you will forever have my thanks!");
+                break;
+        }
+    }
+
+    public void choiceChosen(Player player, String message) {
+        if (message.contains("help")) {
+            questStart(player);
+        } else if (message.contains("later")) {
+            Client.clearTextBox(player);
         }
     }
 
@@ -41,9 +48,9 @@ public class BirdWatcher extends NPC {
 
         player.inventory.removeItem(ItemList.parrotBird, 1);
         player.inventory.addItem(ItemList.gold, 1000);
-        player.addExperience(Skills.WOODCUTTING, 1000);
+        player.addExperience(Skills.WOODCUTTING, 2500);
         Client.sendText(player,"Thank you very much, I will always be grateful for your deed.");
-        Client.sendMessage(player,"For helping the Bird Watcher, you have recieved 1000 Coins and 500 Woodcutting experience!");
+        Client.sendMessage(player,"For helping the Bird Watcher, you have received 1000 Coins and 500 Woodcutting experience!");
         player.setQuestData(0, 2);
     }
 

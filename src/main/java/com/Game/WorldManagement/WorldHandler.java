@@ -7,13 +7,15 @@ public class WorldHandler {
         new MainWorld(0),
         new Underground(1),
         new ChessDungeon(2),
-        new Tropics(3)
+        new Tropics(3),
+        new FarmUnderground(4)
     };
 
-    public static World main = serverWorlds[0];
-    public static World underground = serverWorlds[1];
-    public static World chessDungeon = serverWorlds[2];
-    public static World tropics = serverWorlds[3];
+    public static final int main = 0;
+    public static final int underground = 1;
+    public static final int chessDungeon = 2;
+    public static final int tropics = 3;
+    public static final int farmUnderground = 4;
 
     public static void init() {
         for (int i = 0; i < serverWorlds.length; i++)

@@ -5,22 +5,19 @@ import com.Game.Inventory.Item;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.PseudoData.ImageIdentifier;
+import com.Game.Util.Other.RCOption;
 
 public class StringItem extends Item {
-    public StringItem(int id, String name, String examineText, int worth) {
-        super(id, name, examineText, worth, true);
+    public StringItem(int id, String name, String examineText, int worth, boolean stackable) {
+        super(id, name, examineText, worth, stackable);
         setImage("string.png");
     }
 
-    public void OnClick(Player player, int index) {
+    public void craftString(Player player, int index) {
         convert(player, 3, 1, ItemList.bowString);
     }
 
-    public void setData(ItemStack stack) {
-        stack.options.add("Craft Bow String");
-    }
-
-    public String getOptionText(int i, int data, ItemStack stack) {
-        return "Craft Bow String";
+    public void dataItemChange(ItemStack stack) {
+        stack.setOptions(new RCOption("Craft Bow String", this::craftString));
     }
 }

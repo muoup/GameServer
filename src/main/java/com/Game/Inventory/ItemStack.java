@@ -1,7 +1,11 @@
 package com.Game.Inventory;
 
+import com.Game.Entity.NPC.Shop;
+import com.Game.Entity.Player.Player;
 import com.Game.ItemData.Requirement.ActionRequirement;
 import com.Game.PseudoData.ImageIdentifier;
+import com.Game.Util.Other.RCOption;
+import com.Game.Util.Other.Settings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,15 +18,13 @@ public class ItemStack {
     // Essential
     public Item item;
     public int id, amount, data, equipStatus, worth;
-    public ArrayList<String> options;
+    public ArrayList<RCOption> options;
     public ActionRequirement requirement;
     public ImageIdentifier image;
     public String name, examineText;
 
     // Non-essential
-    public float damageMultiplier = 0;
-    public float defense = 0;
-    public float speed = 0;
+    public float damage = 0, speed = 0, armor = 0;
 
     public ItemStack(ItemList item, int amount) {
         this(item, amount, 0);
@@ -37,6 +39,7 @@ public class ItemStack {
         this.image = item.getImage();
         this.name = item.getName();
         this.worth = item.worth;
+        this.examineText = item.getExamineText();
 
         setData(data);
     }
@@ -58,7 +61,7 @@ public class ItemStack {
                 getData() == stack.getData();
     }
 
-    public ArrayList<String> getOptions() {
+    public ArrayList<RCOption> getOptions() {
         return options;
     }
 
@@ -94,17 +97,40 @@ public class ItemStack {
         return item.getID();
     }
 
+    public float getDamage() {
+        return damage;
+    }
+
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public float getArmor() {
+        return armor;
+    }
+
     public ItemStack clone() {
         return new ItemStack(item, amount, data);
     }
 
     public void setData(int data) {
         this.data = data;
-        item.setData(this);
+
+        setName(item.name);
+        setImage(item.image);
+        setEquipStatus(item.equipStatus);
+        setWorth(item.worth);
+        setRequirement(item.requirement);
+        setArmor(item.armor);
+        setDamage(item.damage);
+        setSpeed(item.speed);
+
+        item.dataItemChange(this);
     }
 
     public int getEquipStatus() {
-        return item.getEquipStatus(data);
+        return equipStatus;
     }
 
     public int getMaxAmount() {
@@ -119,6 +145,10 @@ public class ItemStack {
         this.image = image;
     }
 
+    public void setRequirement(ActionRequirement requirement) {
+        this.requirement = requirement;
+    }
+
     public void setEquipStatus(int status) {
         this.equipStatus = status;
     }
@@ -127,32 +157,64 @@ public class ItemStack {
         this.name = name;
     }
 
+    public void setWorth(int worth) {
+        this.worth = worth;
+    }
+
     public void setExamineText(String text) {
         this.examineText = text;
     }
 
-    public void setOptions(String... options) {
-         this.options.clear();
+    public void setOptions(ArrayList<RCOption> options) {
+        this.options = options;
+    }
+
+    public void setOptions(RCOption... options) {
+        this.options.clear();
 
         this.options.addAll(Arrays.asList(options));
     }
 
-    public void setOptions(ArrayList<String> options) {
-        this.options = options;
+    public void setDamage(float damage) {
+        this.damage = damage;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
+    }
+
+    public void setArmor(float armor) {
+        this.armor = armor;
     }
 
     public String optionsString() {
         StringBuilder optionBuilder = new StringBuilder();
 
-        for (String option : options) {
-            optionBuilder.append(option + "\\");
+        if (getEquipStatus() != -1) {
+            optionBuilder.append("Equip" + "\n");
+        }
+
+        for (RCOption option : options) {
+            optionBuilder.append(option.getOption() + "\n");
         }
 
         return optionBuilder.toString();
     }
 
     public String getExamineText() {
-        return examineText;
+        return setUpExamine(examineText);
+    }
+
+    public String getExamineTextAbstract() {
+        String newExamine = examineText.replace("[amt]", examineText.indexOf("[amt]") == 0 ? "Some" : "some");
+
+        return setUpExamine(newExamine);
+    }
+
+    public String setUpExamine(String text) {
+        text = text.replace("[amt]", Integer.toString(getAmount()));
+
+        return text;
     }
 
     public int getWorth() {
@@ -161,5 +223,53 @@ public class ItemStack {
 
     public ItemStack singleStack() {
         return new ItemStack(item, 1, data);
+    }
+
+    public String getServerPacket() {
+        return getName() + ";" + getAmount() + ";" + getImage().getToken() + ";" + optionsString() + ";" + getExamineText() + ";" + (int) (Settings.shopSellMultiplier * worth);
+    }
+
+    public void rightClick(Player player, int index, String name) {
+        switch (name) {
+            case "Examine":
+                player.sendMessage(getExamineText());
+                return;
+            case "Drop":
+                // Do Drop Stuff
+
+                return;
+            case "Equip":
+                item.equipItem(player, index);
+                return;
+        }
+
+        for (RCOption option : options) {
+            if (option.getOption().equals(name)) {
+                option.run(player, index);
+            }
+        }
+    }
+
+    public void click(Player player, int index) {
+        if (player.shop.selectedShop != Shop.empty) {
+            if (worth <= 0)
+                player.sendMessage("This item cannot be sold!");
+            else
+                player.sendMessage("This item will sell for " + worth + " gold each.");
+            return;
+        }
+
+        if (player.banking.isOpen()) {
+            player.deposit(index, 1);
+            return;
+        }
+
+        if (equipStatus != -1) {
+            item.equipItem(player, index);
+        } else if (options.isEmpty()) {
+            player.sendMessage(getExamineText());
+        } else {
+            options.get(0).run(player, index);
+        }
     }
 }

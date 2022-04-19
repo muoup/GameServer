@@ -2,6 +2,7 @@ package com.Game.Entity;
 
 import com.Game.Util.Math.Vector2;
 import com.Game.WorldManagement.World;
+import com.Game.WorldManagement.WorldHandler;
 
 public class Entity {
     protected World world;

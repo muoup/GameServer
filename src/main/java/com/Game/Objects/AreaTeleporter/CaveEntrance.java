@@ -9,9 +9,9 @@ public class CaveEntrance extends Teleporter {
         caveExit(5150, 3534, WorldHandler.main);
 
         public final int x, y;
-        public World destination;
+        public int destination;
 
-        TeleType(int x, int y, World destination) {
+        TeleType(int x, int y, int destination) {
             this.x = x;
             this.y = y;
             this.destination = destination;

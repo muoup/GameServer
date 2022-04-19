@@ -21,7 +21,6 @@ public class CrystalBow extends Weapon {
         itemSet = ItemSets.arrows;
         equipStatus = AccessoriesManager.WEAPON_SLOT;
 
-        weaponDamage = 1.25f;
         requirement = ActionRequirement.skill(Skills.RANGED, 45);
 
         setImage(SpriteSheet.bowSheet.getCell(0, 3));

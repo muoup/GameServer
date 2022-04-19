@@ -15,7 +15,7 @@ public class DropTable {
         chance = new ArrayList<Double>();
     }
 
-    public void add(ItemList item, int amount, double chance) {
+    public void addItem(ItemList item, int amount, double chance) {
         stacks.add(new ItemStack(item, amount, 0));
         this.chance.add(chance);
     }

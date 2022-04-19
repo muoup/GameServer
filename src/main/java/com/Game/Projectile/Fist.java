@@ -10,11 +10,12 @@ import com.Game.Util.Math.Vector2;
 public class Fist extends Projectile {
 
     public Fist(Player player, Vector2 aim) {
-        super(player, aim, 2.5f + player.getLevel(Skills.RANGED) * 0.035f, 2f, 200);
+        super(player, aim, 2.5f * (1 + 0.025f * player.getLevel(Skills.RANGED)), 200f, 500);
         this.rotate = true;
         this.attackStyle = 1;
+
         setScale(36);
         setImage("fist.png");
-        setCooldown(0.5f);
+        setCooldown(500);
     }
 }

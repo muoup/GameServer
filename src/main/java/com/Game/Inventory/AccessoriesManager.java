@@ -17,11 +17,6 @@ public class AccessoriesManager {
     public ItemStack[] accessories = new ItemStack[SaveSettings.accessoryAmount];
     private Player player;
 
-    public float armor = 0;
-
-    public float damageMultiplier = 0;
-    public float moveSpeedMultiplier = 0;
-
     public AccessoriesManager(Player player) {
         for (int i = 0; i < accessories.length; i++) {
             accessories[i] = Item.emptyStack();
@@ -57,14 +52,21 @@ public class AccessoriesManager {
     }
 
     public void calculateStats() {
-        armor = 0;
-        damageMultiplier = 0;
-        moveSpeedMultiplier = 0;
+        player.armor = 0;
+        player.damageMult = 0;
+        player.speedMult = 0;
 
         for (ItemStack item : accessories) {
-            armor += item.defense;
-            damageMultiplier += item.damageMultiplier;
-            moveSpeedMultiplier += item.speed;
+            player.armor += item.armor;
+            player.damageMult += item.damage;
+            player.speedMult += item.speed;
         }
+    }
+
+    public void unequip(Player player, int index) {
+        ItemStack equip = accessories[index].clone();
+
+        setSlot(index, ItemStack.empty());
+        player.addItem(equip);
     }
 }

@@ -17,8 +17,6 @@
 
 package com.Game.ConnectionHandling.Init;
 
-import com.Game.Entity.Player.Player;
-
 public class GameServer {
     public static void main(String[] args) {
         Server server = new Server(3112);

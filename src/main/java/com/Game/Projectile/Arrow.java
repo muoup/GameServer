@@ -1,6 +1,8 @@
 package com.Game.Projectile;
 
+import com.Game.ConnectionHandling.Init.Server;
 import com.Game.Entity.Entity;
+import com.Game.Entity.Player.Player;
 import com.Game.Util.Math.Vector2;
 
 public class Arrow extends Projectile {
@@ -9,15 +11,20 @@ public class Arrow extends Projectile {
         this.rotate = true;
         this.attackStyle = 1;
 
-        setScale(16);
+        setScale(24);
         setImage("arrow.png");
-        setCooldown(0.65f);
+    }
+
+    public void update() {
+//        for (Player player : owner.getWorld().players) {
+//            Server.send(player, "pp" + position);
+//        }
     }
 
     /*
         This should only be called from multiShotEnemy()
      */
-    public Arrow(Vector2 position, Vector2 aim, Projectile arrow) {
-        super(position, aim, arrow);
-    }
+//    public Arrow(Vector2 position, Vector2 aim, Projectile arrow) {
+//        super(position, aim, arrow);
+//    }
 }

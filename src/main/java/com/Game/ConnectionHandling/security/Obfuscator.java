@@ -42,7 +42,7 @@ public class Obfuscator {
     /**
      * This takes the unhashed password typically set by {@link #setPassword(String)} and securely hashes it with
      * a salted SHA-256 hash.
-     * @param unhashed The unhashed password in String format from {@link #setPassword(String)}.
+     * @param unhashed The unhashed password in string format from {@link #setPassword(String)}.
      * @return The hashed password. This also overrides the password field with the hashed password, which may cause errors in the future.
      */
     public String hashPassword(String unhashed)  {
