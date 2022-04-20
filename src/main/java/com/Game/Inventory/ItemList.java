@@ -65,7 +65,7 @@ public enum ItemList {
     fishBait(new FishBait(40,"Fish Bait", "This will make me fish faster.", 55, true)),
     kanunaNecklace(new AmuletOfKanuna(41, "Necklace of Kanuna", "Makes me a little bit stronger.",7500, false)),
     chickenShield(new ChickenShield(42, "Chicken Shield", "I can use this to protect myself.", 1000, false)),
-    rainbowFish(new RainbowFish(43, "Rainbow Fish", "A sweet fruit snack. Unsure how it got in the waters.", 150, false)),
+    rainbowFish(new RainbowFish(43, "Rainbow Fish", "A sweet fruit snack. Unsure how it got in the waters.", 150, false));
 
     private Item item;
 
