@@ -71,10 +71,9 @@ public class Player extends Entity {
 
     // Real-Time Data
     public float health = 100;
-    public float timer = 1.0f;
+    public float healthRegen = 1;
     public long shootTimer = 0;
     public float armor, damageMult, defense, speedMult;
-    public boolean joiner = false;
     public Vector2 lastKnownPosition;
     public Vector2 estimatedVelocity;
 
@@ -121,6 +120,9 @@ public class Player extends Entity {
 
             lastKnownPosition = currentPosition.clone();
         }
+
+        if (health < maxHealth)
+            changeHealth((float) Server.dTime() * healthRegen);
 
         //Server.send(this, "uu", position);
     }
@@ -243,6 +245,7 @@ public class Player extends Entity {
 
     public void setQuestData(int quest, int set) {
         questData.setData(quest, set);
+        Client.sendQuest(this, quest);
     }
 
     public void changeQuestData(int quest, int set) {
@@ -410,12 +413,19 @@ public class Player extends Entity {
     }
 
     public void swapSlots(int index1, int index2) {
+        if (index1 < 0 || index1 >= banking.items.size() || index2 < 0 || index2 >= banking.items.size())
+            return;
+
         ItemStack holder = inventory.inventory[index1].clone();
         inventory.setItem(index1, inventory.getStack(index2));
         inventory.setItem(index2, holder);
     }
 
     public void swapBankSlots(int index1, int index2) {
+        // check if index1 or index is out of bounds
+        if (index1 < 0 || index1 >= banking.items.size() || index2 < 0 || index2 >= banking.items.size())
+            return;
+
         ItemStack holder = banking.items.get(index1).clone();
         banking.setBankItem(index1, banking.getStack(index2));
         banking.setBankItem(index2, holder);
@@ -479,6 +489,22 @@ public class Player extends Entity {
 
         if (health < 0) {
             health = maxHealth;
+
+            cleanUpAfterDeath();
+
+            setPos(SaveSettings.startX, SaveSettings.startY);
+            setWorld(WorldHandler.getWorld(WorldHandler.main));
+            sendMessage("Oh no! You have died.");
+        }
+
+        Client.sendHealth(this);
+    }
+
+    public void setHealth(float health) {
+        this.health = health;
+
+        if (health < 0) {
+            this.health = maxHealth;
 
             cleanUpAfterDeath();
 

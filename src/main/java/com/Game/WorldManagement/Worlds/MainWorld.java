@@ -87,10 +87,11 @@ public class MainWorld extends World {
 
         // Chickens
         new Chicken(this);
-//        new Chicken(this);
-//        new Chicken(this);
-//        new Chicken(this);
-//        new Chicken(this);
+        new Chicken(this);
+        new Chicken(this);
+        new Chicken(this);
+        new Chicken(this);
+        new Chicken(this);
 
         new StorageChest(this, 1660, 1727);
         new StorageChest(this, 2783, 3693);

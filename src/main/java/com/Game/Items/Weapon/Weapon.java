@@ -37,7 +37,7 @@ public class Weapon extends Item {
         if (acceptable.items.length == 0) {
             Projectile projectile = stack.getItem().createProjectile(player, direction, dmgMultiplier(player));
             player.shootTimer = System.currentTimeMillis() + shotCooldown;
-            player.inventory.removeItem(AccessoriesManager.AMMO_SLOT, 1);
+            player.accessory.addAmount(AccessoriesManager.AMMO_SLOT, -1);
             adaptShot(projectile);
             return;
         }
@@ -46,7 +46,7 @@ public class Weapon extends Item {
             if (stack.getID() == i) {
                 Projectile projectile = stack.getItem().createProjectile(player, direction, dmgMultiplier(player));
                 player.shootTimer = System.currentTimeMillis() + shotCooldown;
-                player.inventory.removeItem(AccessoriesManager.AMMO_SLOT, 1);
+                player.accessory.addAmount(AccessoriesManager.AMMO_SLOT, -1);
                 adaptShot(projectile);
                 return;
             }

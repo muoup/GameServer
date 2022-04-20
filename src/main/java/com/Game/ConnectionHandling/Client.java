@@ -1,6 +1,7 @@
 package com.Game.ConnectionHandling;
 
 import com.Game.ConnectionHandling.Init.Server;
+import com.Game.ConnectionHandling.Save.SaveSettings;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Entity.Player.Player;
@@ -20,6 +21,10 @@ public class Client {
 
     public static void sendAccessorySlot(Player player, int slot, ItemStack item) {
         Server.send(player, "ac", slot, item.getServerPacket());
+    }
+
+    public static void sendQuest(Player player, int questID) {
+        Server.send("07:" + questID + ":" + player.questData.getInfoForPacket(questID), player.getIpAddress(), player.getPort());
     }
 
     public static void sendMessage(Player player, String... messages) {

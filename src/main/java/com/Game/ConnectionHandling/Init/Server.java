@@ -618,9 +618,7 @@ public class Server {
         }
         send(send, packet.getAddress(), packet.getPort());
         // --------------
-        for (int i = 0; i < SaveSettings.questAmount; i++) {
-            send("07:" + i + ":" + connection.questData.getInfoForPacket(i), packet.getAddress(), packet.getPort());
-        }
+
         return connection;
     }
 

@@ -10,6 +10,7 @@ public class SpriteSheet {
     public static final SpriteSheet craftingSheet = new SpriteSheet("Items/crafting_sheet.png", 48, 48);
     public static final SpriteSheet questItemSheet = new SpriteSheet("Items/quest_sheet.png", 48, 48);
     public static final SpriteSheet woodSheet = new SpriteSheet("Items/wood_sheet.png", 48, 48);
+    public static final SpriteSheet fishSheet = new SpriteSheet("Items/fish_sheet.png", 48, 48);
 
     String image;
     int width, height;

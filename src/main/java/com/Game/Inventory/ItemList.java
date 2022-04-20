@@ -5,6 +5,7 @@ import com.Game.Items.Armor.Rock.*;
 import com.Game.Items.Armor.Tribal.AmuletOfKanuna;
 import com.Game.Items.Consumables.Food.BlueFishFood;
 import com.Game.Items.Consumables.Food.ClownFishFood;
+import com.Game.Items.Consumables.Food.RainbowFish;
 import com.Game.Items.Consumables.Food.Seaweed;
 import com.Game.Items.Consumables.Loot.BirdNest;
 import com.Game.Items.Misc.QuestItem;
@@ -63,7 +64,8 @@ public enum ItemList {
     birdNest(new BirdNest(39,"Bird Nest", "It appears that the bird left some goodies.",-1, false)),
     fishBait(new FishBait(40,"Fish Bait", "This will make me fish faster.", 55, true)),
     kanunaNecklace(new AmuletOfKanuna(41, "Necklace of Kanuna", "Makes me a little bit stronger.",7500, false)),
-    chickenShield(new ChickenShield(42, "Chicken Shield", "I can use this to protect myself.", 1000, false));
+    chickenShield(new ChickenShield(42, "Chicken Shield", "I can use this to protect myself.", 1000, false)),
+    rainbowFish(new RainbowFish(43, "Rainbow Fish", "A sweet fruit snack. Unsure how it got in the waters.", 150, false)),
 
     private Item item;
 

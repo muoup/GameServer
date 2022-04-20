@@ -15,6 +15,7 @@ public class StorageChest extends GameObject {
     }
 
     public boolean onInteract(Player player) {
+        player.setHealth(player.maxHealth);
         player.showBank();
         return true;
     }

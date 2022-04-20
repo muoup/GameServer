@@ -101,6 +101,9 @@ public class Enemy extends Entity {
         update();
 
         if (!enabled && System.currentTimeMillis() > currentRespawn) {
+            startTimers();
+
+            playerTarget = null;
             setEnabled(true);
             setHealth(maxHealth);
             setPosition(spawnPosition);
@@ -144,6 +147,12 @@ public class Enemy extends Entity {
 
     public void update() {
 
+    }
+
+    public void startTimers() {
+        // loop through all timers and set the time to be the specified time from the current time
+        projectileTimers.forEach(Timer::setNext);
+        passiveTimers.forEach(Timer::setNext);
     }
 
     public void regenHealth() {
