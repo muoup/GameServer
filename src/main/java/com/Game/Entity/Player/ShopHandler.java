@@ -82,6 +82,6 @@ public class ShopHandler {
         }
 
         player.removeItem(selected.getItemList(), selected.getData(), amount);
-        player.addItem(ItemList.gold, (int) (selected.getWorth() * amount * Settings.shopSellMultiplier));
+        player.addItem(ItemList.gold, (int) (selected.getWorth() * Settings.shopSellMultiplier));
     }
 }

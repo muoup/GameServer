@@ -3,10 +3,7 @@ package com.Game.Inventory;
 import com.Game.Items.Ammo.*;
 import com.Game.Items.Armor.Rock.*;
 import com.Game.Items.Armor.Tribal.AmuletOfKanuna;
-import com.Game.Items.Consumables.Food.BlueFishFood;
-import com.Game.Items.Consumables.Food.ClownFishFood;
-import com.Game.Items.Consumables.Food.RainbowFish;
-import com.Game.Items.Consumables.Food.Seaweed;
+import com.Game.Items.Consumables.Food.*;
 import com.Game.Items.Consumables.Loot.BirdNest;
 import com.Game.Items.Misc.QuestItem;
 import com.Game.Items.Perks.ChickenShield;
@@ -16,7 +13,6 @@ import com.Game.Items.Tool.FishBait;
 import com.Game.Items.Tool.WoodHarp;
 import com.Game.Items.Weapon.Bows.CrystalBow;
 import com.Game.Items.Weapon.Superclasses.*;
-import com.Game.PseudoData.*;
 
 /**
     Contains all of the references of items, used for creating ItemStacks

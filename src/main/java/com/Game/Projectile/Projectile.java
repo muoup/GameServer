@@ -93,8 +93,15 @@ public class Projectile {
         return false;
     }
 
-    protected Object clone() {
-        return null;
+    protected Object clone(Vector2 direction) {
+        Projectile clone = new Projectile(owner, aim, damage, speed, endTime - System.currentTimeMillis());
+        clone.setDirection(direction);
+        clone.setScale((int) scale.x);
+        clone.rotate = rotate;
+        clone.attackStyle = attackStyle;
+        clone.setImage(image);
+
+        return clone;
     }
 
     public Player player() {
@@ -120,8 +127,18 @@ public class Projectile {
         direction = Vector2.magnitudeDirection(position, aim).scale(speed);
     }
 
+    public void setDirection(Vector2 direction) {
+        this.direction = direction;
+    }
+
     public void setImage(String root) {
-        image = ImageIdentifier.singleImage("Projectiles/" + root);
+        ImageIdentifier image = ImageIdentifier.singleImage("Projectiles/" + root);
+
+        setImage(image);
+    }
+
+    public void setImage(ImageIdentifier image) {
+        this.image = image;
 
         if (scale == null) {
             scale = Vector2.identity(8);
@@ -130,10 +147,8 @@ public class Projectile {
         image.setScale(scale);
 
         if (rotate) {
-            double radians = Math.atan(-(aim.x - position.x) / (aim.y - position.y));
-
-            if (aim.y > position.y)
-                radians += Math.PI;
+            // calculate rotation
+            float radians = (float) Math.atan2(direction.y, direction.x) + (float) Math.PI / 2;
 
             image.setRotation(radians);
         }
@@ -206,46 +221,20 @@ public class Projectile {
         world.projectiles.remove(this);
     }
 
-    public void multiShot(double degrees, float radius, int amount) {
-        degrees = Math.toRadians(degrees);
+    public void multiShot(double degrees, int amount) {
+        double baseAngle = Math.atan2(direction.y, direction.x);
+        double deltaAngle = Math.toRadians(degrees);
 
-        if (amount % 2 == 1) {
-            double theta = Math.atan((aim.x - position.x) / (aim.y - position.y));
+        for (int i = -amount / 2; i <= amount / 2; i++) {
+            System.out.println(i);
 
-            if (aim.y - position.y <= 0) {
-                theta += DeltaMath.pi;
-            }
+            if (i == 0)
+                continue;
 
-            Constructor projectileConstructor;
+            double angle = baseAngle + deltaAngle * i;
+            Vector2 direction = new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
 
-            Vector2 adjust = position.addClone(radius * Math.sin(theta), radius * Math.cos(theta));
-
-            setAim(adjust);
-
-            try {
-                projectileConstructor = getClass().getConstructor(Vector2.class, Vector2.class, Projectile.class);
-            } catch (NoSuchMethodException e) {
-                System.err.println(getClass() + " does not contain a correct constructor!");
-                return;
-            }
-
-            for (int i = -amount / 2; i < amount / 2 + 1; i++) {
-                if (i == 0)
-                    continue;
-
-                /*
-                    Point on Circle from Center = (r * sin(θ), r * cos(θ))
-                    Where r = radius of circle and θ = degrees
-                    NOTE: 0 degrees is located at (0, r)
-                 */
-
-                try {
-                    Vector2 newAim = position.addClone(radius * Math.sin(theta + i * degrees), radius * Math.cos(theta + i * degrees));
-                    projectileConstructor.newInstance(position, newAim, this);
-                } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
-                }
-            }
+            clone(direction);
         }
     }
 

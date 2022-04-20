@@ -56,6 +56,10 @@ public class Tree extends GameObject {
                     }
                 }
 
+                if (Math.random() * 100 < 0.05 * player.getLevel(Skills.WOODCUTTING)) {
+                    player.addItem(ItemList.birdNest, 1);
+                }
+
                 if (woodAmount == 0) {
                     delta = System.currentTimeMillis();
                     resetTime = (preset.getTimer(player) * 2) * 1000;

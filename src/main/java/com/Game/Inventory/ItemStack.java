@@ -198,6 +198,11 @@ public class ItemStack {
             optionBuilder.append(option.getOption() + "\n");
         }
 
+        // if optionBuilder is unchanged, append "NO OPTIONS"
+        if (optionBuilder.toString().equals("")) {
+            optionBuilder.append("NO OPTIONS");
+        }
+
         return optionBuilder.toString();
     }
 

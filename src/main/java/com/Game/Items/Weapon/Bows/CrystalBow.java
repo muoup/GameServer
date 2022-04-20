@@ -21,12 +21,14 @@ public class CrystalBow extends Weapon {
         itemSet = ItemSets.arrows;
         equipStatus = AccessoriesManager.WEAPON_SLOT;
 
-        requirement = ActionRequirement.skill(Skills.RANGED, 45);
+        weaponDamage = 3;
+        requirement = ActionRequirement.skill(0, 45);
+        shotCooldown = 450;
 
         setImage(SpriteSheet.bowSheet.getCell(0, 3));
     }
 
     public void adaptShot(Projectile projectile) {
-        projectile.multiShot(7.5, 128, 3);
+        projectile.multiShot(15, 3);
     }
 }

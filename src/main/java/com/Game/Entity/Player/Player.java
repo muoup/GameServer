@@ -50,7 +50,6 @@ public class Player extends Entity {
 
     // Player Constants
     public final float playerMoveSpeed = 225f;
-    public final float playerInitialHealth = 100;
 
     // Connection Settings
     private InetAddress ipAddress;
@@ -492,8 +491,8 @@ public class Player extends Entity {
 
             cleanUpAfterDeath();
 
-            setPos(SaveSettings.startX, SaveSettings.startY);
             setWorld(WorldHandler.getWorld(WorldHandler.main));
+            setPos(SaveSettings.startX, SaveSettings.startY);
             sendMessage("Oh no! You have died.");
         }
 

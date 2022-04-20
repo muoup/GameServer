@@ -26,6 +26,7 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Scanner;
 
 //for testing purposes only
@@ -90,7 +91,7 @@ public class ManageSave {
                     String line = scanner.nextLine();
                     for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
                         String[] cut = line.split(" ");
-                        if (cut[1] != "0")
+                        if (!Objects.equals(cut[1], "0"))
                             data.inventory.setItem(i,
                                 new ItemStack(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3])));
                         line = scanner.nextLine();

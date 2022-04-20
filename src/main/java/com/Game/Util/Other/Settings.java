@@ -20,7 +20,6 @@ public class Settings {
     public static final int fpsCap = 60;
     public static final float enemyLatency = 2;
     public static final float mergeDistance = 128;
-    public static final float maxPickupDistance = 128;
     public static final long velocityCheckTime = 10;
 
     public static TimerTask wrap(Runnable r) {
