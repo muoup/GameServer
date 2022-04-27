@@ -71,7 +71,8 @@ public class Skills {
             Client.sendMessage(player, "Congratulations, you have reached level " + levels[skill]);
         }
 
-        player.setMaxHealth(50 * levels[LIFEPOINTS]);
+        if (skill == Skills.LIFEPOINTS)
+            player.setMaxHealth(50 * levels[LIFEPOINTS]);
     }
 
     public static int expToLevel(float exp) {

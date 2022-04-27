@@ -46,9 +46,8 @@ public class Server {
     private ArrayList<Player> connections;
     private final int MAX_PACKET_SIZE = 1024;
     private byte[] dataBuffer = new byte[MAX_PACKET_SIZE * 10];
-    private static final String serverVersion = "0.0.2a";
+    private static final String serverVersion = "0.1.0a";
     private static int deltaTime;
-
     private static long updateLength;
     private static double fps = 0;
 
@@ -235,6 +234,11 @@ public class Server {
                         int level = Integer.parseInt(parameters[1]);
 
                         player.setExperience(skill, Skills.levelToExp(level));
+                    }
+                    break;
+                case "sethealth":
+                    if (parameters.length >= 1) {
+                        player.setHealth(Float.parseFloat(parameters[0]));
                     }
                     break;
                 case "item":
@@ -612,13 +616,6 @@ public class Server {
         Player connection = (connectionCode == 0) ?
                 ManageSave.loadPlayerData(username, packet) : ManageSave.createPlayerData(username, password, packet);
         connections.add(connection);
-        String send = "04" + username;
-        for (int i = 0; i < SaveSettings.skillAmount; i++) {
-            send += ":" + connection.skills.xp[i];
-        }
-        send(send, packet.getAddress(), packet.getPort());
-        // --------------
-
         return connection;
     }
 

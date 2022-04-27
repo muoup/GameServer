@@ -78,9 +78,8 @@ public class ManageSave {
                     data.setWorld(WorldHandler.getWorld(Integer.parseInt(parts[3])));
                     data.setPos(Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));
                     break;
-                case "Health":
-                    data.setMaxHealth(Integer.parseInt(parts[1]));
-                    data.setHealth(Integer.parseInt(parts[0]));
+                case "Health:":
+                    data.setHealth(Float.parseFloat(parts[1]));
                     break;
                 case "Skills:":
                     for (int i = 1; i < parts.length; i++) {
@@ -178,7 +177,7 @@ public class ManageSave {
             writer.println("Password: " + data.password.getPassword(new VulnerableLogin(data.password)) + " " + "0"); //Must be passed an instance of VulnerableLogin to bypass security measures
         }
         writer.println("Pos: " + data.getX() + " " + data.getY() + " " + data.getWorld().id);
-        writer.println("Health: " + data.health + " " + data.maxHealth);
+        writer.println("Health: " + data.health);
 
         String skillsLine = "Skills:";
 

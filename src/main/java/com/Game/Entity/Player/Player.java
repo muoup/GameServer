@@ -65,11 +65,11 @@ public class Player extends Entity {
     // Stats
     public QuestData questData;
     public Skills skills;
-    public float maxHealth = 100;
+    public float maxHealth = 0;
     public float msMulti = 1;
 
     // Real-Time Data
-    public float health = 100;
+    public float health = 0;
     public float healthRegen = 1;
     public long shootTimer = 0;
     public float armor, damageMult, defense, speedMult;
@@ -106,6 +106,8 @@ public class Player extends Entity {
         this.timers = new Hashtable<>();
         banking = new BankingHandler(this);
 
+        timers.put("healthRegen", System.currentTimeMillis() + 250);
+
         initSkills();
     }
 
@@ -120,10 +122,11 @@ public class Player extends Entity {
             lastKnownPosition = currentPosition.clone();
         }
 
-        if (health < maxHealth)
-            changeHealth((float) Server.dTime() * healthRegen);
-
-        //Server.send(this, "uu", position);
+        // every when timers.get("healthRegen") is less than the current time, the player will regen health
+        if (System.currentTimeMillis() > timers.get("healthRegen")) {
+            timers.put("healthRegen", System.currentTimeMillis() + Settings.healInterval);
+            health = Math.min(health + healthRegen * Settings.healInterval, maxHealth);
+        }
     }
 
     public void initSkills() {

@@ -19,7 +19,7 @@ public class BirdNest extends LootGenerator {
         table.addItem(ItemList.gold, 2500, .05);
 
         // I don't know if this is at all balanced but it seems like a decent idea.
-        table.addItem(ItemList.crystalBow, 1, .0025);
+        table.addItem(ItemList.crystalBow, 1, .025);
     }
 
     public void OnClick(Player player, int index) {
