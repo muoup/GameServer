@@ -70,7 +70,7 @@ public class Player extends Entity {
 
     // Real-Time Data
     public float health = 0;
-    public float healthRegen = 1;
+    public float healthRegen = 10;
     public long shootTimer = 0;
     public float armor, damageMult, defense, speedMult;
     public Vector2 lastKnownPosition;
@@ -125,7 +125,8 @@ public class Player extends Entity {
         // every when timers.get("healthRegen") is less than the current time, the player will regen health
         if (System.currentTimeMillis() > timers.get("healthRegen")) {
             timers.put("healthRegen", System.currentTimeMillis() + Settings.healInterval);
-            health = Math.min(health + healthRegen * Settings.healInterval, maxHealth);
+//            health = Math.min(health + healthRegen * Settings.healInterval, maxHealth);
+            changeHealth((health < maxHealth) ? Math.min(healthRegen * Settings.healInterval / 1000, maxHealth - health) : 0);
         }
     }
 
@@ -448,13 +449,9 @@ public class Player extends Entity {
     public void enableShop(Shop shop) {
         this.shop.selectedShop = shop;
 
-        StringBuilder builder = new StringBuilder();
+        Server.send(this, "ui", "shop", shop.getShopVerb(), shop.getInventoryVerb());
 
-        for (ItemStack stack : shop.offeredItems) {
-            builder.append(stack.name).append(";").append(stack.getImage()).append(";").append(stack.getWorth()).append(";").append(stack.getExamineTextAbstract()).append("::");
-        }
-
-        Server.send(this, "ui", "shop", builder.toString());
+        shop.sendItems(this);
     }
 
     public void shoot(Vector2 shootPos) {
@@ -486,7 +483,7 @@ public class Player extends Entity {
         health += healAmount;
 
         if (health > maxHealth) {
-            health = maxHealth;
+            health -= healAmount;
         }
 
         if (health < 0) {

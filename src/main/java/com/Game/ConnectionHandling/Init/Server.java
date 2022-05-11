@@ -651,7 +651,7 @@ public class Server {
         }
 
         // TAG;Data1;Data2;Data3...
-        send(player, packetContents.toString().substring(0, packetContents.length() - 1));
+        send(player, packetContents.substring(0, packetContents.length() - 1));
     }
 
     /**

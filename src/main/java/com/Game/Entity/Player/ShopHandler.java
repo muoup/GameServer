@@ -16,12 +16,12 @@ public class ShopHandler {
     }
 
     public void handlePacket(String[] message) {
-        switch (message[1]) {
-            case "buy":
-                buyOption(Integer.parseInt(message[2]), Integer.parseInt(message[3]));
+        switch (message[0]) {
+            case "shop":
+                selectedShop.shopInteraction(this, Integer.parseInt(message[1]), Integer.parseInt(message[2]));
                 break;
-            case "sell":
-                sellInventory(Integer.parseInt(message[2]), Integer.parseInt(message[3]));
+            case "inventory":
+                selectedShop.inventoryInteraction(this, Integer.parseInt(message[1]), Integer.parseInt(message[2]));
                 break;
         }
     }

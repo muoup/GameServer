@@ -22,7 +22,7 @@ public class Settings {
     public static final float mergeDistance = 128;
     public static final long velocityCheckTime = 10;
 
-    public static final long healInterval = 1000;
+    public static final long healInterval = 500;
 
     public static TimerTask wrap(Runnable r) {
         return new TimerTask() {

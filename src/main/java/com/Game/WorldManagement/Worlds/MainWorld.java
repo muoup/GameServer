@@ -99,6 +99,9 @@ public class MainWorld extends World {
         new StorageChest(this, 871, 4518);
         new StorageChest(this, 4921, 2060);
 
+        // Smithing Area
+        new Anvil(this, 2795, 4345);
+
         // Beach Area
         new FishingArea(this, 885, 5595, FishingPreset.clownFish);
         new FishingArea(this, 971, 5697, FishingPreset.clownFish);
