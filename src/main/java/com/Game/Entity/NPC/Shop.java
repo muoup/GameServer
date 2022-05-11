@@ -35,6 +35,18 @@ public class Shop {
 
     public void miscInteraction(ShopHandler handler, String message, int index, int amount) {}
 
+    public void examineShop(ShopHandler handler, int index) {
+        ItemStack item = offeredItems[index];
+
+        handler.getPlayer().sendMessage(item.getExamineTextAbstract());
+    }
+
+    public void examineInventory(ShopHandler handler, int index) {
+        ItemStack item = handler.getPlayer().getInventory().getStack(index);
+
+        handler.getPlayer().sendMessage(item.getExamineTextAbstract());
+    }
+
     public String getShopVerb() {
         return shopVerb;
     }
@@ -43,8 +55,12 @@ public class Shop {
         return inventoryVerb;
     }
 
+    public int getWorth(ItemStack stack) {
+        return stack.getWorth();
+    }
+
     public void sendItems(Player player) {
         for (ItemStack stack : offeredItems)
-            Server.send(player, "sa", stack.name, stack.getImage(), stack.getWorth(), stack.getExamineTextAbstract());
+            Server.send(player, "sa", stack.name, stack.getImage(), getWorth(stack), stack.getExamineTextAbstract());
     }
 }

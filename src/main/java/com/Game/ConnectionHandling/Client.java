@@ -96,7 +96,6 @@ public class Client {
             return;
         }
 
-        //System.out.println(player.username + "eu: " + randomToken + ", " + variable + ", " + newValue);
         Server.send(player, "eu", randomToken, variable, newValue);
     }
 

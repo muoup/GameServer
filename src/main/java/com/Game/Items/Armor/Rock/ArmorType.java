@@ -1,7 +1,7 @@
 package com.Game.Items.Armor.Rock;
 
 public enum ArmorType {
-    helmet(1), chestplate(2.95f), leggings(2.1f), boots(0.75f);
+    helmet(3), chestplate(5), leggings(4), boots(2);
 
     float armorMultiplier;
 

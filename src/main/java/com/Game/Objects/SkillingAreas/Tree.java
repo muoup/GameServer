@@ -48,7 +48,6 @@ public class Tree extends GameObject {
                     // The chance that the player collects the bird is a 1 in 16 chance.
                     // This should only take around 2 or 3 minutes to complete hopefully.
 
-                    // TODO: Instead of having the tree drop the bird, implement bird's nests into the game to drop them instead.
                     // Making the birds nest drop the parrot bird will introduce the player to the idea of a bird's nest
                     // without having to explain it which is quite handy.
                     if (new Random().nextInt(15) == 5 && player.inventory.itemCount(ItemList.parrotBird) == 0) {
@@ -56,7 +55,7 @@ public class Tree extends GameObject {
                     }
                 }
 
-                if (Math.random() * 100 < 0.05 * player.getLevel(Skills.WOODCUTTING)) {
+                if (Math.random() * 100 < 0.05 * Math.pow(player.getLevel(Skills.WOODCUTTING), 2/3)) {
                     player.addItem(ItemList.birdNest, 1);
                 }
 

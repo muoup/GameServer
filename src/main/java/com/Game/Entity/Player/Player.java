@@ -33,9 +33,7 @@ import com.Game.Projectile.Fist;
 import com.Game.Questing.QuestList;
 import com.Game.Skills.Skills;
 import com.Game.Util.Math.Vector2;
-import com.Game.Util.Other.ItemAction;
-import com.Game.Util.Other.Perk;
-import com.Game.Util.Other.Settings;
+import com.Game.Util.Other.*;
 import com.Game.WorldManagement.GroundItem;
 import com.Game.WorldManagement.World;
 import com.Game.WorldManagement.WorldHandler;
@@ -92,6 +90,8 @@ public class Player extends Entity {
 
     // On Action Lambdas
     public Perk onHit = null;
+    public PlayerActionLoop playerLoop = null;
+    public int playerLoopsRemaining = 0;
 
     /**
      * The Password, when set using {@link #setPassword(Password)}.
@@ -121,6 +121,9 @@ public class Player extends Entity {
 
             lastKnownPosition = currentPosition.clone();
         }
+
+        if (playerLoop != null)
+            playerLoop.update();
 
         // every when timers.get("healthRegen") is less than the current time, the player will regen health
         if (System.currentTimeMillis() > timers.get("healthRegen")) {
@@ -221,8 +224,9 @@ public class Player extends Entity {
         skills.setExperience(skill, exp);
     }
 
-    public void addExperience(int skill, float amount) {
+    public boolean addExperience(int skill, float amount) {
         skills.addExperience(skill, amount);
+        return true;
     }
 
     public boolean skillCompare(int index, int lvl) {
@@ -364,6 +368,8 @@ public class Player extends Entity {
     }
 
     public void loseFocus() {
+        endPlayerLoop();
+
         if (banking.isOpen())
             hideBank();
 
@@ -569,6 +575,35 @@ public class Player extends Entity {
 
     public void setOnHit(Perk onHit) {
         this.onHit = onHit;
+    }
+
+    public void createPlayerLoop(PlayerAction action, long delay) {
+        playerLoop = new PlayerActionLoop(this, action, delay);
+    }
+
+    public void createPlayerLoop(PlayerActionLoop actionLoop) {
+        playerLoop = actionLoop;
+    }
+
+    public void setLoopTime(long delay) {
+        playerLoop.setLoopTime(delay);
+    }
+
+    public void endPlayerLoop() {
+        playerLoop = null;
+    }
+
+    public InventoryManager getInventory() {
+        return inventory;
+    }
+
+    public void dropItem(int index) {
+        if (inventory.getItem(index).worth == -1) {
+            sendMessage("You can't drop that.");
+        }
+
+        world.createGroundItem(position, inventory.getStack(index));
+        inventory.setItem(index, ItemStack.empty());
     }
 
 //    public float getDamageMultiplier() {

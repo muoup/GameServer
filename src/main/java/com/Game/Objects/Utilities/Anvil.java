@@ -7,11 +7,12 @@ import com.Game.Objects.Utilities.Interfaces.AnvilInterface;
 import com.Game.WorldManagement.World;
 
 public class Anvil extends GameObject {
-    private AnvilInterface anvilInterface;
+    private final AnvilInterface anvilInterface;
 
     public Anvil(World world, int x, int y) {
         super(world, x, y);
         setImage("anvil.png");
+        setScale(64, 64);
 
         this.anvilInterface = new AnvilInterface();
         this.maxDistance = 64;

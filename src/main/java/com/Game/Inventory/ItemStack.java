@@ -15,6 +15,8 @@ import java.util.Arrays;
  */
 public class ItemStack {
 
+    public static final ItemStack shopBreakPoint = new ItemStack(ItemList.empty, -456, -456, -456);
+
     // Essential
     public Item item;
     public int id, amount, data, equipStatus, worth;
@@ -28,6 +30,11 @@ public class ItemStack {
 
     public ItemStack(ItemList item, int amount) {
         this(item, amount, 0);
+    }
+
+    public ItemStack(ItemList item, int amount, int data, int worth) {
+        this(item, amount, data);
+        this.worth = worth;
     }
 
     public ItemStack(Item item, int amount, int data) {
@@ -240,8 +247,7 @@ public class ItemStack {
                 player.sendMessage(getExamineText());
                 return;
             case "Drop":
-                // Do Drop Stuff
-
+                player.dropItem(index);
                 return;
             case "Equip":
                 item.equipItem(player, index);

@@ -7,12 +7,12 @@ import com.Game.Util.Other.SpriteSheet;
 public class ArmorPiece extends Item {
     private ArmorType type;
 
-    public ArmorPiece(int id, ArmorType type, int tier, String name, String examineText, int worth, boolean stackable) {
+    public ArmorPiece(int id, ArmorType type, int column, String name, String examineText, int worth, boolean stackable) {
         super(id, name, examineText, worth, stackable);
         this.type = type;
 
-        setTier(tier);
-        setImage(SpriteSheet.armorSheet.getCell((int) (tier / 10.0), type.ordinal()));
+        setTier(column * 10 - ((column > 1) ? 10 : 0));
+        setImage(SpriteSheet.armorSheet.getCell(column, type.ordinal()));
 
         switch (type) {
             case helmet:
@@ -37,7 +37,7 @@ public class ArmorPiece extends Item {
     public void setTier(int tier) {
         float multiplier = type.getMultiplier();
 
-        armor = tier * 0.125f + 10f;
+        armor = tier * 0.125f * multiplier;
     }
 }
 

@@ -82,9 +82,6 @@ public class MainWorld extends World {
         new MiningRock(this, 4236, 3880, RockType.tin);
         new MiningRock(this, 4173, 4056, RockType.tin);
 
-//        new Furnace(this, 5042, 4382);
-//        new Anvil(this, 5042, 4658);
-
         // Chickens
         new Chicken(this);
         new Chicken(this);
@@ -100,7 +97,8 @@ public class MainWorld extends World {
         new StorageChest(this, 4921, 2060);
 
         // Smithing Area
-        new Anvil(this, 2795, 4345);
+        new Furnace(this, 2795, 4345);
+        new Anvil(this, 3724, 4345);
 
         // Beach Area
         new FishingArea(this, 885, 5595, FishingPreset.clownFish);

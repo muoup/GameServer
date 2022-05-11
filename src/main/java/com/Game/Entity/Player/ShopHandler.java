@@ -16,12 +16,22 @@ public class ShopHandler {
     }
 
     public void handlePacket(String[] message) {
-        switch (message[0]) {
+        switch (message[1]) {
             case "shop":
-                selectedShop.shopInteraction(this, Integer.parseInt(message[1]), Integer.parseInt(message[2]));
+                if (message[3].equals("-1")) {
+                    selectedShop.examineShop(this, Integer.parseInt(message[2]));
+                    return;
+                }
+
+                selectedShop.shopInteraction(this, Integer.parseInt(message[2]), Integer.parseInt(message[3]));
                 break;
             case "inventory":
-                selectedShop.inventoryInteraction(this, Integer.parseInt(message[1]), Integer.parseInt(message[2]));
+                if (message[3].equals("-1")) {
+                    selectedShop.examineInventory(this, Integer.parseInt(message[2]));
+                    return;
+                }
+
+                selectedShop.inventoryInteraction(this, Integer.parseInt(message[2]), Integer.parseInt(message[3]));
                 break;
         }
     }
@@ -83,5 +93,9 @@ public class ShopHandler {
 
         player.removeItem(selected.getItemList(), selected.getData(), amount);
         player.addItem(ItemList.gold, (int) (selected.getWorth() * Settings.shopSellMultiplier));
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 }

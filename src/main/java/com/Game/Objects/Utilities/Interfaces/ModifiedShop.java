@@ -11,9 +11,13 @@ public abstract class ModifiedShop extends Shop {
         this.inventoryVerb = inventoryVerb;
     }
 
-    public abstract void shopInteraction(ShopHandler handler, String command, int index, int amount);
+    public int getWorth(ItemStack stack) {
+        return stack.getAmount();
+    }
 
-    public abstract void inventoryInteraction(ShopHandler handler, String command, int index, int amount);
+    public abstract void shopInteraction(ShopHandler handler, int index, int amount);
+
+    public abstract void inventoryInteraction(ShopHandler handler, int index, int amount);
 
     public void miscInteraction(ShopHandler handler, String message, int index, int amount) {}
 }
