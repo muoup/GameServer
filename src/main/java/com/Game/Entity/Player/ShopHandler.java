@@ -1,7 +1,6 @@
 package com.Game.Entity.Player;
 
 import com.Game.Entity.NPC.Shop;
-import com.Game.Inventory.InventoryManager;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Util.Other.Settings;
@@ -59,11 +58,11 @@ public class ShopHandler {
             return;
         }
 
-        int maxSpace = player.inventory.emptySpace() * selected.getMaxAmount();
+        int maxSpace = player.inventory.emptySpace() * selected.maxStack();
 
         for (ItemStack item : player.inventory.inventory) {
             if (item.compare(selected)) {
-                maxSpace += item.getMaxAmount() - item.getAmount();
+                maxSpace += item.maxStack() - item.getAmount();
             }
         }
 

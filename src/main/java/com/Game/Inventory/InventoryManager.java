@@ -201,17 +201,36 @@ public class InventoryManager {
     }
 
     public int addItem(ItemList item, int amount, int data) {
-        // amt - total amount added, amount - items remaining to add, add - local variable
-        int amt = amount;
+        return addItem(new ItemStack(item, amount, data));
+    }
+
+    public int addItem(Item item, int amount, int data) {
+        return addItem(ItemList.values()[item.id], amount, data);
+    }
+
+    public int addItem(ItemList item, int amount) {
+        return addItem(item, amount, 0);
+    }
+
+    public int addItem(Item item, int amount) {
+        return addItem(ItemList.values()[item.id], amount);
+    }
+
+    public int addItem(ItemStack itemStack) {
+        // Constants
+        int amount = itemStack.amount;
+        int data = itemStack.data;
+
+        // Loop Dynamic Variables
+        int amt = itemStack.amount;
         int add;
 
         for (int i = 0; i < inventory.length; i++) {
             add = amount;
             ItemStack stack = inventory[i];
-            if (stack.getID() == item.getID()
-                    && stack.getData() == data) {
-                if (add > stack.getMaxAmount() - stack.getAmount()) {
-                    add = stack.getMaxAmount() - stack.getAmount();
+            if (stack.compare(itemStack)) {
+                if (add > stack.maxStack() - stack.getAmount()) {
+                    add = stack.maxStack() - stack.getAmount();
                 }
 
                 addAmount(i, add);
@@ -230,11 +249,11 @@ public class InventoryManager {
             add = amount;
 
             if (inventory[i].getID() == 0) {
-                if (add > item.maxStack()) {
-                    add = item.maxStack();
+                if (add > itemStack.maxStack()) {
+                    add = itemStack.maxStack();
                 }
 
-                setItem(i, new ItemStack(item, add, data));
+                setItem(i, new ItemStack(itemStack.getItem(), add, data, itemStack.isStacked));
 
                 amount -= add;
             }
@@ -244,22 +263,6 @@ public class InventoryManager {
         }
 
         return amt - amount;
-    }
-
-    public int addItem(Item item, int amount, int data) {
-        return addItem(ItemList.values()[item.id], amount, data);
-    }
-
-    public int addItem(ItemList item, int amount) {
-        return addItem(item, amount, 0);
-    }
-
-    public int addItem(Item item, int amount) {
-        return addItem(ItemList.values()[item.id], amount);
-    }
-
-    public int addItem(ItemStack stack) {
-        return addItem(stack.getItem(), stack.getAmount(), stack.getData());
     }
 
     public ItemStack getStack(int inventoryIndex) {

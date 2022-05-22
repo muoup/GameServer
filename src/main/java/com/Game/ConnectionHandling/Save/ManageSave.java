@@ -91,8 +91,7 @@ public class ManageSave {
                     for (int i = 0; i < SaveSettings.inventoryAmount; i++) {
                         String[] cut = line.split(" ");
                         if (!Objects.equals(cut[1], "0"))
-                            data.inventory.setItem(i,
-                                new ItemStack(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3])));
+                            data.inventory.setItem(i, interpretItemStack(cut));
                         line = scanner.nextLine();
                     }
                     break;
@@ -101,8 +100,7 @@ public class ManageSave {
                     String aline = scanner.nextLine();
                     for (int i = 0; i < SaveSettings.accessoryAmount; i++) {
                         String[] cut = aline.split(" ");
-                        data.accessory.setSlot(i,
-                                new ItemStack(Integer.parseInt(cut[1]), Integer.parseInt(cut[2]), Integer.parseInt(cut[3])));
+                        data.accessory.setSlot(i, interpretItemStack(cut));
                         aline = scanner.nextLine();
                     }
                 case "Accessory:":
@@ -189,7 +187,7 @@ public class ManageSave {
         ItemStack[] inventoryItems = data.inventory.inventory;
         for (int i = 0; i < inventoryItems.length; i++) {
             ItemStack item = inventoryItems[i];
-            writer.println(i + " " + item.id + " " + item.amount + " " + item.data);
+            writer.println(i + " " + item);
         }
 
         writer.println("\nAccessories:");
@@ -197,7 +195,7 @@ public class ManageSave {
         ItemStack[] accessoryItems = data.accessory.accessories;
         for (int i = 0; i < accessoryItems.length; i++) {
             ItemStack item = accessoryItems[i];
-            writer.println(i + " " + item.id + " " + item.amount + " " + item.data);
+            writer.println(i + " " + item);
         }
 
         writer.println("");
@@ -217,7 +215,7 @@ public class ManageSave {
             writer.println("\nBank:");
 
             for (ItemStack item : bankItems) {
-                writer.println(item.id + " " + item.amount + " " + item.data);
+                writer.println(item.id + " " + item.amount + " " + item.data + " " + false);
             }
         }
 
@@ -267,6 +265,10 @@ public class ManageSave {
     public static boolean usernameExists(String username) {
         File getFile = new File("src/Saves/" + username.toLowerCase() + ".psave");
         return getFile.exists();
+    }
+
+    private static ItemStack interpretItemStack(String[] itemLine) {
+        return new ItemStack(Integer.parseInt(itemLine[1]), Integer.parseInt(itemLine[2]), Integer.parseInt(itemLine[3]), Boolean.parseBoolean(itemLine[4]));
     }
     
 }

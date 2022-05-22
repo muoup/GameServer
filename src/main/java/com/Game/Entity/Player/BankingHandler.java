@@ -26,6 +26,8 @@ public class BankingHandler {
     }
 
     public void addBankItem(ItemStack itemStack) {
+        itemStack.setStacked(false);
+
         Client.sendBankChange(player, "add", itemStack.getServerPacket());
 
         items.add(itemStack);
@@ -53,17 +55,19 @@ public class BankingHandler {
         items.set(index, newStack);
     }
 
-    public void withdrawItem(int index, int amount) {
+    public void withdrawItem(int index, int amount, boolean inStack) {
         if (index > items.size() - 1)
             return;
 
         ItemStack item = items.get(index).clone();
 
-        if (amount == -1 || amount > item.getAmount()) {
+        if (amount < 0 || amount > item.getAmount()) {
             amount = item.getAmount();
         }
 
         item.amount = amount;
+        item.setStacked(inStack);
+
         int realAmount = player.addItem(item);
 
         changeBankItem(index, -realAmount);
@@ -75,6 +79,9 @@ public class BankingHandler {
 
         ItemStack item = player.inventory.getStack(index).clone();
 
+        if (item.amount <= 0 || item.getID() <= 0)
+            return;
+
         int count = player.inventory.itemCount(item.getItemList(), item.getData());
 
         if (amount == -1 || amount > count) {
@@ -85,7 +92,7 @@ public class BankingHandler {
 
         for (int i = 0; i < items.size(); i++) {
             ItemStack stack = items.get(i);
-            if (stack.compare(item)) {
+            if (stack.compareIgnoreStack(item)) {
                 changeBankItem(i, amount);
                 player.removeItem(index, amount);
                 return;

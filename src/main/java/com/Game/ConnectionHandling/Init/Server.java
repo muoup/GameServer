@@ -468,11 +468,6 @@ public class Server {
                     Player shooter = findPlayer(index[0]);
                     shooter.shoot(Vector2.fromString(index[1]));
                     break;
-                case "wb": // Withdraw [into] inventory
-                    index = message.split(";");
-                    Player withdrawer = findPlayer(index[0]);
-                    withdrawer.banking.withdrawItem(Integer.parseInt(index[1]), 1);
-                    break;
                 case "gi": // GroundItem Interact
                     index = message.split(";");
                     Player pickerUper = findPlayer(index[0]);

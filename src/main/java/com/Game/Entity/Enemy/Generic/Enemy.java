@@ -142,7 +142,7 @@ public class Enemy extends Entity {
     }
 
     public boolean target() {
-        return System.currentTimeMillis() < previousDamage + targetLostTime;
+        return System.currentTimeMillis() < previousDamage + targetLostTime && playerTarget != null;
     }
 
     public void update() {

@@ -7,8 +7,8 @@ import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 
 public class Shop {
-    protected String shopVerb = "Sell";
-    protected String inventoryVerb = "Buy";
+    protected String shopVerb = "Buy";
+    protected String inventoryVerb = "Sell";
 
     public static Shop empty = new Shop(new ItemStack[0]);
     public static Shop fishing = new Shop(new ItemStack[] {

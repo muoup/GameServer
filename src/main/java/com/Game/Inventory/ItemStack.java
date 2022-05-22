@@ -24,6 +24,7 @@ public class ItemStack {
     public ActionRequirement requirement;
     public ImageIdentifier image;
     public String name, examineText;
+    public boolean isStacked = false;
 
     // Non-essential
     public float damage = 0, speed = 0, armor = 0;
@@ -51,12 +52,35 @@ public class ItemStack {
         setData(data);
     }
 
+    public ItemStack(Item item, int amount, int data, boolean stacked) {
+        this.id = item.getID();
+        this.item = item;
+        this.amount = amount;
+        this.options = new ArrayList();
+        this.requirement = ActionRequirement.none();
+        this.image = item.getImage();
+        this.name = item.getName();
+        this.worth = item.worth;
+        this.examineText = item.getExamineText();
+        this.isStacked = stacked;
+
+        setData(data);
+    }
+
     public ItemStack(ItemList item, int amount, int data) {
         this(item.getItem(), amount, data);
     }
 
+    public ItemStack(ItemList item, int amount, int data, boolean stacked) {
+        this(item.getItem(), amount, data, stacked);
+    }
+
     public ItemStack(int item, int amount, int data) {
         this(ItemList.values()[item], amount, data);
+    }
+
+    public ItemStack(int item, int amount, int data, boolean stacked) {
+        this(ItemList.values()[item], amount, data, stacked);
     }
 
     public static ItemStack empty() {
@@ -65,7 +89,8 @@ public class ItemStack {
 
     public boolean compare(ItemStack stack) {
         return getID() == stack.getID() &&
-                getData() == stack.getData();
+                getData() == stack.getData() &&
+                isStacked == stack.isStacked;
     }
 
     public ArrayList<RCOption> getOptions() {
@@ -118,7 +143,7 @@ public class ItemStack {
     }
 
     public ItemStack clone() {
-        return new ItemStack(item, amount, data);
+        return new ItemStack(item, amount, data, isStacked);
     }
 
     public void setData(int data) {
@@ -138,10 +163,6 @@ public class ItemStack {
 
     public int getEquipStatus() {
         return equipStatus;
-    }
-
-    public int getMaxAmount() {
-        return item.getMaxAmount();
     }
 
     public ItemList getItemList() {
@@ -195,6 +216,9 @@ public class ItemStack {
     }
 
     public String optionsString() {
+        if (isStacked)
+            return "NO OPTIONS";
+
         StringBuilder optionBuilder = new StringBuilder();
 
         if (getEquipStatus() != -1) {
@@ -214,7 +238,10 @@ public class ItemStack {
     }
 
     public String getExamineText() {
-        return setUpExamine(examineText);
+        if (!isStacked)
+            return setUpExamine(examineText);
+        else
+            return "A stack of " + getAmount() + " " + getName();
     }
 
     public String getExamineTextAbstract() {
@@ -238,7 +265,7 @@ public class ItemStack {
     }
 
     public String getServerPacket() {
-        return getName() + ";" + getAmount() + ";" + getImage().getToken() + ";" + optionsString() + ";" + getExamineText() + ";" + (int) (Settings.shopSellMultiplier * worth);
+        return getName() + ";" + getAmount() + ";" + getImage().getToken() + ";" + optionsString() + ";" + getExamineText() + ";" + (int) (Settings.shopSellMultiplier * worth) + ";" + isStacked;
     }
 
     public void rightClick(Player player, int index, String name) {
@@ -253,6 +280,9 @@ public class ItemStack {
                 item.equipItem(player, index);
                 return;
         }
+
+        if (isStacked)
+            return;
 
         for (RCOption option : options) {
             if (option.getOption().equals(name)) {
@@ -275,12 +305,28 @@ public class ItemStack {
             return;
         }
 
-        if (equipStatus != -1) {
+        if (equipStatus != -1 && !isStacked) {
             item.equipItem(player, index);
-        } else if (options.isEmpty()) {
+        } else if (options.isEmpty() || isStacked) {
             player.sendMessage(getExamineText());
         } else {
             options.get(0).run(player, index);
         }
+    }
+
+    public int maxStack() {
+        return item.stackable || isStacked ? Integer.MAX_VALUE : 1;
+    }
+
+    public String toString() {
+        return getID() + " " + getAmount() + " " + getData() + " " + isStacked;
+    }
+
+    public boolean compareIgnoreStack(ItemStack item) {
+        return item.getID() == getID() && item.getData() == getData();
+    }
+
+    public void setStacked(boolean stacked) {
+        isStacked = stacked && !item.stackable;
     }
 }

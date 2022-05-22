@@ -7,10 +7,6 @@ import com.Game.Projectile.Projectile;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Vector2;
-import com.Game.WorldManagement.GroundItem;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Contains the functionality of an item, one instance of this is held in an ItemList
@@ -102,6 +98,9 @@ public class Item {
     }
 
     public void equipItem(Player player, int index) {
+        if (player.inventory.getStack(index).isStacked)
+            return;
+
         ItemStack stack = player.inventory.getStack(index);
         ItemStack slotStack = player.accessory.getSlot(stack.getEquipStatus());
 
@@ -113,8 +112,8 @@ public class Item {
         if (slotStack.getID() == stack.getID() && slotStack.getData() == stack.getData()) {
             int add = stack.getAmount();
 
-            if (add > slotStack.getMaxAmount() - slotStack.getAmount())
-                add = slotStack.getMaxAmount() - slotStack.getAmount();
+            if (add > slotStack.maxStack() - slotStack.getAmount())
+                add = slotStack.maxStack() - slotStack.getAmount();
 
             player.accessory.addAmount(stack.getEquipStatus(), add);
             player.inventory.addAmount(index, -add);

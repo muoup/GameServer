@@ -42,7 +42,7 @@ public class AccessoriesManager {
     }
 
     public void setSlot(int slot, ItemStack item) {
-        int stackSet = Math.min(item.getAmount(), item.getMaxAmount());
+        int stackSet = Math.min(item.getAmount(), item.maxStack());
 
         accessories[slot] = new ItemStack(item.getItemList(), stackSet, item.getData());
 

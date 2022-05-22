@@ -392,25 +392,26 @@ public class Player extends Entity {
         banking.depositFromInventory(inventoryIndex, amount);
     }
 
-    public void withdraw(int bankIndex, int amount) {
+    public void withdraw(int bankIndex, int amount, boolean inStack) {
         if (!banking.isOpen()) {
             sendMessage("Uh oh! Error alert. Please reopen the bank.");
         }
 
-        banking.withdrawItem(bankIndex, amount);
+        banking.withdrawItem(bankIndex, amount, inStack);
     }
 
     public void handleBankRequest(String[] index) {
         String request = index[1];
         int hover = Integer.parseInt(index[2]);
         int amount = Integer.parseInt(index[3]);
+        boolean isStacked = Boolean.parseBoolean(index[4]);
 
         switch (request.trim()) {
             case "deposit":
                 deposit(hover, amount);
                 break;
             case "withdraw":
-                withdraw(hover, amount);
+                withdraw(hover, amount, isStacked);
                 break;
             default:
                 System.err.println("Unknown banking request " + request);

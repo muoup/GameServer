@@ -92,10 +92,6 @@ public enum ItemList {
         return item.getExamineText();
     }
 
-    public int maxStack() {
-        return (item.stackable) ? Integer.MAX_VALUE : 1;
-    }
-
     public ItemStack singleStack() {
         return new ItemStack(this, 1, 0);
     }
