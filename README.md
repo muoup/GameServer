@@ -1,4 +1,4 @@
-# Masterdust GameServer
+# GameServer
 ### Because nobody really liked local play anyway
 
 ***
