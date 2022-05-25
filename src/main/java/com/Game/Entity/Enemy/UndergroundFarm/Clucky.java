@@ -2,12 +2,10 @@ package com.Game.Entity.Enemy.UndergroundFarm;
 
 import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Inventory.ItemList;
-import com.Game.Inventory.ItemStack;
 import com.Game.ItemData.DropTable;
 import com.Game.Projectile.Pellet;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Vector2;
-import com.Game.WorldManagement.GroundItem;
 import com.Game.WorldManagement.World;
 
 import java.util.ArrayList;
@@ -20,11 +18,11 @@ public class Clucky extends Enemy {
     public Clucky(World world, int x, int y) {
         super(world, x, y);
         this.name = "Clucky The Undisturbed";
-        this.targetLostTime = 45000;
+        this.loseTargetTime = 45000;
         this.speed = 50f;
         this.minions = new ArrayList<>();
         this.respawnTime = 20000;
-        this.maxFollowDistance = 1500;
+        this.loseFocusDistance = 1500;
 
         setImage("clucky.png", 128, 128);
         setMaxHealth(450);

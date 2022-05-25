@@ -6,7 +6,7 @@ import com.Game.WorldManagement.World;
 public class SpiderRoach extends Enemy {
     public SpiderRoach(World world,  int x, int y) {
         super(world, x, y);
-        this.targetLostTime = 25500;
+        this.loseTargetTime = 25500;
         this.speed = 250;
         this.name = "Spider Roach";
 

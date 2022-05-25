@@ -263,6 +263,22 @@ public class Server {
                             System.out.println("new Tree(this, " + x + ", " + y + ", TreePreset.tree);");
                             new Tree(player.getWorld(), x, y, TreePreset.tree);
                             break;
+                        case "ash":
+                            System.out.println("new Tree(this, " + x + ", " + y + ", TreePreset.ash);");
+                            new Tree(player.getWorld(), x, y, TreePreset.ash);
+                            break;
+                        case "oak":
+                            System.out.println("new Tree(this, " + x + ", " + y + ", TreePreset.oak);");
+                            new Tree(player.getWorld(), x, y, TreePreset.oak);
+                            break;
+                        case "spruce":
+                            System.out.println("new Tree(this, " + x + ", " + y + ", TreePreset.spruce);");
+                            new Tree(player.getWorld(), x, y, TreePreset.spruce);
+                            break;
+                        case "pine":
+                            System.out.println("new Tree(this, " + x + ", " + y + ", TreePreset.pine);");
+                            new Tree(player.getWorld(), x, y, TreePreset.pine);
+                            break;
                         case "maple":
                             System.out.println("new Tree(this, " + x + ", " + y + ", TreePreset.maple);");
                             new Tree(player.getWorld(), x, y, TreePreset.maple);

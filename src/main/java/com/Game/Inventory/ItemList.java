@@ -36,7 +36,7 @@ public enum ItemList {
     feather(new Feather(15,"Feather", "Because steel is heavier than feathers.", 20, true)),
     arrowShaft(new ArrowShaft(16, "Arrow Shaft", "Not quite the orange kind.", 10, true)),
     stringItem(new StringItem(17, "String", "Where does the string come from?", 5, false)),
-    bowString(new BowString(18, "Bow string", "I can combine this with a bow stock.", 20, false)),
+    bowString(new BowString(18, "Bow String", "I can combine this with a bow stock.", 20, false)),
     ashBow(new BowWeapon(19, 1, 10, "Unstrung Ash Bow", "Tier 10", 100, false)),
     pineBow(new BowWeapon(20, 2, 20, "Unstrung Pine Bow", "Tier 20", 100, false)),
     oakBow(new BowWeapon(21, 3, 30, "Unstrung Oak Bow", "Tier 30", 100, false)),

@@ -6,12 +6,12 @@ import com.Game.Entity.Entity;
 import com.Game.Entity.Player.Player;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Util.Math.DeltaMath;
+import com.Game.Util.Math.Rect2;
 import com.Game.Util.Math.Vector2;
 import com.Game.Util.Other.Timer;
 import com.Game.WorldManagement.World;
 
 import java.util.ArrayList;
-import java.util.Vector;
 
 public class Enemy extends Entity {
 
@@ -24,7 +24,7 @@ public class Enemy extends Entity {
     public float speed = 0;
     public ImageIdentifier image;
     public boolean temporary = false;
-    public long targetLostTime = 60000;
+    public long loseTargetTime = 60000;
 
     public AIRunnable idleAI = AIType.none;
     public AIRunnable targetAI = AIType.none;
@@ -32,11 +32,10 @@ public class Enemy extends Entity {
     public ArrayList<Timer> passiveTimers;
 
     // Optional Static Variables
-    public float moveRadius = 0;
-    public float maxFollowDistance = 512f;
-    public boolean useBounds = false;
-    public Vector2 b1;
-    public Vector2 b2;
+    public float maxMoveRadius = 0;
+    public float moveRadius = 25f;
+    public float loseFocusDistance = 512f;
+    public Rect2 bounds;
     public long respawnTime = 0;
     public boolean passive = false;
 
@@ -120,7 +119,7 @@ public class Enemy extends Entity {
         position.add(movement.scaleClone(speed * (float) Server.dTime()));
 
         if (playerTarget != null) {
-            if (Vector2.distance(playerTarget.getPosition(), spawnPosition) > maxFollowDistance || !target()) {
+            if (Vector2.distance(playerTarget.getPosition(), spawnPosition) > loseFocusDistance || !target()) {
                 previousDamage = 0;
                 loseTarget();
             }
@@ -142,7 +141,7 @@ public class Enemy extends Entity {
     }
 
     public boolean target() {
-        return System.currentTimeMillis() < previousDamage + targetLostTime && playerTarget != null;
+        return System.currentTimeMillis() < previousDamage + loseTargetTime && playerTarget != null;
     }
 
     public void update() {
@@ -170,15 +169,6 @@ public class Enemy extends Entity {
 
     public void onRespawn() {
 
-    }
-
-    public boolean withinBounds() {
-        if (b1 == null || b2 == null) {
-            System.err.println(getClass() + " does not contain a definition for its boundaries!");
-            return false;
-        }
-
-        return position.compareTo(b1) != -1 && position.compareTo(b2) != 1;
     }
 
     public void loseTarget() {
@@ -212,9 +202,7 @@ public class Enemy extends Entity {
     }
 
     public void setBounds(float x, float y, float x2, float y2) {
-        b1 = new Vector2(x, y);
-        b2 = new Vector2(x2, y2);
-        useBounds = true;
+        bounds = new Rect2(x, y, x2 - x, y2 - y);
     }
 
     public void setMoveTo(Vector2 moveTo) {
@@ -249,7 +237,8 @@ public class Enemy extends Entity {
         if (health <= 0) {
             playerTarget = null;
             setEnabled(false);
-            handleDrops();
+            if (!temporary)
+                handleDrops();
             currentRespawn = System.currentTimeMillis() + respawnTime;
 
             if (temporary)

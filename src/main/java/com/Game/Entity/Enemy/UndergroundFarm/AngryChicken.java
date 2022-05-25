@@ -16,7 +16,7 @@ public class AngryChicken extends Enemy {
         this.targetAI = AIType::basicChase;
         this.speed = 60f;
         this.followDistance = 128f;
-        this.maxFollowDistance = 2500;
+        this.loseFocusDistance = 2500;
         this.temporary = true;
         this.owner = owner;
 

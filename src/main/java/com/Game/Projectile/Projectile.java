@@ -226,7 +226,6 @@ public class Projectile {
         double deltaAngle = Math.toRadians(degrees);
 
         for (int i = -amount / 2; i <= amount / 2; i++) {
-            System.out.println(i);
 
             if (i == 0)
                 continue;
@@ -235,51 +234,6 @@ public class Projectile {
             Vector2 direction = new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
 
             clone(direction);
-        }
-    }
-
-    public void multiShotEnemy(Player target, double degrees, float radius, int amount) {
-        degrees = Math.toRadians(degrees);
-
-        if (amount % 2 == 1) {
-            Vector2 aim = target.getPosition();
-
-            double theta = Math.atan((aim.x - position.x) / (aim.y - position.y));
-
-            if (aim.y - position.y <= 0) {
-                theta += DeltaMath.pi;
-            }
-
-            Vector2 adjust = position.addClone(radius * Math.sin(theta), radius * Math.cos(theta));
-
-            setAim(adjust);
-
-            Constructor projectileConstructor;
-
-            try {
-                projectileConstructor = getClass().getConstructor(Vector2.class, Vector2.class, Projectile.class);
-            } catch (NoSuchMethodException e) {
-                System.err.println(getClass() + " does not contain a correct multi-shot constructor!");
-                return;
-            }
-
-            for (int i = -amount / 2; i < amount / 2 + 1; i++) {
-                if (i == 0)
-                    continue;
-
-                /*
-                    Point on Circle from Center = (r * sin(θ), r * cos(θ))
-                    Where r = radius of circle and θ = degrees
-                    NOTE: 0 degrees is located at (0, r)
-                 */
-
-                try {
-                    Vector2 newAim = position.addClone(radius * Math.sin(theta + i * degrees), radius * Math.cos(theta + i * degrees));
-                    projectileConstructor.newInstance(position, newAim, this);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
         }
     }
 }

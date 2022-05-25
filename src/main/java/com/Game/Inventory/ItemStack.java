@@ -315,7 +315,7 @@ public class ItemStack {
     }
 
     public int maxStack() {
-        return item.stackable || isStacked ? Integer.MAX_VALUE : 1;
+        return isStackable() ? Integer.MAX_VALUE : 1;
     }
 
     public String toString() {
@@ -328,5 +328,9 @@ public class ItemStack {
 
     public void setStacked(boolean stacked) {
         isStacked = stacked && !item.stackable;
+    }
+
+    public boolean isStackable() {
+        return item.stackable || isStacked;
     }
 }

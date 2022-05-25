@@ -25,7 +25,7 @@ public class MainWorld extends World {
     }
 
     public void worldCreation() {
-        // Forest Area
+        // Trees
         new Tree(this, 2084, 2136, TreePreset.tree);
         new Tree(this, 2333, 2319, TreePreset.tree);
         new Tree(this, 2094, 2358, TreePreset.tree);
@@ -91,14 +91,20 @@ public class MainWorld extends World {
         new Chicken(this);
 
         new StorageChest(this, 1660, 1727);
-        new StorageChest(this, 2783, 3693);
         new StorageChest(this, 5637, 4902);
         new StorageChest(this, 871, 4518);
         new StorageChest(this, 4921, 2060);
 
         // Smithing Area
-        new Furnace(this, 2795, 4345);
+        new StorageChest(this, 2800, 3693);
+
+        new Furnace(this, 2800, 4345);
+        new Furnace(this, 2800, 4145);
+        new Furnace(this, 2800, 3945);
+        new Furnace(this, 2800, 3445);
+
         new Anvil(this, 3724, 4345);
+        new Anvil(this, 3724, 3455);
 
         // Beach Area
         new FishingArea(this, 885, 5595, FishingPreset.clownFish);
@@ -123,8 +129,28 @@ public class MainWorld extends World {
         // Teleporter to Chess Dungeon
         new InvisibleTeleporter(this, 5507, 1643, WorldHandler.chessDungeon, 135, 125);
 
+        // Forest
+        new Tree(this, 5006, 3898, TreePreset.spruce);
+        new Tree(this, 5351, 3459, TreePreset.maple);
+        new Tree(this, 5948, 3687, TreePreset.spruce);
+        new Tree(this, 5637, 3972, TreePreset.maple);
+        new Tree(this, 5790, 4243, TreePreset.spruce);
+        new Tree(this, 5305, 4038, TreePreset.oak);
+        new Tree(this, 5140, 3643, TreePreset.oak);
+        new Tree(this, 5674, 3491, TreePreset.oak);
+        new Tree(this, 5990, 4138, TreePreset.oak);
+        new Tree(this, 5870, 3837, TreePreset.oak);
+        new Tree(this, 5126, 3453, TreePreset.pine);
+        new Tree(this, 5550, 3302, TreePreset.pine);
+        new Tree(this, 5902, 3519, TreePreset.pine);
+        new Tree(this, 5709, 3710, TreePreset.pine);
+        new Tree(this, 5520, 4189, TreePreset.ash);
+        new Tree(this, 5832, 4026, TreePreset.ash);
+        new Tree(this, 5288, 3827, TreePreset.pine);
+        new Tree(this, 4929, 3632, TreePreset.pine);
+
         // Teleporter to Underground
-//        new CaveEntrance(this, 5150, 3534, CaveEntrance.TeleType.caveEntrance);
+        new CaveEntrance(this, 5511, 3749, CaveEntrance.TeleType.caveEntrance);
 
         // Teleporter to Tribal Lands
         new TribalTeleport(this, 500, 4100, WorldHandler.tropics, 1652, 3098);

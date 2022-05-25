@@ -7,6 +7,7 @@ import com.Game.Inventory.ItemStack;
 import com.Game.ItemData.Requirement.ActionRequirement;
 import com.Game.Items.Weapon.Weapon;
 import com.Game.Entity.Player.Player;
+import com.Game.Objects.Utilities.Interfaces.CraftActionLoop;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Skills.Skills;
 import com.Game.Util.Other.RCOption;
@@ -54,8 +55,18 @@ public class BowWeapon extends Weapon {
     }
 
     public void string(Player player, int index) {
-        if (combine(player, index, ItemList.bowString, 1, 1))
-            player.addExperience(Skills.FLETCHING, 30 * (1 + tier / 5));
+        int level = player.getLevel(Skills.FLETCHING);
+
+        if (level < tier) {
+            player.sendMessage("You need a fletching level of " + tier + " to string this bow.");
+            return;
+        }
+
+        CraftActionLoop loop = new CraftActionLoop(player, index, (long) (750 + 1000 / Math.sqrt(1 + level - tier)),
+                Skills.FLETCHING, 30 * (1 + tier / 5),
+                1, new ItemStack(ItemList.bowString, 1));
+
+        player.createPlayerLoop(loop);
     }
 
     public void dataItemChange(ItemStack stack) {

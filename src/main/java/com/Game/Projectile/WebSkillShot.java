@@ -6,7 +6,7 @@ import com.Game.Util.Math.Vector2;
 
 public class WebSkillShot extends Projectile {
     public WebSkillShot(Entity owner, Vector2 aim) {
-        super(owner, aim, 12, 2.25f, 2500);
+        super(owner, aim, 75, 250f, 2500);
         this.rotate = false;
         setScale(18);
         setImage("web.png");

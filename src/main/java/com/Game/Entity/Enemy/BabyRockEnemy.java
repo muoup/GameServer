@@ -21,7 +21,7 @@ public class BabyRockEnemy extends Enemy {
 
         setImage("babyRock.png", 64 ,64);
         this.respawnTime = 5000;
-        this.targetLostTime = 7500;
+        this.loseTargetTime = 7500;
         this.speed = 125;
         this.name = "Baby Rock";
         setMaxHealth(100);

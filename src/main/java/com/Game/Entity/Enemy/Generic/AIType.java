@@ -9,18 +9,73 @@ public class AIType {
 
     // ------------- AI Types -------------------------
 
-    public static void passiveRadiusWalk(Enemy enemy) {
+    /**
+     * Staggered movement only a certain distance from the spawn point. Useful for spiders and other creepy-crawlies.
+     *
+     * Required settings:
+     * moveRadius - The maximum movement distance from one point to another
+     * maxMoveRadius - The maximum distance from the spawn point that the enemy can move
+     *
+     * @param enemy
+     */
+    public static void passiveRadiusCreep(Enemy enemy) {
         if (timeForNextMove(enemy)) {
-            enemy.setMoveTo(enemy.spawnPosition.addClone(DeltaMath.range(-enemy.moveRadius, enemy.moveRadius)));
+            Vector2 moveTo;
+
+            do {
+                moveTo = enemy.getPosition().addClone(new Vector2(DeltaMath.range(-enemy.moveRadius, enemy.moveRadius),
+                        DeltaMath.range(-enemy.moveRadius, enemy.moveRadius)));
+            } while (Vector2.distance(enemy.spawnPosition, moveTo) > enemy.maxMoveRadius);
+
+            enemy.setMoveTo(moveTo);
         }
     }
 
+    /**
+     * Staggered movement only within bounds. Useful for spiders and other creepy-crawlies.
+     *
+     * Required settings:
+     * moveRadius - The maximum movement distance from one point to another
+     * bounds - The bounds that the enemy can move within
+     *
+     * @param enemy
+     */
+    public static void passiveBoundaryCreep(Enemy enemy) {
+        if (timeForNextMove(enemy)) {
+            Vector2 moveTo;
+
+            do {
+                moveTo = enemy.getPosition().addClone(new Vector2(DeltaMath.range(-enemy.moveRadius, enemy.moveRadius),
+                        DeltaMath.range(-enemy.moveRadius, enemy.moveRadius)));
+            } while (!enemy.bounds.contains(moveTo));
+
+            enemy.setMoveTo(moveTo);
+        }
+    }
+
+    /**
+     * Passive movement within a boundary, picks a point within the bounds, moves to the point, and then picks a new one.
+     *
+     * Required settings:
+     * bounds - The bounds that the enemy can move within
+     *
+     * @param enemy
+     */
     public static void passiveBoundaryWalk(Enemy enemy) {
         if (timeForNextMove(enemy)) {
-            enemy.setMoveTo(new Vector2(DeltaMath.range(enemy.b1.x, enemy.b2.x), DeltaMath.range(enemy.b1.y, enemy.b2.y)));
+            enemy.setMoveTo(enemy.bounds.randomPoint());
         }
     }
 
+    /**
+     * A basic AI that moves towards the player, stopping when it is within a certain distance of the player.
+     *
+     * Required settings:
+     * followDistance - The distance that the enemy will stop moving towards the player
+     * scale - The scale of the enemy
+     *
+     * @param enemy
+     */
     public static void basicChase(Enemy enemy) {
         if (Vector2.distance(enemy.getPosition(), enemy.playerTarget.getPosition()) <= enemy.followDistance) {
             if (!enemy.movement.isZero())

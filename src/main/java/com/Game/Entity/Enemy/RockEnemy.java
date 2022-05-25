@@ -22,7 +22,7 @@ public class RockEnemy extends Enemy {
         this.id = 1;
         this.respawnTime = 7500;
         this.speed = 150f;
-        this.targetLostTime = 10000;
+        this.loseTargetTime = 10000;
         this.name = "Bigger Rock";
 
         setMaxHealth(250);

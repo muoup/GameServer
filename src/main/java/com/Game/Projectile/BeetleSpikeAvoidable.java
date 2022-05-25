@@ -5,7 +5,7 @@ import com.Game.Util.Math.Vector2;
 
 public class BeetleSpikeAvoidable extends Projectile {
     public BeetleSpikeAvoidable(Entity owner, Vector2 aim) {
-        super(owner, aim, 35f, 2.5f, 1000);
+        super(owner, aim, 100f, 400f, 3000);
         this.rotate = false;
         setScale(16);
         setImage("beetle_spike2.png");

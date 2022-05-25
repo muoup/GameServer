@@ -4,8 +4,8 @@ import java.util.Random;
 
 public class Vector2 {
 
-    public float x = 0;
-    public float y = 0;
+    public float x;
+    public float y;
 
     public Vector2(float x, float y) {
         this.x = x;
@@ -15,6 +15,22 @@ public class Vector2 {
     public Vector2(float xy) {
         this.x = xy;
         this.y = xy;
+    }
+
+    public float getX() {
+        return x;
+    }
+
+    public void setX(float x) {
+        this.x = x;
+    }
+
+    public float getY() {
+        return y;
+    }
+
+    public void setY(float y) {
+        this.y = y;
     }
 
     public Vector2 clone() {

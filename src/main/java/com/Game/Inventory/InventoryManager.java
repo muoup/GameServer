@@ -58,6 +58,10 @@ public class InventoryManager {
         return amount;
     }
 
+    public int itemCount(ItemStack stack) {
+        return itemCount(stack.getItemList(), stack.getData());
+    }
+
     public int itemCount(ItemList item, int data) {
         int amount = 0;
         for (ItemStack stack : inventory) {
@@ -87,6 +91,15 @@ public class InventoryManager {
         return -1;
     }
 
+    public int indexOf(ItemStack stack) {
+        for (int i = 0; i < inventory.length; i++) {
+            if (inventory[i].equals(stack))
+                return i;
+        }
+
+        return -1;
+    }
+
     public ItemStack findStack(ItemList item) {
         for (ItemStack stack : inventory) {
             if (stack.getID() == item.getID())
@@ -107,9 +120,17 @@ public class InventoryManager {
 
     public int getIndex(ItemStack stack) {
         for (int i = 0; i < inventory.length; i++) {
-            if (stack.getID() == inventory[i].getID() &&
-                    stack.getAmount() == inventory[i].getAmount() &&
-                    stack.getData() == inventory[i].getData()) {
+            if (stack.compare(inventory[i])) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
+    public int getIndexIgnoreStack(ItemStack stack) {
+        for (int i = 0; i < inventory.length; i++) {
+            if (stack.compareIgnoreStack(inventory[i])) {
                 return i;
             }
         }

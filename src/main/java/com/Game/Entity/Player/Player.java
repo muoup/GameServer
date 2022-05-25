@@ -299,6 +299,13 @@ public class Player extends Entity {
         return inventory.addItem(stack);
     }
 
+    public int addItem(ItemStack stack, int amount) {
+        ItemStack newStack = stack.clone();
+        newStack.amount = amount;
+
+        return inventory.addItem(newStack);
+    }
+
     public void setItem(int slot, int amount) {
         inventory.setItemAmount(slot, amount);
     }
@@ -306,6 +313,10 @@ public class Player extends Entity {
     public void removeItem(int slot, int amount) {
         ItemStack type = inventory.getStack(slot).clone();
         removeItem(type.getItemList(), type.getData(), amount);
+    }
+
+    public void removeItem(ItemStack stack, int amount) {
+        removeItem(stack.getItemList(), stack.getData(), amount);
     }
 
     public void removeItem(ItemList type, int data, int amount) {
@@ -526,6 +537,10 @@ public class Player extends Entity {
         ArrayList<Enemy> enemies = world.enemies;
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
+
+            if (enemy.playerTarget == null)
+                continue;
+
             if (enemy.playerTarget.username.equalsIgnoreCase(username)) {
                 enemy.loseTarget();
             }

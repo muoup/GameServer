@@ -13,7 +13,7 @@ public class Pawn extends Enemy {
         this.name = "Chessboard Pawn";
         this.id = 35;
         this.respawnTime = 25000;
-        this.targetLostTime = 4500;
+        this.loseTargetTime = 4500;
         this.passive = false;
         this.speed = 0;
     }

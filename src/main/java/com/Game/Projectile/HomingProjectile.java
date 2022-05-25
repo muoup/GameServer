@@ -27,7 +27,7 @@ public class HomingProjectile extends Projectile {
         Vector2 targetPos = target.getPosition();
         position.add(Vector2.magnitudeDirection(position, targetPos).scale(speed * (float) Server.dTime()));
 
-        speed += speed * 0.05 * Server.dTime();
+        speed += speed * 0.25 * Server.dTime();
 
         Player playerTarget = (Player) target;
 
