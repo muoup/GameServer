@@ -9,11 +9,12 @@ import com.Game.Util.Math.Vector2;
 import com.Game.WorldManagement.World;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 public class Clucky extends Enemy {
     private ArrayList<AngryChicken> minions;
     private float minionSpawnDistance = 64;
-    private int maxMinions = 3;
+    private int maxMinions = 4;
 
     public Clucky(World world, int x, int y) {
         super(world, x, y);
@@ -25,9 +26,9 @@ public class Clucky extends Enemy {
         this.loseFocusDistance = 1500;
 
         setImage("clucky.png", 128, 128);
-        setMaxHealth(450);
-        addProjTimer(15000, this::spawnMinion);
-        addProjTimer(3500, this::starAttack);
+        setMaxHealth(500);
+        addProjTimer(10000, this::spawnMinion);
+        addProjTimer(2000, this::starAttack);
     }
 
     public void spawnMinion() {
@@ -55,7 +56,7 @@ public class Clucky extends Enemy {
 
             Vector2 velocity = new Vector2(x, y).normalize();
 
-            new Pellet(this, velocity, 25f, 200f, 10000);
+            new Pellet(this, velocity, 250f, 200f, 10000);
         }
     }
 
@@ -65,10 +66,17 @@ public class Clucky extends Enemy {
         // create a drop table
         // add a random chance for each item
         DropTable dropTable = new DropTable();
-        dropTable.addItem(ItemList.feather, 100, 1f);
-        dropTable.addItem(ItemList.feather, 250, 0.5f);
+        dropTable.addItem(ItemList.feather, 25, 250, 1f);
         dropTable.addItem(ItemList.chickenShield, 1, 0.05f);
         world.createGroundItem(position, dropTable.determineOutput());
+    }
+
+    public void onTargetLost() {
+        killMinions(minions);
+    }
+
+    public void update() {
+
     }
 
     public void minionDied(AngryChicken angryChicken) {

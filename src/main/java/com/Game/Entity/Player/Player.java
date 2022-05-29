@@ -40,9 +40,7 @@ import com.Game.WorldManagement.WorldHandler;
 
 import java.net.InetAddress;
 import java.util.ArrayList;
-import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.Optional;
 
 public class Player extends Entity {
 
@@ -82,6 +80,7 @@ public class Player extends Entity {
     public long velocityCheckTime = 0;
     public GameObject objectInteration = null;
     private Hashtable<String, Long> timers;
+    private Hashtable<String, Object> references;
 
     // Movement Verification
     public long lastMoveTime = 0;
@@ -104,6 +103,7 @@ public class Player extends Entity {
         this.ipAddress = ipAddress;
         this.port = port;
         this.timers = new Hashtable<>();
+        this.references = new Hashtable<>();
         banking = new BankingHandler(this);
 
         timers.put("healthRegen", System.currentTimeMillis() + 250);
@@ -470,6 +470,11 @@ public class Player extends Entity {
         Server.send(this, "ui", "shop", shop.getShopVerb(), shop.getInventoryVerb());
 
         shop.sendItems(this);
+
+        String extra = shop.extraInfoPacket(this);
+
+        if (extra != null)
+            Server.send(this, "ui", "shopextra", extra);
     }
 
     public void shoot(Vector2 shootPos) {
@@ -507,10 +512,8 @@ public class Player extends Entity {
         if (health < 0) {
             health = maxHealth;
 
-            cleanUpAfterDeath();
-
-            setWorld(WorldHandler.getWorld(WorldHandler.main));
             setPos(SaveSettings.startX, SaveSettings.startY);
+            setWorld(WorldHandler.getWorld(WorldHandler.main));
             sendMessage("Oh no! You have died.");
         }
 
@@ -523,8 +526,6 @@ public class Player extends Entity {
         if (health < 0) {
             this.health = maxHealth;
 
-            cleanUpAfterDeath();
-
             setPos(SaveSettings.startX, SaveSettings.startY);
             setWorld(WorldHandler.getWorld(WorldHandler.main));
             sendMessage("Oh no! You have died.");
@@ -533,7 +534,7 @@ public class Player extends Entity {
         Client.sendHealth(this);
     }
 
-    private void cleanUpAfterDeath() {
+    public void cleanUpWorld() {
         ArrayList<Enemy> enemies = world.enemies;
         for (int i = 0; i < enemies.size(); i++) {
             Enemy enemy = enemies.get(i);
@@ -555,7 +556,7 @@ public class Player extends Entity {
 
         for (GroundItem groundItem : world.groundItems) {
             if (groundItem.randomToken == token) {
-                if (groundItem.stack.size() < index - 1)
+                if (groundItem.stack.size() <= index)
                     continue;
 
                 int removed = addItem(groundItem.stack.get(index));
@@ -620,6 +621,20 @@ public class Player extends Entity {
 
         world.createGroundItem(position, inventory.getStack(index));
         inventory.setItem(index, ItemStack.empty());
+    }
+
+    public void pushReference(String key, Object value) {
+        references.put(key, value);
+    }
+
+    public <T> T getReference(String key) {
+        try {
+            return (T) references.get(key);
+        } catch (ClassCastException e) {
+            System.err.println("Reference " + key + " has not been cast to the correct type.");
+            e.printStackTrace();
+            return null;
+        }
     }
 
 //    public float getDamageMultiplier() {

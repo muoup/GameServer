@@ -1,16 +1,9 @@
 package com.Game.Objects.Utilities;
 
 import com.Game.Entity.Player.Player;
-import com.Game.Inventory.InventoryManager;
-import com.Game.Inventory.ItemList;
-import com.Game.Inventory.ItemStack;
 import com.Game.Objects.UsableGameObject;
-import com.Game.Objects.Utilities.Interfaces.FurnaceInterface;
-import com.Game.Skills.Skills;
-import com.Game.Util.Other.Settings;
+import com.Game.CustomInterfaces.FurnaceInterface;
 import com.Game.WorldManagement.World;
-
-import java.util.Timer;
 
 public class Furnace extends UsableGameObject {
     private final FurnaceInterface furnaceInterface;

@@ -10,7 +10,7 @@ public class Quest {
             Color.RED,
             Color.YELLOW,
             Color.BLUE,
-            Color.GREEN.darker()
+            Color.GREEN
     };
 
     protected final int id;

@@ -1,13 +1,14 @@
-package com.Game.Objects.Utilities.Interfaces;
+package com.Game.CustomInterfaces;
 
+import com.Game.CustomInterfaces.Loops.CraftActionLoop;
+import com.Game.Entity.NPC.Shop;
 import com.Game.Entity.Player.Player;
 import com.Game.Entity.Player.ShopHandler;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Skills.Skills;
-import com.Game.Util.Other.PlayerAction;
 
-public class FurnaceInterface extends ModifiedShop {
+public class FurnaceInterface extends Shop {
     private int[] experience = {
             2,
             4,
@@ -23,8 +24,9 @@ public class FurnaceInterface extends ModifiedShop {
                 new ItemStack(ItemList.tinOre, -1, 1),
                 new ItemStack(ItemList.ironOre, -1, 1),
                 new ItemStack(ItemList.goldOre, -1, 1)
-                                    },
-                "Smelt", "N/A");
+                                    });
+        this.shopVerb = "Smelt";
+        this.inventoryVerb = "N/A";
     }
 
     public void shopInteraction(ShopHandler handler, int index, int amount) {
@@ -37,8 +39,7 @@ public class FurnaceInterface extends ModifiedShop {
 
         Player player = handler.getPlayer();
 
-        CraftActionLoop loop = new CraftActionLoop(player, 1250, amount, input, result,
-                (crafter) -> crafter.addExperience(Skills.SMITHING, experience[index]));
+        CraftActionLoop loop = new CraftActionLoop(player, 1250, amount, Skills.SMITHING, experience[index], 1, result, input);
 
         player.createPlayerLoop(loop);
     }

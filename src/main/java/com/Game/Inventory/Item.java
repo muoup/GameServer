@@ -1,10 +1,12 @@
 package com.Game.Inventory;
 
+import com.Game.CustomInterfaces.Loops.CraftActionLoop;
 import com.Game.Entity.Entity;
 import com.Game.ItemData.Requirement.ActionRequirement;
 import com.Game.Entity.Player.Player;
 import com.Game.Projectile.Projectile;
 import com.Game.PseudoData.ImageIdentifier;
+import com.Game.Skills.Skills;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Vector2;
 
@@ -202,5 +204,16 @@ public class Item {
 
     public int getEquipStatus(int data) {
         return equipStatus;
+    }
+
+    public void craftActionLoop(Player player, int longTime, int loops, int skill, float exp, int craftsPer, ItemStack... outputAndInputs) {
+        CraftActionLoop loop = new CraftActionLoop(player, longTime, loops, skill,
+                exp, craftsPer, outputAndInputs);
+
+        player.createPlayerLoop(loop);
+    }
+
+    public ItemStack getClickStack(Player player, int index) {
+        return player.inventory.getStack(index).clone();
     }
 }

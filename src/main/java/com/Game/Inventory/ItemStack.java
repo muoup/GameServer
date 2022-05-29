@@ -333,4 +333,8 @@ public class ItemStack {
     public boolean isStackable() {
         return item.stackable || isStacked;
     }
+
+    public int getSingleValue() {
+        return worth;
+    }
 }

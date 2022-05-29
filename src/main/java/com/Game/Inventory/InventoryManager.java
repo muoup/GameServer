@@ -189,6 +189,10 @@ public class InventoryManager {
         return removeItem(stack.getItemList(), stack.amount, stack.data);
     }
 
+    public int removeItem(ItemStack stack, int amt) {
+        return removeItem(stack.getItemList(), stack.amount * amt, stack.data);
+    }
+
     public void setAmount(int slot, int amount) {
         ItemStack stack = getStack(slot);
         stack.amount = amount;
@@ -284,6 +288,13 @@ public class InventoryManager {
         }
 
         return amt - amount;
+    }
+
+    public int addItem(ItemStack itemStack, int amount) {
+        ItemStack newStack = itemStack.clone();
+        newStack.amount *= amount;
+
+        return addItem(newStack);
     }
 
     public ItemStack getStack(int inventoryIndex) {

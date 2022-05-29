@@ -1,14 +1,16 @@
-package com.Game.Objects.Utilities.Interfaces;
+package com.Game.CustomInterfaces;
 
+import com.Game.CustomInterfaces.Loops.CraftActionLoop;
+import com.Game.Entity.NPC.Shop;
 import com.Game.Entity.Player.Player;
 import com.Game.Entity.Player.ShopHandler;
 import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Skills.Skills;
 
-public class AnvilInterface extends ModifiedShop {
+public class AnvilInterface extends Shop {
     public AnvilInterface() {
-        super(new ItemStack[]{
+        super(new ItemStack[] {
                 new ItemStack(ItemList.rockHelmet, -1, 1),
                 new ItemStack(ItemList.rockChestplate, -1, 1),
                 new ItemStack(ItemList.rockLeggings, -1, 1),
@@ -23,8 +25,9 @@ public class AnvilInterface extends ModifiedShop {
                 new ItemStack(ItemList.tinChestplate, -1, 1),
                 new ItemStack(ItemList.tinLeggings, -1, 1),
                 new ItemStack(ItemList.tinBoots, -1, 1)
-                             },
-                "Smith", "N/A");
+                             });
+        this.shopVerb = "Smith";
+        this.inventoryVerb = "N/A";
     }
 
     public int[] barRequirement = {
@@ -58,8 +61,8 @@ public class AnvilInterface extends ModifiedShop {
 
         Player player = handler.getPlayer();
 
-        CraftActionLoop loop = new CraftActionLoop(player, 750 * barRequirement[col], amount, input, result,
-                (crafter) -> crafter.addExperience(Skills.SMITHING, experience[row] * barRequirement[col]));
+        CraftActionLoop loop = new CraftActionLoop(player, 750 * barRequirement[col], amount,
+                Skills.SMITHING, experience[row] * barRequirement[col], 1, result, input);
 
         player.createPlayerLoop(loop);
     }

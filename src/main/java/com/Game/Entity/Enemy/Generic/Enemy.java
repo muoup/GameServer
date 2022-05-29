@@ -4,6 +4,7 @@ import com.Game.ConnectionHandling.Client;
 import com.Game.ConnectionHandling.Init.Server;
 import com.Game.Entity.Entity;
 import com.Game.Entity.Player.Player;
+import com.Game.Inventory.ItemStack;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Rect2;
@@ -171,7 +172,8 @@ public class Enemy extends Entity {
 
     }
 
-    public void loseTarget() {
+
+    public final void loseTarget() {
         playerTarget = null;
 
         if (temporary) {
@@ -237,6 +239,7 @@ public class Enemy extends Entity {
         if (health <= 0) {
             playerTarget = null;
             setEnabled(false);
+            onDeath();
             if (!temporary)
                 handleDrops();
             currentRespawn = System.currentTimeMillis() + respawnTime;
@@ -248,6 +251,10 @@ public class Enemy extends Entity {
         }
 
         informHealth();
+    }
+
+    public void onDeath() {
+
     }
 
     public void changeHealth(float deltaHealth) {
@@ -340,5 +347,17 @@ public class Enemy extends Entity {
 
     public void addPassiveTimer(long wait, Runnable run) {
         passiveTimers.add(new Timer(wait, run));
+    }
+
+    public void announceDrop(ItemStack stack) {
+
+    }
+
+    public <T> void killMinions(ArrayList<T> minions) {
+        while (minions.size() > 0) {
+            T minion = minions.get(0);
+            minions.remove(0);
+            ((Enemy) minion).die();
+        }
     }
 }

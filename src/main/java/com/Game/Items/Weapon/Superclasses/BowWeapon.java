@@ -7,7 +7,7 @@ import com.Game.Inventory.ItemStack;
 import com.Game.ItemData.Requirement.ActionRequirement;
 import com.Game.Items.Weapon.Weapon;
 import com.Game.Entity.Player.Player;
-import com.Game.Objects.Utilities.Interfaces.CraftActionLoop;
+import com.Game.CustomInterfaces.Loops.CraftActionLoop;
 import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Skills.Skills;
 import com.Game.Util.Other.RCOption;
@@ -62,9 +62,9 @@ public class BowWeapon extends Weapon {
             return;
         }
 
-        CraftActionLoop loop = new CraftActionLoop(player, index, (long) (750 + 1000 / Math.sqrt(1 + level - tier)),
-                Skills.FLETCHING, 30 * (1 + tier / 5),
-                1, new ItemStack(ItemList.bowString, 1));
+        CraftActionLoop loop = new CraftActionLoop(player, (long) (750 + 1000 / Math.sqrt(1 + level - tier)), 20,
+                Skills.FLETCHING, 30 * (1 + tier / 5), 1, new ItemStack(ItemList.bowString, 1),
+                new ItemStack(ItemList.bowString, 1), new ItemStack(this.getItemList(), 1));
 
         player.createPlayerLoop(loop);
     }

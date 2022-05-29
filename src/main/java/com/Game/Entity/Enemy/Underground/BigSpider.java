@@ -41,7 +41,7 @@ public class BigSpider extends Enemy {
     public void update() {
     }
 
-    public void loseTarget() {
+    public void onTargetLost() {
         minions.forEach(Enemy::die);
         minions.clear();
     }

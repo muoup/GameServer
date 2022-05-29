@@ -36,6 +36,14 @@ public class ShopHandler {
     }
 
     public void buyOption(int index, int amount) {
+        buyOption(index, amount, 1);
+    }
+
+    public void sellInventory(int index, int amount) {
+        sellInventory(index, amount, 1);
+    }
+
+    public void buyOption(int index, int amount, float priceModifier) {
         if (index > selectedShop.offeredItems.length - 1) {
             System.err.println("UH OH, shoppy did an oopsie");
             return;
@@ -68,11 +76,11 @@ public class ShopHandler {
 
         selected.amount = Math.min(amount, maxSpace);
 
-        player.removeItem(ItemList.gold, 0, price);
+        player.removeItem(ItemList.gold, 0, (int) (price * priceModifier));
         player.addItem(selected);
     }
 
-    public void sellInventory(int index, int amount) {
+    public void sellInventory(int index, int amount, float priceModifier) {
         ItemStack selected = player.inventory.getStack(index);
 
         if (selected.getWorth() <= 0) {
@@ -91,7 +99,7 @@ public class ShopHandler {
         }
 
         player.removeItem(selected.getItemList(), selected.getData(), amount);
-        player.addItem(ItemList.gold, (int) (selected.getWorth() * Settings.shopSellMultiplier));
+        player.addItem(ItemList.gold, (int) (selected.getSingleValue() * priceModifier * amount));
     }
 
     public Player getPlayer() {

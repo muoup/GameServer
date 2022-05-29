@@ -67,19 +67,19 @@ public class Server {
         // See method documentation for explanations.
         listening = true;
 
-        listenThread = new Thread(() -> listen());
+        listenThread = new Thread(this::listen);
         listenThread.start();
 
-        checkConnect = new Thread(() -> checkConnection());
+        checkConnect = new Thread(this::checkConnection);
         checkConnect.start();
 
-        commandThread = new Thread(() -> commands());
+        commandThread = new Thread(this::commands);
         commandThread.start();
 
-        saveThread = new Thread(() -> savePlayerData());
+        saveThread = new Thread(this::savePlayerData);
         saveThread.start();
 
-        gameLoop = new Thread(() -> gameLoop());
+        gameLoop = new Thread(this::gameLoop);
         gameLoop.start();
     }
 
@@ -169,10 +169,10 @@ public class Server {
                     for (int i = 1; i < parts.length; i++) {
                         message += parts[i];
                     }
-                    chatMessage("[Server] " + message);
+                    sendPublicMessage("[Server] " + message);
                     break;
                 case "stop":
-                    chatMessage("Server shutting down...");
+                    sendPublicMessage("Server shutting down...");
                     for (Player c : connections) {
                         ManageSave.savePlayerData(c);
                         send("99", c.getIpAddress(), c.getPort());
@@ -400,7 +400,7 @@ public class Server {
                         connection.connected = 0;
                     break;
                 case "13": // Chat box message code
-                    chatMessage(contents);
+                    sendPublicMessage(contents);
                     break;
                 case "55": // Disconnect code
                     connection = findPlayer(message);
@@ -608,7 +608,7 @@ public class Server {
      * Sends a message to all connected player's chatbars.
      * @param message Message to broadcast.
      */
-    public void chatMessage(String message) {
+    public void sendPublicMessage(String message) {
         for (Player c : connections) {
             send(message.getBytes(), c.getIpAddress(), c.getPort());
         }

@@ -32,7 +32,6 @@ public abstract class World {
         enemies = new ArrayList<>();
         objects = new ArrayList<>();
         projectiles = new ArrayList<>();
-        groundItems = new ArrayList<>();
         npcs = new ArrayList<>();
         groundItems = new ArrayList<>();
 
@@ -169,6 +168,7 @@ public abstract class World {
             return;
         }
 
+        player.cleanUpWorld();
         players.remove(player);
     }
 

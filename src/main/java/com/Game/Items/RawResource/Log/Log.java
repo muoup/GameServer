@@ -33,8 +33,10 @@ public class Log extends Item {
 
     public void craftBow(Player player, int index) {
         if (player.skillCompare (Skills.FLETCHING, tier)) {
-            replaceInventory(player, index, new ItemStack((bow == null) ? ItemList.bow : bow, 1, 0));
-            player.addExperience(Skills.FLETCHING, 25 * (1 + tier / 5));
+            craftActionLoop(player, 1000, 20, Skills.FLETCHING,
+                    25 * (1 + (tier / 5)), 1,
+                    new ItemStack((bow == null) ? ItemList.bow : bow, 1),
+                    getClickStack(player, index));
         } else {
             Client.sendMessage(player, requirement.toString());
         }
@@ -43,8 +45,9 @@ public class Log extends Item {
     public void craftShafts(Player player, int index) {
         // Craft Arrow Shafts
         if (player.skillCompare(Skills.FLETCHING, tier)) {
-            replaceInventory(player, index, new ItemStack(ItemList.arrowShaft, arrowShaft));
-            player.addExperience(Skills.FLETCHING, 20 * (1 + tier / 5));
+            craftActionLoop(player, 1000, 20, Skills.FLETCHING,
+                    20 * (1 + tier / 5), 1, new ItemStack(ItemList.arrowShaft, 10 * (1 + tier / 20)),
+                    getClickStack(player, index));
         } else {
             player.sendMessage(requirement.toString());
         }

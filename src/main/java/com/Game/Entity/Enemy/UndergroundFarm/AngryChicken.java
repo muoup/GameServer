@@ -30,12 +30,10 @@ public class AngryChicken extends Enemy {
             return;
 
         new Pellet(this, Vector2.movementPredictVector(position, playerTarget.getPosition(), playerTarget.estimatedVelocity, 500f).normalize(),
-                10f, 500f, 2000);
+                200f, 500f, 2000);
     }
 
-    public void handleDrops() {
+    public void onDeath() {
         owner.minionDied(this);
     }
-
-
 }
