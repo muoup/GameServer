@@ -1,5 +1,6 @@
 package com.Game.Inventory;
 
+import com.Game.BaseClass;
 import com.Game.Entity.NPC.Shop;
 import com.Game.Entity.Player.Player;
 import com.Game.ItemData.Requirement.ActionRequirement;
@@ -9,22 +10,27 @@ import com.Game.Util.Other.Settings;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Hashtable;
 
 /**
  * Physical stacks held in the inventory or other storage devices.
  */
-public class ItemStack {
+public class ItemStack extends BaseClass {
 
-    public static final ItemStack shopBreakPoint = new ItemStack(ItemList.empty, -456, -456, -456);
+    public static final ItemStack shopBreakPoint = new ItemStack("Break Point");
 
     // Essential
     public Item item;
-    public int id, amount, data, equipStatus, worth;
+    public int id, amount, equipStatus, worth;
+    public long data;
     public ArrayList<RCOption> options;
     public ActionRequirement requirement;
     public ImageIdentifier image;
     public String name, examineText;
     public boolean isStacked = false;
+
+    // Special Variable Cases
+    public boolean preventBanking = false;
 
     // Non-essential
     public float damage = 0, speed = 0, armor = 0;
@@ -33,12 +39,17 @@ public class ItemStack {
         this(item, amount, 0);
     }
 
-    public ItemStack(ItemList item, int amount, int data, int worth) {
+    public ItemStack(ItemList item, int amount, long data, int worth) {
         this(item, amount, data);
         this.worth = worth;
     }
 
-    public ItemStack(Item item, int amount, int data) {
+    public ItemStack(String name) {
+        this(ItemList.empty, 0, 0);
+        this.name = name;
+    }
+
+    public ItemStack(Item item, int amount, long data) {
         this.id = item.getID();
         this.item = item;
         this.amount = amount;
@@ -52,7 +63,7 @@ public class ItemStack {
         setData(data);
     }
 
-    public ItemStack(Item item, int amount, int data, boolean stacked) {
+    public ItemStack(Item item, int amount, long data, boolean stacked) {
         this.id = item.getID();
         this.item = item;
         this.amount = amount;
@@ -67,19 +78,19 @@ public class ItemStack {
         setData(data);
     }
 
-    public ItemStack(ItemList item, int amount, int data) {
+    public ItemStack(ItemList item, int amount, long data) {
         this(item.getItem(), amount, data);
     }
 
-    public ItemStack(ItemList item, int amount, int data, boolean stacked) {
+    public ItemStack(ItemList item, int amount, long data, boolean stacked) {
         this(item.getItem(), amount, data, stacked);
     }
 
-    public ItemStack(int item, int amount, int data) {
+    public ItemStack(int item, int amount, long data) {
         this(ItemList.values()[item], amount, data);
     }
 
-    public ItemStack(int item, int amount, int data, boolean stacked) {
+    public ItemStack(int item, int amount, long data, boolean stacked) {
         this(ItemList.values()[item], amount, data, stacked);
     }
 
@@ -121,7 +132,7 @@ public class ItemStack {
         return amount;
     }
 
-    public int getData() {
+    public long getData() {
         return data;
     }
 
@@ -146,7 +157,7 @@ public class ItemStack {
         return new ItemStack(item, amount, data, isStacked);
     }
 
-    public void setData(int data) {
+    public void setData(long data) {
         this.data = data;
 
         setName(item.name);
@@ -297,11 +308,6 @@ public class ItemStack {
                 player.sendMessage("This item cannot be sold!");
             else
                 player.sendMessage("This item will sell for " + worth + " gold each.");
-            return;
-        }
-
-        if (player.banking.isOpen()) {
-            player.deposit(index, 1);
             return;
         }
 

@@ -95,6 +95,14 @@ public class Item {
 
     }
 
+    public void update(Player player, ItemStack stack, int index) {
+
+    }
+
+    public void onDeath(Player player, ItemStack stack, int index) {
+
+    }
+
     public Projectile createProjectile(Entity entity, Vector2 direction, float damageMultiplier) {
         return null;
     }
@@ -215,5 +223,9 @@ public class Item {
 
     public ItemStack getClickStack(Player player, int index) {
         return player.inventory.getStack(index).clone();
+    }
+
+    public void playerStatChange(ItemStack itemStack, Player player) {
+
     }
 }

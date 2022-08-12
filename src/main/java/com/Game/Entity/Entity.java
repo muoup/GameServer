@@ -1,16 +1,20 @@
 package com.Game.Entity;
 
+import com.Game.BaseClass;
 import com.Game.Util.Math.Vector2;
 import com.Game.WorldManagement.World;
 import com.Game.WorldManagement.WorldHandler;
 
-public class Entity {
+import java.util.Hashtable;
+
+public class Entity extends BaseClass {
     protected World world;
     protected Vector2 position;
 
     public Entity(World world, Vector2 position) {
         this.world = world;
         this.position = position;
+        this.references = new Hashtable<>();
     }
 
     public int getX() {

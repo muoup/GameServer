@@ -3,12 +3,20 @@ package com.Game.Objects.AreaTeleporter;
 import com.Game.Objects.GameObject;
 import com.Game.Entity.Player.Player;
 import com.Game.WorldManagement.World;
+import com.Game.WorldManagement.WorldHandler;
 
 public class Teleporter extends GameObject {
     private int tx, ty;
-    private int destination;
+    private World destination;
 
     public Teleporter (World objectWorld, int x, int y, int destination, int tx, int ty) {
+        super(objectWorld, x, y);
+        this.tx = tx;
+        this.ty = ty;
+        this.destination = WorldHandler.getWorld(destination);
+    }
+
+    public Teleporter(World objectWorld, int x, int y, World destination, int tx, int ty) {
         super(objectWorld, x, y);
         this.tx = tx;
         this.ty = ty;
@@ -19,7 +27,7 @@ public class Teleporter extends GameObject {
         return true;
     }
 
-    public void unSuccessful(Player player) {
+    public void onFail(Player player) {
 
     }
 
@@ -28,7 +36,7 @@ public class Teleporter extends GameObject {
             player.teleport(tx, ty, destination);
             return true;
         } else {
-            unSuccessful(player);
+            onFail(player);
             return false;
         }
     }

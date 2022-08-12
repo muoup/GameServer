@@ -9,6 +9,7 @@ import com.Game.PseudoData.ImageIdentifier;
 import com.Game.Skills.Skills;
 import com.Game.Util.Math.DeltaMath;
 import com.Game.Util.Math.Vector2;
+import com.Game.Util.Other.IterationConditional;
 import com.Game.Util.Other.Settings;
 import com.Game.WorldManagement.World;
 
@@ -57,17 +58,17 @@ public class Projectile {
         setRandomToken();
     }
 
-    public Projectile(Vector2 position, Vector2 aim, Projectile arrow) {
+    public Projectile(Vector2 position, Vector2 aim, Projectile copy) {
         this.position = position.clone();
         this.aim = aim.clone();
-        this.damage = arrow.damage;
-        this.owner = arrow.owner;
-        this.speed = arrow.speed;
-        this.rotate = arrow.rotate;
-        this.attackStyle = arrow.attackStyle;
-        this.endTime = arrow.endTime;
-        this.image = arrow.image;
-        this.scale = arrow.scale;
+        this.damage = copy.damage;
+        this.owner = copy.owner;
+        this.speed = copy.speed;
+        this.rotate = copy.rotate;
+        this.attackStyle = copy.attackStyle;
+        this.endTime = copy.endTime;
+        this.image = copy.image;
+        this.scale = copy.scale;
 
         initPos = position.clone();
 
@@ -77,9 +78,9 @@ public class Projectile {
     }
 
     private void setRandomToken() {
-        while (tokenNotUnique() || randomToken == 0) {
-            randomToken = (int) DeltaMath.range(0, 10000);
-        }
+        do {
+            randomToken = (int) (Math.random() * Integer.MAX_VALUE);
+        } while (tokenNotUnique());
     }
 
     private boolean tokenNotUnique() {
@@ -186,7 +187,7 @@ public class Projectile {
             for (int i = 0; i < world.players.size(); i++) {
                 Player e = world.players.get(i);
 
-                if (Vector2.distance(e.getPosition(), position) < scale.x + 48) {
+                if (Vector2.distance(e.getPosition(), position) < scale.x + 16) {
                     e.damage(damage);
                     destroy();
                 }
@@ -222,18 +223,21 @@ public class Projectile {
     }
 
     public void multiShot(double degrees, int amount) {
+        multiShot(degrees, amount, (i) -> true);
+    }
+
+    public void multiShot(double degrees, int amount, IterationConditional conditional) {
         double baseAngle = Math.atan2(direction.y, direction.x);
         double deltaAngle = Math.toRadians(degrees);
 
-        for (int i = -amount / 2; i <= amount / 2; i++) {
-
-            if (i == 0)
-                continue;
-
+        for (int i = -amount / 2; i <= amount / 2 - (amount % 2 == 0 ? 1 : 0); i++) {
             double angle = baseAngle + deltaAngle * i;
             Vector2 direction = new Vector2((float) Math.cos(angle), (float) Math.sin(angle));
 
-            clone(direction);
+            if (conditional.shouldExecute(i))
+                clone(direction);
         }
+
+        destroy();
     }
 }

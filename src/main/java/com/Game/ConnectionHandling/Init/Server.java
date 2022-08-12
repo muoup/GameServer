@@ -18,6 +18,7 @@
 package com.Game.ConnectionHandling.Init;
 
 
+import com.Game.ConnectionHandling.Client;
 import com.Game.ConnectionHandling.Save.ManageSave;
 import com.Game.ConnectionHandling.Save.SaveSettings;
 import com.Game.Entity.NPC.NPC;
@@ -88,6 +89,8 @@ public class Server {
         double lastFpsTime = 0;
         double lfps = 0;
         long lastLoopTime = System.nanoTime();
+
+        WorldHandler.init();
 
         while (true) {
             long optimalTime = 1000000000 / Settings.fpsCap;
@@ -246,11 +249,23 @@ public class Server {
                         int item = Integer.parseInt(parameters[0]);
                         int amount = Integer.parseInt(parameters[1]);
                         int data = 0;
+                        boolean stacked = false;
+
                         if (parameters.length >= 3)
                             data = Integer.parseInt(parameters[2]);
+                        if (parameters.length >= 4)
+                            stacked = Boolean.parseBoolean(parameters[3]);
 
-                        player.addItem(new ItemStack(item, amount, data));
+                        player.addItem(new ItemStack(item, amount, data, stacked));
                     }
+                    break;
+                case "damage":
+                    if (parameters.length >= 1) {
+                        player.damage(Float.parseFloat(parameters[0]));
+                    }
+                    break;
+                case "heal":
+                    player.setHealth(player.maxHealth);
                     break;
                 case "nt":
                 case "newtree":
@@ -287,6 +302,14 @@ public class Server {
                             player.sendMessage("That is not a valid tree type!");
                     }
                     break;
+                case "god":
+                    player.takeDamage = !player.takeDamage;
+                    player.sendMessage("Godmode: " + !player.takeDamage);
+                    break;
+                case "back":
+                    player.setWorld(player.deathWorld);
+                    player.setPos((int) player.deathPosition.x, (int) player.deathPosition.y);
+                    break;
                 default:
                     player.sendMessage("That is not a valid command, please check your spelling and try again.");
                     System.out.println("Command: " + command);
@@ -302,7 +325,8 @@ public class Server {
      */
     private void savePlayerData() {
         while (true) {
-            for (Player c : connections) {
+            for (int i = 0; i < connections.size(); i++) {
+                Player c = connections.get(i);
                 ManageSave.savePlayerData(c);
             }
             try {
@@ -325,10 +349,10 @@ public class Server {
             try {
                 for (Player c : connections) {
                     if (c.connected < 3) {
-                        send("76".getBytes(), c.getIpAddress(), c.getPort());
+                        send("76", c.getIpAddress(), c.getPort());
                         c.connected++;
                     } else {
-                        send("99".getBytes(), c.getIpAddress(), c.getPort());
+                        send("99", c.getIpAddress(), c.getPort());
                         playerDisconnect(c);
                         connections.remove(c);
                         break;
@@ -348,9 +372,8 @@ public class Server {
      */
     private void playerDisconnect(Player connection) {
         ManageSave.savePlayerData(connection);
-        for (Player c : connections) {
-            send("66" + connection.getUsername(), c.getIpAddress(), c.getPort());
-        }
+        for (Player c : connection.getWorld().players)
+            Client.informPlayerLeft(c, connection.getUsername());
     }
 
     /**
@@ -359,8 +382,6 @@ public class Server {
      * @param packet Packet that was received.
      */
     private void process(DatagramPacket packet) {
-        //dumpPacket(packet);
-
         dataBuffer = new byte[MAX_PACKET_SIZE * 10];
         String contents = new String(packet.getData());
 
@@ -387,12 +408,7 @@ public class Server {
                     send("00" + SaveSettings.questAmount + ":" + SaveSettings.skillAmount, packet.getAddress(), packet.getPort());
                     if (!connect)
                         break;
-                    connection = getPlayerObject(packet, username, password, Integer.parseInt(connectionCode));
-                    for (Player c : connections) {
-                        if (!c.getUsername().equals(connection.getUsername())) {
-                            send(c, "12", connection.getX() + ":" + connection.getY() + ":" + connection.getUsername());
-                        }
-                    }
+                    getPlayerObject(packet, username, password, Integer.parseInt(connectionCode));
                     break;
                 case "76":
                     connection = findPlayer(message);
@@ -409,142 +425,94 @@ public class Server {
                     break;
                 case "15":
                     index = message.split(":");
-                    Player movement = findPlayer(index[0]);
+                    connection = findPlayer(index[0]);
 
-                    if (movement == null)
+                    if (connection == null)
                         break;
 
                     Vector2 newPos = new Vector2(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
 
-                    if (Vector2.distance(movement.getPosition(), newPos) > 1f) {
-                        movement.setPos((int) newPos.x, (int) newPos.y);
-                        movement.loseFocus();
+                    if (Vector2.distance(connection.getPosition(), newPos) > 1f) {
+                        connection.setPos((int) newPos.x, (int) newPos.y, index[3]);
+                        connection.loseFocus();
                     }
-
-                    for (Player c : connections) {
-                        if (!c.getUsername().equals(movement.getUsername())) {
-                            send("15" + movement.getUsername() + ":" + movement.getX() + ":" + movement.getY() + ":" + index[4], c.getIpAddress(), c.getPort());
+                    break;
+                case "an":
+                    index = message.split(":");
+                    connection = findPlayer(index[0]);
+                    connection.lastAnimation = index[1];
+                    for (Player c : connection.getWorld().players) {
+                        if (!c.getUsername().equals(connection.getUsername())) {
+                            send("an" + connection.getUsername() + ":" + index[1], c.getIpAddress(), c.getPort());
                         }
                     }
                     break;
                 case "oi": // Object Interaction
-                    Player objectInteracter = findPlayer(message);
-                    objectInteracter.interact();
+                    connection = findPlayer(message);
+                    connection.interact();
                     break;
                 case "lf": // Lose Focus
-                    Player focusLost = findPlayer(message);
-                    focusLost.loseFocus();
+                    connection = findPlayer(message);
+                    connection.loseFocus();
                     break;
                 case "bc": // Bank Change (Request)
                     index = message.split(";");
-                    Player bankRequest = findPlayer(index[0]);
-                    bankRequest.handleBankRequest(index);
+                    connection = findPlayer(index[0]);
+                    connection.handleBankRequest(index);
                     break;
                 case "gc": // GUI Close
-                    Player closer = findPlayer(message);
-                    closer.hideBank();
+                    connection = findPlayer(message);
+                    connection.hideBank();
                     break;
                 case "ss": // Swap Slots
                     index = message.split(";");
-                    Player swapper = findPlayer(index[0]);
-                    swapper.swapSlots(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
+                    connection = findPlayer(index[0]);
+                    connection.swapSlots(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
                     break;
                 case "bs": // Bank Swap
                     index = message.split(";");
-                    Player bswapper = findPlayer(index[0]);
-                    bswapper.swapBankSlots(Integer.parseInt(index[1]), Integer.parseInt(index[2]));
+                    connection = findPlayer(index[0]);
+                    connection.swapBankSlots(Integer.parseInt(index[1]), Double.parseDouble(index[2]));
                     break;
                 case "rc": // Right Click Item
                     index = message.split(";");
-                    Player rcer = findPlayer(index[0]);
-                    rcer.rightClick(Integer.parseInt(index[1]), index[2]);
+                    connection = findPlayer(index[0]);
+                    connection.rightClick(Integer.parseInt(index[1]), index[2]);
                     break;
                 case "lc": // Left Click Item
                     index = message.split(";");
-                    Player click = findPlayer(index[0]);
-                    click.click(Integer.parseInt(index[1]));
+                    connection = findPlayer(index[0]);
+                    connection.click(Integer.parseInt(index[1]));
                     break;
                 case "un": // Unequip Item
                     index = message.split(";");
-                    Player unequip = findPlayer(index[0]);
-                    unequip.unequip(Integer.parseInt(index[1]));
+                    connection = findPlayer(index[0]);
+                    connection.unequip(Integer.parseInt(index[1]));
                     break;
                 case "si": // Shop Interact
                     index = message.split(";");
-                    Player buyItem = findPlayer(index[0]);
-                    buyItem.shop.handlePacket(index);
+                    connection = findPlayer(index[0]);
+                    connection.shop.handlePacket(index);
                     break;
                 case "ch": // Textbox Choice (Chosen)
                     index = message.split(";");
-                    Player chooser = findPlayer(index[0]);
-                    NPC.choose(chooser, Integer.parseInt(index[1]), index[2]);
+                    connection = findPlayer(index[0]);
+                    NPC.choose(connection, Integer.parseInt(index[1]), index[2]);
                     break;
                 case "sb": // Shoot Bullet
                     index = message.split(";");
-                    Player shooter = findPlayer(index[0]);
-                    shooter.shoot(Vector2.fromString(index[1]));
+                    connection = findPlayer(index[0]);
+                    connection.shoot(Vector2.fromString(index[1]));
                     break;
                 case "gi": // GroundItem Interact
                     index = message.split(";");
-                    Player pickerUper = findPlayer(index[0]);
-                    pickerUper.pickUp(message);
+                    connection = findPlayer(index[0]);
+                    connection.pickUp(message);
                     break;
                 case "cm": // Player Command
                     handlePlayerCommand(message);
                     break;
-            /*case "07":
-                index = message.split(":");
-                int skill = Integer.parseInt(index[0]);
-                float xp = Float.parseFloat(index[1]);
-                findPlayer(index[2]).skills.xp[skill] += xp;
-                break;
-            case "08":
-                index = message.split(":");
-                int slot = Integer.parseInt(index[0]);
-                int id = Integer.parseInt(index[1]);
-                int amount = Integer.parseInt(index[2]);
-                int data = Integer.parseInt(index[3]);
-                connection = findPlayer(index[4]);
-                connection.inventory.clientSetItem(id, amount);
-                break;
-            case "09":
-                index = message.split(":");
-                int aslot = Integer.parseInt(index[0]);
-                int aid = Integer.parseInt(index[1]);
-                int aamount = Integer.parseInt(index[2]);
-                int adata = Integer.parseInt(index[3]);
-                connection = findPlayer(index[4]);
-                connection.accessoryItems[aslot].id = aid;
-                connection.accessoryItems[aslot].amount = aamount;
-                connection.accessoryItems[aslot].data = adata;
-                break;
-            case "57":
-                index = message.split(":");
-                int qid = Integer.parseInt(index[0]);
-                int qdata = Integer.parseInt(index[1]);
-                connection = findPlayer(index[2]);
-                connection.questSaves[qid] = qdata;
-                break;
-            case "6e":
-                index = message.split(":");
-                int bindex = Integer.parseInt(index[0]);
-                int bid = Integer.parseInt(index[1]);
-                int bamount = Integer.parseInt(index[2]);
-                int bdata = Integer.parseInt(index[3]);
-                connection = findPlayer(index[4]);
-                ItemMemory bankItem = connection.bankItems.get(bindex);
-                bankItem.id = bid;
-                bankItem.amount = bamount;
-                bankItem.data = bdata;
-                break;
-            case "6c":
-                index = message.split(":");
-                int baid = Integer.parseInt(index[0]);
-                int baamount = Integer.parseInt(index[1]);
-                int badata = Integer.parseInt(index[2]);
-                connection = findPlayer(index[3]);
-                connection.bankItems.add(new ItemMemory(baid, baamount, badata));
-                break;*/
+
             }
         } catch (Exception e) {
             e.printStackTrace();

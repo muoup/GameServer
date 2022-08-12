@@ -58,11 +58,20 @@ public class GameObject {
         this.scale = new Vector2(x, y);
         this.image.setScale(x, y);
 
+        if (maxDistance == 0)
+            maxDistance = (x + y) / 2;
+
         Client.sendObjectUpdate(this);
     }
 
     public void setImage(String root) {
         this.image = ImageIdentifier.singleImage("/Objects/" + root);
+
+        Client.sendObjectUpdate(this);
+    }
+
+    public void setImage(ImageIdentifier image) {
+        this.image = image;
 
         Client.sendObjectUpdate(this);
     }

@@ -55,6 +55,9 @@ public class Skills {
     }
 
     public void addExperience(int skill, float amount) {
+        if (amount == 0)
+            return;
+
         amount *= Settings.xpMultiplier;
         xp[skill] += amount;
         deltaLevel(skill, amount, true, true);

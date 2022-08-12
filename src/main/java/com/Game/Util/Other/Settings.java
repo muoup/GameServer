@@ -16,7 +16,7 @@ public class Settings {
 
     public static float xpMultiplier = 1;
 
-    public static final long groundItemDuration = 600000;
+    public static final long groundItemDuration = 300000;
     public static final int fpsCap = 60;
     public static final float enemyLatency = 2;
     public static final float mergeDistance = 128;

@@ -9,11 +9,11 @@ import com.Game.WorldManagement.World;
 
 import java.util.ArrayList;
 
-public class BigSpider extends Enemy {
-    public ArrayList<Enemy> minions = new ArrayList<Enemy>();
+public class BigSpider extends UndergroundEnrageable {
+    public ArrayList<Enemy> minions = new ArrayList<>();
 
-    public BigSpider(World world, int x, int y) {
-        super(world, x, y);
+    public BigSpider(World world) {
+        super(world, 0, 0);
         this.name = "Big Spider";
         this.speed = 75f;
         this.respawnTime = 6000;
@@ -24,25 +24,30 @@ public class BigSpider extends Enemy {
         this.targetAI = AIType::basicChase;
 
         setImage("bigSpider.png", 64, 64);
-        setBounds(663, 1808, 1594, 2805);
+        setBounds(616, 2194, 1496, 2777);
         setMaxHealth(75);
+        setSpawnPosition(bounds.randomPoint());
 
-        addProjTimer(1000, () -> new WebSkillShot(this, playerTarget.getPosition()).multiShot(40, 3));
-        addProjTimer(4000, () -> {
+        addProjTimer(1000, this::notEnraged, () -> new WebSkillShot(this, playerTarget.getPosition(), 250, 75).multiShot(40, 3));
+        addProjTimer(750, this::isEnraged, () -> new WebSkillShot(this, predict(250), 250, 75).multiShot(40, 9));
+        addProjTimer(4000, this::notEnraged, () -> {
             Enemy enemy = new BabySpider(world, (int) position.x, (int) position.y);
 
-            enemy.setTarget(playerTarget);
+            enemy.targetPlayer(playerTarget);
             enemy.temporary = true;
 
             minions.add(enemy);
         });
     }
 
-    public void update() {
+    public void onPlayerTarget() {
+        for (Enemy enemy : minions) {
+            enemy.targetPlayer(playerTarget);
+        }
     }
 
     public void onTargetLost() {
-        minions.forEach(Enemy::die);
+        minions.forEach(Enemy::kill);
         minions.clear();
     }
 
@@ -54,7 +59,7 @@ public class BigSpider extends Enemy {
         table.addItem(ItemList.tinOre, 1, 3, 0.5, true);
         world.createGroundItem(position, table.determineOutput());
 
-        minions.forEach(Enemy::die);
+        minions.forEach(Enemy::kill);
         minions.clear();
     }
 }

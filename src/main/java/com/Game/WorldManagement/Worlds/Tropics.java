@@ -16,7 +16,7 @@ public class Tropics extends World {
         // Teleporter to Main Land
         new InvisibleTeleporter(this,1652, 3098, WorldHandler.main, 500, 4100);
 
-        new Kanuna(0, this, 880, 1900);
+        new Kanuna(this, 880, 1900);
     }
 
     public void update() {

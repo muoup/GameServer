@@ -27,6 +27,7 @@ public class FurnaceInterface extends Shop {
                                     });
         this.shopVerb = "Smelt";
         this.inventoryVerb = "N/A";
+        this.showBuyPrice = false;
     }
 
     public void shopInteraction(ShopHandler handler, int index, int amount) {

@@ -268,7 +268,7 @@ public class ManageSave {
     }
 
     private static ItemStack interpretItemStack(String[] itemLine) {
-        return new ItemStack(Integer.parseInt(itemLine[1]), Integer.parseInt(itemLine[2]), Integer.parseInt(itemLine[3]), Boolean.parseBoolean(itemLine[4]));
+        return new ItemStack(Integer.parseInt(itemLine[1]), Integer.parseInt(itemLine[2]), Long.parseLong(itemLine[3]), Boolean.parseBoolean(itemLine[4]));
     }
     
 }

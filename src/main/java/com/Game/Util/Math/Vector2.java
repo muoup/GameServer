@@ -4,6 +4,15 @@ import java.util.Random;
 
 public class Vector2 {
 
+    public static final Vector2 up = new Vector2(0, -1);
+    public static final Vector2 down = new Vector2(0, 1);
+    public static final Vector2 left = new Vector2(-1, 0);
+    public static final Vector2 right = new Vector2(1, 0);
+    public static final Vector2 upright = new Vector2(1, -1);
+    public static final Vector2 downright = new Vector2(1, 1);
+    public static final Vector2 upleft = new Vector2(-1, -1);
+    public static final Vector2 downleft = new Vector2(-1, 1);
+
     public float x;
     public float y;
 
@@ -15,6 +24,10 @@ public class Vector2 {
     public Vector2(float xy) {
         this.x = xy;
         this.y = xy;
+    }
+
+    public static boolean approximatelyEqualAngles(Vector2 movement, Vector2 magnitudeDirection) {
+        return Math.abs(Math.atan2(movement.y, movement.x) - Math.atan2(magnitudeDirection.y, magnitudeDirection.x)) < 0.1;
     }
 
     public float getX() {
@@ -354,5 +367,14 @@ public class Vector2 {
             // if the determinant is less than zero and returns a complex number for selfVel.x or selfVel.y
             return Vector2.magnitudeDirection(selfPos, targetPos);
         }
+    }
+
+    /**
+     * Tells whether two vectors are approximately equal, with a distance lax of 0.1 units.
+     * @param compare - The vector to compare to
+     * @return Whether the vectors are approximately equal
+     */
+    public boolean approximately(Vector2 compare) {
+        return Vector2.distance(this, compare) < 0.1f;
     }
 }

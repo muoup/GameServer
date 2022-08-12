@@ -1,14 +1,19 @@
 package com.Game.WorldManagement;
 
+import com.Game.ConnectionHandling.Client;
 import com.Game.ConnectionHandling.Init.Server;
 import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Entity.NPC.NPC;
 import com.Game.Entity.Player.Player;
 import com.Game.Inventory.ItemStack;
+import com.Game.ItemData.DropTable;
 import com.Game.Objects.GameObject;
 import com.Game.Projectile.Projectile;
 import com.Game.Util.Math.Vector2;
+import com.Game.Util.Other.Iteration;
+import com.Game.Util.Other.IterationConditional;
 import com.Game.Util.Other.Settings;
+import com.Game.Util.Other.Timer;
 
 import java.util.ArrayList;
 
@@ -22,6 +27,7 @@ public abstract class World {
     public ArrayList<Projectile> projectiles;
     public ArrayList<GroundItem> groundItems;
     public ArrayList<NPC> npcs;
+    public ArrayList<Timer> itemSpawns;
 
     private String worldImage;
 
@@ -34,8 +40,7 @@ public abstract class World {
         projectiles = new ArrayList<>();
         npcs = new ArrayList<>();
         groundItems = new ArrayList<>();
-
-        worldCreation();
+        itemSpawns = new ArrayList<>();
     }
 
     public abstract void worldCreation();
@@ -65,6 +70,16 @@ public abstract class World {
             Player player = players.get(i);
             player.update();
         }
+
+        for (int i = 0; i < groundItems.size(); i++) {
+            GroundItem item = groundItems.get(i);
+            item.update();
+        }
+
+        for (int i = 0; i < itemSpawns.size(); i++) {
+            Timer timer = itemSpawns.get(i);
+            timer.update();
+        }
     }
 
     public boolean empty() {
@@ -82,6 +97,7 @@ public abstract class World {
         sendNPCs(player);
         sendEnemies(player);
         sendGroundItems(player);
+        sendOtherPlayers(player);
     }
 
     public void sendObjects(Player player) {
@@ -103,6 +119,14 @@ public abstract class World {
         }
     }
 
+    public void sendOtherPlayers(Player player) {
+        for (Player otherPlayer : players) {
+            if (otherPlayer != player) {
+                Client.sendPlayerCreate(player, otherPlayer);
+            }
+        }
+    }
+
     public void newEnemy(Enemy enemy) {
         enemies.add(enemy);
 
@@ -117,6 +141,9 @@ public abstract class World {
                 return;
             }
         }
+
+        if (drops.size() == 0)
+            return;
 
         new GroundItem(this, position, drops);
     }
@@ -179,5 +206,35 @@ public abstract class World {
         }
 
         players.add(player);
+
+        for (Player p : players)
+            Client.sendPlayerCreate(p, player);
+    }
+
+    protected void repeat(int times, Iteration runnable) {
+        for (int i = 0; i < times; i++) {
+            runnable.iterate(i);
+        }
+    }
+
+    protected void repeat(int times, IterationConditional conditional, Iteration runnable) {
+        for (int i = 0; i < times; i++) {
+            if (conditional.shouldExecute(i))
+                runnable.iterate(i);
+            else
+                times++;
+        }
+    }
+
+    public String getToken() {
+        return "w" + id;
+    }
+
+    public void addItemSpawn(ItemStack item, float x, float y) {
+        itemSpawns.add(new Timer(Settings.groundItemDuration, true, () -> createGroundItem(new Vector2(x, y), item)));
+    }
+
+    public void addItemSpawn(DropTable table, float x, float y) {
+        itemSpawns.add(new Timer(Settings.groundItemDuration, true, () -> createGroundItem(new Vector2(x, y), table.determineOutput())));
     }
 }

@@ -15,7 +15,7 @@ public class TribalTeleport extends InvisibleTeleporter {
         return player.isQuestComplete(1);
     }
 
-    public void unSuccessful(Player player) {
+    public void onFail(Player player) {
         player.sendMessage("Maybe you should ask the captain before you ride his ship.");
     }
 }

@@ -48,19 +48,7 @@ public class AccessoriesManager {
 
         Client.sendAccessorySlot(player, slot, item);
 
-        calculateStats();
-    }
-
-    public void calculateStats() {
-        player.armor = 0;
-        player.damageMult = 0;
-        player.speedMult = 0;
-
-        for (ItemStack item : accessories) {
-            player.armor += item.armor;
-            player.damageMult += item.damage;
-            player.speedMult += item.speed;
-        }
+        player.calculateStats();
     }
 
     public void unequip(Player player, int index) {

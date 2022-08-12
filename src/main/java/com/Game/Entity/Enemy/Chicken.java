@@ -5,17 +5,12 @@ import com.Game.Entity.Enemy.Generic.AIType;
 import com.Game.Entity.Enemy.Generic.Enemy;
 import com.Game.Entity.Player.Player;
 import com.Game.Inventory.ItemList;
-import com.Game.Inventory.ItemStack;
 import com.Game.ItemData.DropTable;
-import com.Game.Util.Math.DeltaMath;
 import com.Game.WorldManagement.World;
-
-import java.util.ArrayList;
 
 public class Chicken extends Enemy {
     public Chicken(World world) {
         super(world, 0, 0);
-        this.id = 3;
         this.respawnTime = 5000;
         this.loseTargetTime = 2000;
         this.name = "Chicken";
@@ -28,7 +23,7 @@ public class Chicken extends Enemy {
                 4143, 1912);
 
         this.spawnPosition = bounds.randomPoint();
-        setPosition(spawnPosition.clone());
+        setPosition(spawnPosition);
 
         //addPassiveTimer(1000, this::chickenTest);
     }

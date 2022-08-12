@@ -47,4 +47,9 @@ public class Rect2 {
     public Vector2 randomPoint() {
             return new Vector2(pos.getX() + (float) Math.random() * size.getX(), pos.getY() + (float) Math.random() * size.getY());
     }
+
+    public Vector2 clamp(Vector2 moveTo) {
+        return new Vector2(Math.max(pos.getX(), Math.min(moveTo.getX(), pos.getX() + size.getX())),
+                Math.max(pos.getY(), Math.min(moveTo.getY(), pos.getY() + size.getY())));
+    }
 }

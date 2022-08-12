@@ -46,6 +46,7 @@ public class Player extends Entity {
 
     // Player Constants
     public final float playerMoveSpeed = 225f;
+    public String lastAnimation = "idle";
 
     // Connection Settings
     private InetAddress ipAddress;
@@ -62,13 +63,12 @@ public class Player extends Entity {
     public QuestData questData;
     public Skills skills;
     public float maxHealth = 0;
-    public float msMulti = 1;
 
     // Real-Time Data
     public float health = 0;
     public float healthRegen = 10;
     public long shootTimer = 0;
-    public float armor, damageMult, defense, speedMult;
+    public float armor = 1, damageMult = 1, speedMult = 1, damageTakenMult = 1;
     public Vector2 lastKnownPosition;
     public Vector2 estimatedVelocity;
 
@@ -80,10 +80,14 @@ public class Player extends Entity {
     public long velocityCheckTime = 0;
     public GameObject objectInteration = null;
     private Hashtable<String, Long> timers;
-    private Hashtable<String, Object> references;
 
     // Movement Verification
     public long lastMoveTime = 0;
+
+    // Admin Settings
+    public boolean takeDamage = true;
+    public Vector2 deathPosition = new Vector2(SaveSettings.startX, SaveSettings.startY);
+    public World deathWorld = WorldHandler.getWorld(0);
 
     public Runnable[] options = new Runnable[0];
 
@@ -103,7 +107,6 @@ public class Player extends Entity {
         this.ipAddress = ipAddress;
         this.port = port;
         this.timers = new Hashtable<>();
-        this.references = new Hashtable<>();
         banking = new BankingHandler(this);
 
         timers.put("healthRegen", System.currentTimeMillis() + 250);
@@ -128,9 +131,10 @@ public class Player extends Entity {
         // every when timers.get("healthRegen") is less than the current time, the player will regen health
         if (System.currentTimeMillis() > timers.get("healthRegen")) {
             timers.put("healthRegen", System.currentTimeMillis() + Settings.healInterval);
-//            health = Math.min(health + healthRegen * Settings.healInterval, maxHealth);
             changeHealth((health < maxHealth) ? Math.min(healthRegen * Settings.healInterval / 1000, maxHealth - health) : 0);
         }
+
+        inventory.update();
     }
 
     public void initSkills() {
@@ -177,15 +181,22 @@ public class Player extends Entity {
     }
 
     public void setPos(int x, int y) {
+        setPos(x, y, "nochange");
+    }
+
+    public void setPos(int x, int y, String facingLeft) {
         Vector2 newPosition = new Vector2(x, y);
 
         Server.send(this, "pc", x, y);
 
-        if (Vector2.distance(position, newPosition) > (System.currentTimeMillis() - lastMoveTime) * playerMoveSpeed * msMulti * 2.0) {
+
+        if (Vector2.distance(position, newPosition) > (System.currentTimeMillis() - lastMoveTime) * playerMoveSpeed * speedMult * 2.0) {
             Client.correctPosition(this, position);
         }
 
         this.position = newPosition;
+
+        Client.sendPlayerMovement(this, facingLeft);
     }
 
     public void setWorld(World world) {
@@ -210,6 +221,10 @@ public class Player extends Entity {
 
         world.informPlayer(this);
         world.addPlayer(this);
+    }
+
+    public void setWorld(int index) {
+        setWorld(WorldHandler.getWorld(index));
     }
 
     public void sendMessage(String message) {
@@ -319,7 +334,7 @@ public class Player extends Entity {
         removeItem(stack.getItemList(), stack.getData(), amount);
     }
 
-    public void removeItem(ItemList type, int data, int amount) {
+    public void removeItem(ItemList type, long data, int amount) {
         ItemStack[] itemStacks = inventory.inventory;
 
         for (int i = 0; i < itemStacks.length; i++) {
@@ -337,11 +352,14 @@ public class Player extends Entity {
     }
 
     public void damage(float damage) {
+        if (!takeDamage)
+            return;
+
         // set damage to what is returned from the onhit lamda
         if (onHit != null)
             damage -= onHit.action(damage);
 
-        changeHealth(-damage * getDamageReduction());
+        changeHealth(-damage * getDamageReduction() * damageTakenMult);
     }
 
     public float getDamageReduction() {
@@ -442,14 +460,20 @@ public class Player extends Entity {
         inventory.setItem(index2, holder);
     }
 
-    public void swapBankSlots(int index1, int index2) {
+    public void swapBankSlots(int index1, double index2) {
         // check if index1 or index is out of bounds
         if (index1 < 0 || index1 >= banking.items.size() || index2 < 0 || index2 >= banking.items.size())
             return;
 
         ItemStack holder = banking.items.get(index1).clone();
-        banking.setBankItem(index1, banking.getStack(index2));
-        banking.setBankItem(index2, holder);
+
+        if (index2 % 1 == 0) {
+            banking.setBankItem(index1, banking.getStack((int) index2));
+            banking.setBankItem((int) index2, holder);
+        } else {
+            banking.removeBankItem(index1);
+            banking.addBetweenItem((int) index2 + 1, holder);
+        }
     }
 
     public void rightClick(int index, String name) {
@@ -467,7 +491,7 @@ public class Player extends Entity {
     public void enableShop(Shop shop) {
         this.shop.selectedShop = shop;
 
-        Server.send(this, "ui", "shop", shop.getShopVerb(), shop.getInventoryVerb());
+        Server.send(this, "ui", "shop", shop.getShopVerb(), shop.getInventoryVerb(), shop.showPrices());
 
         shop.sendItems(this);
 
@@ -506,16 +530,11 @@ public class Player extends Entity {
         health += healAmount;
 
         if (health > maxHealth) {
-            health -= healAmount;
-        }
-
-        if (health < 0) {
             health = maxHealth;
-
-            setPos(SaveSettings.startX, SaveSettings.startY);
-            setWorld(WorldHandler.getWorld(WorldHandler.main));
-            sendMessage("Oh no! You have died.");
         }
+
+        if (health < 0)
+            die();
 
         Client.sendHealth(this);
     }
@@ -523,15 +542,23 @@ public class Player extends Entity {
     public void setHealth(float health) {
         this.health = health;
 
-        if (health < 0) {
-            this.health = maxHealth;
-
-            setPos(SaveSettings.startX, SaveSettings.startY);
-            setWorld(WorldHandler.getWorld(WorldHandler.main));
-            sendMessage("Oh no! You have died.");
-        }
+        if (health < 0)
+            die();
 
         Client.sendHealth(this);
+    }
+
+    public void die() {
+        this.health = maxHealth;
+
+        this.deathPosition = position.clone();
+        this.deathWorld = world;
+
+        setPos(SaveSettings.startX, SaveSettings.startY);
+        setWorld(WorldHandler.getWorld(WorldHandler.main));
+        sendMessage("Oh no! You have died.");
+
+        inventory.onDeath();
     }
 
     public void cleanUpWorld() {
@@ -623,27 +650,37 @@ public class Player extends Entity {
         inventory.setItem(index, ItemStack.empty());
     }
 
-    public void pushReference(String key, Object value) {
-        references.put(key, value);
+    public void sendMiscTimer(String protcircle, long duration) {
+        Client.sendMiscTimer(this, protcircle, duration, System.currentTimeMillis() + duration);
     }
 
-    public <T> T getReference(String key) {
-        try {
-            return (T) references.get(key);
-        } catch (ClassCastException e) {
-            System.err.println("Reference " + key + " has not been cast to the correct type.");
-            e.printStackTrace();
-            return null;
+    public void resetProtCircle() {
+        Client.sendMiscTimer(this, "protcircle0", 0, 0);
+    }
+
+    public void calculateStats() {
+        armor = 1;
+        damageMult = 1;
+        speedMult = 1;
+
+        for (ItemStack item : accessory.accessories) {
+            armor += item.armor;
+            damageMult += item.damage;
+            speedMult += item.speed;
         }
+
+        for (ItemStack item : inventory.inventory) {
+            item.getItem().playerStatChange(item, this);
+        }
+
+        Client.sendMS(this);
     }
 
-//    public float getDamageMultiplier() {
-//        float mult = 1;
-//
-//        for (ItemStack item : accessory.accessories) {
-//            mult += item.getDamage();
-//        }
-//
-//        return mult;
-//    }
+    public float getSpeed() {
+        return playerMoveSpeed * speedMult;
+    }
+
+    public String getPacketData() {
+        return getX() + ":" + getY() + ":" + getUsername() + ":" + lastAnimation;
+    }
 }

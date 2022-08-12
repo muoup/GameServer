@@ -5,8 +5,8 @@ import com.Game.WorldManagement.WorldHandler;
 
 public class CaveEntrance extends Teleporter {
     public enum TeleType {
-        caveEntrance(784, 230, WorldHandler.underground),
-        caveExit(5150, 3534, WorldHandler.main);
+        caveEntrance(487, 353, WorldHandler.underground),
+        caveExit(5509, 3743, WorldHandler.main);
 
         public final int x, y;
         public int destination;

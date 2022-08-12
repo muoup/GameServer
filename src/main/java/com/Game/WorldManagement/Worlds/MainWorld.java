@@ -1,10 +1,10 @@
 package com.Game.WorldManagement.Worlds;
 
+import com.Game.Entity.Enemy.ChessDungeon.Pawn;
 import com.Game.Entity.Enemy.Chicken;
-import com.Game.Entity.NPC.BirdWatcher;
-import com.Game.Entity.NPC.BoatingCaptain;
-import com.Game.Entity.NPC.Fisher;
-import com.Game.Entity.NPC.SpawnWizard;
+import com.Game.Entity.NPC.*;
+import com.Game.Inventory.ItemList;
+import com.Game.ItemData.DropTable;
 import com.Game.Objects.AreaTeleporter.CaveEntrance;
 import com.Game.Objects.AreaTeleporter.InvisibleTeleporter;
 import com.Game.Objects.AreaTeleporter.Ladder;
@@ -13,6 +13,7 @@ import com.Game.Objects.SkillingAreas.*;
 import com.Game.Objects.Utilities.Anvil;
 import com.Game.Objects.Utilities.Furnace;
 import com.Game.Objects.Utilities.StorageChest;
+import com.Game.Util.Math.Vector2;
 import com.Game.WorldManagement.World;
 import com.Game.WorldManagement.WorldHandler;
 
@@ -83,12 +84,7 @@ public class MainWorld extends World {
         new MiningRock(this, 4173, 4056, RockType.tin);
 
         // Chickens
-        new Chicken(this);
-        new Chicken(this);
-        new Chicken(this);
-        new Chicken(this);
-        new Chicken(this);
-        new Chicken(this);
+        repeat(12, (i) -> new Chicken(this));
 
         new StorageChest(this, 1660, 1727);
         new StorageChest(this, 5637, 4902);
@@ -98,10 +94,7 @@ public class MainWorld extends World {
         // Smithing Area
         new StorageChest(this, 2800, 3693);
 
-        new Furnace(this, 2800, 4345);
-        new Furnace(this, 2800, 4145);
-        new Furnace(this, 2800, 3945);
-        new Furnace(this, 2800, 3445);
+        repeat(4, (i) -> i != 3, (i) -> new Furnace(this, 2800, 4345 - i * 225));
 
         new Anvil(this, 3724, 4345);
         new Anvil(this, 3724, 3455);
@@ -120,11 +113,13 @@ public class MainWorld extends World {
         new FishingArea(this, 4994, 1670, FishingPreset.blueFish);
         new FishingArea(this, 5307, 1604, FishingPreset.blueFish);
 
+        new FishingArea(this, 1070, 5800, FishingPreset.gradedFish);
+
         // NPCS
-        new BirdWatcher(0, this ,2024, 2881);
-        new BoatingCaptain(1, this, 841, 4303);
-        new Fisher(2, this, 1301, 5497);
-        new SpawnWizard(3, this, 1669, 1221);
+        new BirdWatcher(this ,2024, 2881);
+        new BoatingCaptain(this, 841, 4303);
+        new Fisher(this, 1301, 5497);
+        new SpawnWizard(this, 1669, 1221);
 
         // Teleporter to Chess Dungeon
         new InvisibleTeleporter(this, 5507, 1643, WorldHandler.chessDungeon, 135, 125);
@@ -152,9 +147,18 @@ public class MainWorld extends World {
         // Teleporter to Underground
         new CaveEntrance(this, 5511, 3749, CaveEntrance.TeleType.caveEntrance);
 
+        // Relic Collector near the Underground Cave
+        new RelicCollector(this, 5497, 3900);
+
         // Teleporter to Tribal Lands
         new TribalTeleport(this, 500, 4100, WorldHandler.tropics, 1652, 3098);
 
         new Ladder(this, 3411, 921, WorldHandler.farmUnderground, 100, 100);
+
+        // Item Spawns
+        DropTable featherDrop = new DropTable();
+        featherDrop.addItem(ItemList.feather, 1, 5, 1);
+
+        addItemSpawn(featherDrop, 4201, 927);
     }
 }

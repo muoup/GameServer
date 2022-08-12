@@ -9,7 +9,6 @@ import com.Game.Util.Math.Vector2;
 import com.Game.WorldManagement.World;
 
 import java.util.ArrayList;
-import java.util.Optional;
 
 public class Clucky extends Enemy {
     private ArrayList<AngryChicken> minions;
@@ -39,7 +38,7 @@ public class Clucky extends Enemy {
 
             AngryChicken newMinion = new AngryChicken(world, this, getX() + (int) offset.x, getY() + (int) offset.y);
 
-            newMinion.setTarget(playerTarget);
+            newMinion.targetPlayer(playerTarget);
 
             minions.add(newMinion);
         }

@@ -19,7 +19,6 @@ public class RockEnemy extends Enemy {
 
     public RockEnemy(World world, int x, int y) {
         super(world, x, y);
-        this.id = 1;
         this.respawnTime = 7500;
         this.speed = 150f;
         this.loseTargetTime = 10000;

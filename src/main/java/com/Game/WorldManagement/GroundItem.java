@@ -15,7 +15,7 @@ public class GroundItem {
     public World world;
     public ArrayList<ItemStack> stack;
     private static final float maxDistance = 256f;
-    private long time = 0;
+    private long time;
     public int randomToken;
 
     public GroundItem(World world, Vector2 position, ArrayList<ItemStack> items) {
@@ -123,6 +123,6 @@ public class GroundItem {
             items.append("0;" + stack.getServerPacket() + "=>");
         }
 
-        return position + ";" + randomToken + "=items>" + items.toString();
+        return position + ";" + randomToken + "=items>" + items;
     }
 }

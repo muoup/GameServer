@@ -5,6 +5,8 @@ import com.Game.Items.Armor.Rock.*;
 import com.Game.Items.Armor.Tribal.AmuletOfKanuna;
 import com.Game.Items.Consumables.Food.*;
 import com.Game.Items.Consumables.Loot.BirdNest;
+import com.Game.Items.Consumables.Loot.GradedFish;
+import com.Game.Items.Misc.BugRelic;
 import com.Game.Items.Misc.QuestItem;
 import com.Game.Items.Perks.ChickenShield;
 import com.Game.Items.RawResource.*;
@@ -69,7 +71,10 @@ public enum ItemList {
     goldHelmet(new ArmorPiece(48, ArmorType.helmet, 3, "Tin Helmet", "Gold Helmet", 1000, false)),
     goldChestplate(new ArmorPiece(49, ArmorType.chestplate, 3, "Tin Chestplate", "Gold Chestplate", 5000, false)),
     goldLeggings(new ArmorPiece(50, ArmorType.leggings, 3, "Tin Leggings", "Gold Leggings",4000, false)),
-    goldBoots(new ArmorPiece(51, ArmorType.boots, 3, "Tin Boots", "Gold Boots",2000, false));
+    goldBoots(new ArmorPiece(51, ArmorType.boots, 3, "Tin Boots", "Gold Boots",2000, false)),
+    bugRelic(new BugRelic(52, "Bug Relic", "A relic of the creepies down.",-1, false)),
+    gradedFish(new GradedFish(53, "Graded Fish", "A fish worth some money.",100, false));
+
     private Item item;
 
     ItemList(Item item) {

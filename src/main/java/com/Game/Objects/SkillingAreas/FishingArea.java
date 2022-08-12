@@ -27,7 +27,7 @@ public class FishingArea extends GameObject {
         for (int i = 0; i < interacters.size(); i++) {
             Player player = interacters.get(i);
             if (System.currentTimeMillis() > player.completionTime) {
-                player.addItem(preset.fish, 1);
+                player.addItem(preset.getFish(player));
                 player.addExperience(Skills.FISHING, preset.getXp());
 
                 if (player.hasItem(ItemList.fishBait, 0)) {

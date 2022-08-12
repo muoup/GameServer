@@ -137,4 +137,28 @@ public class Client {
         newText = newText.replace("[gold]", Integer.toString(player.inventory.itemCount(ItemList.gold, 0)));
         return newText;
     }
+
+    public static void sendTimer(Player player, int index, long duration, long finishTime) {
+        Server.send(player, "it", index, duration, finishTime);
+    }
+
+    public static void sendMiscTimer(Player player, String type, long duration, long finishTime) {
+        Server.send(player, "mt", type, duration, finishTime);
+    }
+
+    public static void sendMS(Player player) {
+        Server.send(player, "ms", player.playerMoveSpeed * player.speedMult);
+    }
+
+    public static void sendPlayerCreate(Player informant, Player appearer) {
+        Server.send(informant, "12", appearer.getPacketData());
+    }
+
+    public static void sendPlayerMovement(Player player, String facingLeft) {
+        for (Player c : player.getWorld().players) {
+            if (!c.getUsername().equals(player.getUsername())) {
+                Server.send("15" + player.getPacketData() + ":" + facingLeft, c.getIpAddress(), c.getPort());
+            }
+        }
+    }
 }

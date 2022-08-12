@@ -25,10 +25,10 @@ public class Weapon extends Item {
     }
 
     public void useWeapon(Player player, Vector2 direction) {
-        shoot(player, itemSet, direction, damage);
+        shoot(player, itemSet, direction);
     }
 
-    public void shoot(Player player, ItemSets acceptable, Vector2 direction, float damage) {
+    public void shoot(Player player, ItemSets acceptable, Vector2 direction) {
         ItemStack stack = player.accessory.getSlot(AccessoriesManager.AMMO_SLOT);
 
         if (stack.getAmount() <= 0 || stack.getID() == 0)

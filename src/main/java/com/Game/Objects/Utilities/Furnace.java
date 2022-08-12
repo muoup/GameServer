@@ -12,7 +12,7 @@ public class Furnace extends UsableGameObject {
         super(world, x, y);
 
         setImage("Furnace.png");
-        setScale(48, 63);
+        setScale(60, 80);
 
         this.furnaceInterface = new FurnaceInterface();
         this.maxDistance = 64;

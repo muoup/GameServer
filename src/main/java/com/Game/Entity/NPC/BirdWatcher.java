@@ -9,8 +9,8 @@ import com.Game.WorldManagement.World;
 
 public class BirdWatcher extends NPC {
 
-    public BirdWatcher(int id, World world, int x, int y) {
-        super(id, world, x, y);
+    public BirdWatcher(World world, int x, int y) {
+        super(world, x, y);
 
         setImage("birdWatcher.png");
     }
@@ -42,7 +42,7 @@ public class BirdWatcher extends NPC {
 
     private void onBird(Player player) {
         if (player.inventory.isFull()) {
-            Client.sendText(player, "It appears that you do not have any inventory space, please come back and try again.");
+            Client.sendText(player, "It appears that you do not have any inventory space, please come back with more room, I have some things for you.");
             return;
         }
 

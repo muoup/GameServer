@@ -22,8 +22,8 @@ public class CrystalBow extends Weapon {
         equipStatus = AccessoriesManager.WEAPON_SLOT;
 
         weaponDamage = 3;
-        requirement = ActionRequirement.skill(0, 45);
-        shotCooldown = 450;
+        requirement = ActionRequirement.skill(Skills.RANGED, 45);
+        shotCooldown = 1200;
 
         setImage(SpriteSheet.bowSheet.getCell(0, 3));
     }

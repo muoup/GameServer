@@ -7,8 +7,8 @@ import com.Game.Inventory.ItemSets;
 import com.Game.WorldManagement.World;
 
 public class BoatingCaptain extends NPC {
-    public BoatingCaptain(int id, World world, int x, int y) {
-        super(id, world, x, y);
+    public BoatingCaptain(World world, int x, int y) {
+        super(world, x, y);
 
         setImage("captain.png");
     }

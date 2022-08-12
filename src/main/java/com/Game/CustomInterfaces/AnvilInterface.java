@@ -34,7 +34,8 @@ public class AnvilInterface extends Shop {
             3,
             5,
             4,
-            2
+            2,
+            -1 // Break Line
     };
 
     public ItemStack[] barList = {
@@ -69,5 +70,9 @@ public class AnvilInterface extends Shop {
 
     public void inventoryInteraction(ShopHandler handler, int index, int amount) {
 
+    }
+
+    public int getBuyPrice(ItemStack stack) {
+        return barRequirement[getStackIndex(stack) % 5];
     }
 }

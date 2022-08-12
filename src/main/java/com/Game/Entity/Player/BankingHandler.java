@@ -55,6 +55,20 @@ public class BankingHandler {
         items.set(index, newStack);
     }
 
+    public void addBetweenItem(int index, ItemStack newStack) {
+        if (index >= items.size()) {
+            addBankItem(newStack);
+            return;
+        }
+
+        items.add(index, newStack);
+
+        Client.sendBankChange(player, "clear", index);
+
+        for (int i = index; i < items.size(); i++)
+            Client.sendBankChange(player, "add", i + "=>" + items.get(i).getServerPacket());
+    }
+
     public void withdrawItem(int index, int amount, boolean inStack) {
         if (index > items.size() - 1)
             return;
@@ -74,7 +88,7 @@ public class BankingHandler {
     }
 
     public void depositFromInventory(int index, int amount) {
-        if (index > SaveSettings.inventoryAmount - 1)
+        if (index > SaveSettings.inventoryAmount - 1 || index < 0)
             return;
 
         ItemStack item = player.inventory.getStack(index).clone();

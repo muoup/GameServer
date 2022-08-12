@@ -7,12 +7,16 @@ import com.Game.Inventory.ItemList;
 import com.Game.Inventory.ItemStack;
 import com.Game.Util.Other.Settings;
 
+import java.awt.*;
+
 public class Shop {
     protected String shopVerb = "Buy";
     protected String inventoryVerb = "Sell";
 
     protected float buyMultiplier = 1;
     protected float sellMultiplier = 1;
+
+    protected boolean showBuyPrice = true;
 
     public static Shop empty = new Shop(new ItemStack[0]);
     public static Shop fishing = new Shop(new ItemStack[] {
@@ -110,5 +114,17 @@ public class Shop {
 
     public float getBuyMultiplier() {
         return buyMultiplier;
+    }
+
+    public int getStackIndex(ItemStack stack) {
+        for (int i = 0; i < offeredItems.length; i++) {
+            if (offeredItems[i].equals(stack))
+                return i;
+        }
+        return -1;
+    }
+
+    public boolean showPrices() {
+        return showBuyPrice;
     }
 }

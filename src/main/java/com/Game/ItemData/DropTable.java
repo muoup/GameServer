@@ -12,9 +12,9 @@ public class DropTable {
     public ArrayList<Integer> range;
 
     public DropTable() {
-        stacks = new ArrayList<ItemStack>();
-        chance = new ArrayList<Double>();
-        range = new ArrayList<Integer>();
+        stacks = new ArrayList();
+        chance = new ArrayList();
+        range = new ArrayList();
     }
 
     public void addItem(ItemList item, int amount, double chance) {
@@ -49,7 +49,7 @@ public class DropTable {
             ItemStack stack = stacks.get(i).clone();
             double percent = chance.get(i);
 
-            stack.amount = (int) DeltaMath.range(stack.amount, range.get(i) - stack.amount);
+            stack.amount += (int) DeltaMath.range(0, range.get(i));
 
             if (DeltaMath.range(0, 1) <= percent) {
                 for (ItemStack drop : drops) {

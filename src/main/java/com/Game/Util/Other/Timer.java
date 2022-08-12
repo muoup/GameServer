@@ -5,15 +5,18 @@ public class Timer {
     public long timer;
     public Runnable onRun;
 
-    public Timer(long timer, Runnable onRun) {
+    public Timer(long timer, boolean initStart, Runnable onRun) {
         this.timer = timer;
         this.onRun = onRun;
 
-        setNext();
+        if (initStart)
+            nextTime = 0;
+        else
+            setNext();
     }
 
-    public Timer(long timer, Runnable onRun, long offset) {
-        this(timer, onRun);
+    public Timer(long timer, long offset, boolean initStart, Runnable onRun) {
+        this(timer, initStart, onRun);
         nextTime += offset;
     }
 

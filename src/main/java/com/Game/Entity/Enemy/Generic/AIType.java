@@ -77,18 +77,31 @@ public class AIType {
      * @param enemy
      */
     public static void basicChase(Enemy enemy) {
-        if (Vector2.distance(enemy.getPosition(), enemy.playerTarget.getPosition()) <= enemy.followDistance) {
-            if (!enemy.movement.isZero())
-                enemy.stop();
-
-            return;
-        }
-
-        if (timeForNextMove(enemy)) {
+        if (timeForActiveMove(enemy)) {
             Vector2 dir = Vector2.magnitudeDirection(enemy.getPosition(), enemy.playerTarget.getPosition());
             dir.scale(getLatencyNoOverreach(enemy));
 
-            enemy.setMoveTo(dir.addClone(enemy.getPosition()));
+            Vector2 moveTo = enemy.getPosition().addClone(dir);
+
+            enemy.setMoveTo(moveTo);
+        }
+    }
+
+    public static void checkPoint(Enemy enemy) {
+        if (!enemy.target()) {
+            enemy.pushReference("checkpointIndex", 0);
+            enemy.setMoveTo(enemy.checkpoints[0]);
+            return;
+        }
+
+        if (enemy.getReference("checkpointIndex") == null)
+            enemy.pushReference("checkpointIndex", 0);
+
+        if (timeForNextMove(enemy)) {
+            int index = enemy.getReference("checkpointIndex");
+
+            enemy.setMoveTo(enemy.checkpoints[index]);
+            enemy.pushReference("checkpointIndex", (index + 1) % enemy.checkpoints.length);
         }
     }
 
@@ -101,7 +114,16 @@ public class AIType {
      * @return Should the enemy find a new moveTo point?
      */
     public static boolean timeForNextMove(Enemy enemy) {
-        return enemy.movement.isZero() || Vector2.distance(enemy.getPosition(), enemy.moveTo) < enemy.getAvgScale();
+        return enemy.movement.isZero();// || Vector2.distance(enemy.getPosition(), enemy.moveTo) < enemy.getAvgScale() / 4;
+    }
+
+    /**
+     * TargetAI equivalent of timeForNextMove, makes sure that the enemy has a target before it attempts to move.
+     * @param enemy Enemy to be moved
+     * @return Should the enemy find a new moveTo point?
+     */
+    public static boolean timeForActiveMove(Enemy enemy) {
+        return timeForNextMove(enemy) && enemy.target();
     }
 
     /**

@@ -16,8 +16,9 @@ public class NPC {
     public Vector2 position;
     public World world;
 
-    public NPC(int id, World world, int x, int y) {
-        this.id = id;
+    public NPC(World world, int x, int y) {
+        this.world = world;
+        this.id = getID();
 
         position = new Vector2(x, y);
         image = null;
@@ -33,6 +34,23 @@ public class NPC {
                 npc.choiceChosen(chooser, choice);
             }
         }
+    }
+
+    private int getID() {
+        int id;
+
+        do {
+            id = (int) (Math.random() * Integer.MAX_VALUE);
+        } while (IDExists(id));
+
+        return id;
+    }
+
+    private boolean IDExists(int id) {
+        for (NPC npc : world.npcs)
+            if (npc.id == id)
+                return true;
+        return false;
     }
 
     public void setImage(String imageName) {

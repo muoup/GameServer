@@ -4,8 +4,8 @@ import com.Game.Entity.Player.Player;
 import com.Game.WorldManagement.World;
 
 public class Kanuna extends NPC {
-    public Kanuna(int id, World world, int x, int y) {
-        super(id, world, x, y);
+    public Kanuna(World world, int x, int y) {
+        super(world, x, y);
         setImage("tribalKanuna.png");
     }
 

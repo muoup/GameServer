@@ -42,7 +42,21 @@ public class InventoryManager {
     }
 
     public void update() {
+        for (int i = 0; i < inventory.length; i++) {
+            ItemStack stack = inventory[i];
+            if (stack.getItem().id != 0) {
+                stack.getItem().update(player, stack, i);
+            }
+        }
+    }
 
+    public void onDeath() {
+        for (int i = 0; i < inventory.length; i++) {
+            ItemStack stack = inventory[i];
+            if (stack.getItem().id != 0) {
+                stack.getItem().onDeath(player, stack, i);
+            }
+        }
     }
 
     public void removeItem(int index, int amount) {
@@ -62,7 +76,7 @@ public class InventoryManager {
         return itemCount(stack.getItemList(), stack.getData());
     }
 
-    public int itemCount(ItemList item, int data) {
+    public int itemCount(ItemList item, long data) {
         int amount = 0;
         for (ItemStack stack : inventory) {
             if (stack.getID() == item.getID() && stack.getData() == data)
@@ -147,7 +161,7 @@ public class InventoryManager {
         return amount;
     }
 
-    public int getAmount(ItemList list, int data) {
+    public int getAmount(ItemList list, long data) {
         int amount = 0;
         for (ItemStack s : inventory) {
             if (s.getID() == list.getID() && s.getData() == data)
@@ -157,11 +171,11 @@ public class InventoryManager {
         return amount;
     }
 
-    public int removeItem(ItemList item, int amount, int data) {
+    public int removeItem(ItemList item, int amount, long data) {
         int remove = amount;
         for (int i = 0; i < inventory.length; i++) {
             ItemStack stack = inventory[i];
-            if (stack.getID() == item.getID() && stack.getData() == data) {
+            if (stack.getID() == item.getID() && (stack.getData() == data || data == -1)) {
                 int removeAmount = (remove > stack.getAmount()) ? stack.getAmount() : remove;
                 removeItem(i, removeAmount);
                 remove -= removeAmount;
@@ -182,7 +196,7 @@ public class InventoryManager {
     }
 
     public int removeItem(ItemList item, int amount) {
-        return removeItem(item, amount, 0);
+        return removeItem(item, amount, -1);
     }
 
     public int removeItem(ItemStack stack) {
@@ -212,6 +226,7 @@ public class InventoryManager {
             inventory[slot] = new ItemStack(ItemList.empty, 0);
         }
 
+        player.calculateStats();
         Client.sendInventorySlot(player, slot, inventory[slot]);
     }
 
@@ -221,15 +236,15 @@ public class InventoryManager {
         setItem(slot2, temp);
     }
 
-    public void clientSetItem(int slot, int id, int amount, int data) {
+    public void clientSetItem(int slot, int id, int amount, long data) {
         inventory[slot] = new ItemStack(ItemList.values()[id], amount, data);
     }
 
-    public int addItem(ItemList item, int amount, int data) {
+    public int addItem(ItemList item, int amount, long data) {
         return addItem(new ItemStack(item, amount, data));
     }
 
-    public int addItem(Item item, int amount, int data) {
+    public int addItem(Item item, int amount, long data) {
         return addItem(ItemList.values()[item.id], amount, data);
     }
 
@@ -244,7 +259,7 @@ public class InventoryManager {
     public int addItem(ItemStack itemStack) {
         // Constants
         int amount = itemStack.amount;
-        int data = itemStack.data;
+        long data = itemStack.data;
 
         // Loop Dynamic Variables
         int amt = itemStack.amount;
@@ -310,7 +325,7 @@ public class InventoryManager {
         setItem(slot, new ItemStack(ItemList.values()[oldStack.getID()], oldStack.getAmount(), data));
     }
 
-    public int getData(int index) {
+    public long getData(int index) {
         return inventory[index].getData();
     }
 
@@ -346,5 +361,9 @@ public class InventoryManager {
 
     public void changeItemAmount(int slot, int amount) {
         setItemAmount(slot, getStack(slot).amount + amount);
+    }
+
+    public void sendTimer(int index, long duration) {
+        Client.sendTimer(player, index, duration, System.currentTimeMillis() + duration);
     }
 }

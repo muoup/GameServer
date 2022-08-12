@@ -11,7 +11,7 @@ public class Anvil extends GameObject {
     public Anvil(World world, int x, int y) {
         super(world, x, y);
         setImage("anvil.png");
-        setScale(64, 64);
+        setScale(80, 80);
 
         this.anvilInterface = new AnvilInterface();
         this.maxDistance = 64;

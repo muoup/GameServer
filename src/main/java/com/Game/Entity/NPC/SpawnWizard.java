@@ -5,8 +5,8 @@ import com.Game.Entity.Player.Player;
 import com.Game.WorldManagement.World;
 
 public class SpawnWizard extends NPC {
-    public SpawnWizard(int id, World world, int x, int y) {
-        super(id, world, x, y);
+    public SpawnWizard(World world, int x, int y) {
+        super(world, x, y);
 
         setImage("SpawnNPC.png");
     }

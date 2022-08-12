@@ -38,4 +38,8 @@ public class DeltaMath {
     public static double trueArcSine(float amt) {
         return Math.asin(amt) + Math.ceil((2 * amt - pi) / pi);
     }
+
+    public static boolean randBool() {
+        return Math.random() > 0.5;
+    }
 }

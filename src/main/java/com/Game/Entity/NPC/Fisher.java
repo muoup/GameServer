@@ -4,8 +4,8 @@ import com.Game.Entity.Player.Player;
 import com.Game.WorldManagement.World;
 
 public class Fisher extends NPC {
-    public Fisher(int id, World world, int x, int y) {
-        super(id, world, x, y);
+    public Fisher(World world, int x, int y) {
+        super(world, x, y);
 
         setImage("fish_npc.png");
     }
